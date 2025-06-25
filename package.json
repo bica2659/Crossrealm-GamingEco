@@ -1,0 +1,13 @@
+{
+  "name": "crypticus-live-gaming",
+  "version": "1.0.0",
+  "description": "LIVE blockchain gaming platform on Core Chain",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "dev": "python3 -m http.server 3000"
+  },
+  "keywords": ["blockchain", "gaming", "Core Chain", "LIVE", "cryptocurrency"],
+  "author": "Crypticus Team",
+  "license": "MIT"
+}

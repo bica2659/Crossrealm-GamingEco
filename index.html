@@ -38,6 +38,30 @@
             background-clip: text;
         }
         
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-item {
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(78, 205, 196, 0.5);
+        }
+        
+        .nav-item.active {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+        }
+        
         .live-badge {
             background: linear-gradient(45deg, #00ff88, #00cc6a);
             color: #000;
@@ -89,12 +113,31 @@
             box-shadow: 0 10px 20px rgba(78, 205, 196, 0.3);
         }
         
+        .main-container {
+            display: flex;
+            min-height: calc(100vh - 80px);
+        }
+        
+        .sidebar {
+            width: 300px;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+        }
+        
+        .content-area {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
         .fee-info {
             background: rgba(255, 215, 0, 0.1);
             border: 1px solid rgba(255, 215, 0, 0.3);
             border-radius: 10px;
             padding: 2rem;
-            margin: 2rem;
+            margin-bottom: 2rem;
             text-align: center;
         }
         
@@ -107,10 +150,6 @@
         .fee-info p {
             margin-bottom: 0.5rem;
             font-size: 1.1rem;
-        }
-        
-        .main-content {
-            padding: 2rem;
         }
         
         .games-grid {
@@ -135,6 +174,24 @@
             border-color: rgba(78, 205, 196, 0.5);
         }
         
+        .coming-soon {
+            opacity: 0.7;
+            position: relative;
+        }
+        
+        .coming-soon::after {
+            content: "COMING SOON";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        
         .create-game-btn {
             width: 100%;
             background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
@@ -154,6 +211,146 @@
             box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
         }
         
+        .stake-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 0.8rem;
+            color: white;
+            font-size: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .stake-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .leaderboard {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .leaderboard h3 {
+            color: #ffd700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid #4ecdc4;
+        }
+        
+        .global-chat {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        
+        .chat-message {
+            margin-bottom: 0.8rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .chat-input-container {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .chat-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 0.8rem;
+            color: white;
+        }
+        
+        .chat-send-btn {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .settings-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-switch::before {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-switch.active {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+        }
+        
+        .toggle-switch.active::before {
+            transform: translateX(30px);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
         @media (max-width: 768px) {
             .header {
                 padding: 1rem;
@@ -161,7 +358,22 @@
                 gap: 1rem;
             }
             
-            .main-content {
+            .nav-menu {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+            
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                order: 2;
+            }
+            
+            .content-area {
+                order: 1;
                 padding: 1rem;
             }
             
@@ -175,6 +387,11 @@
 <body>
     <div class="header">
         <div class="logo">CRYPTICUS</div>
+        <div class="nav-menu">
+            <div class="nav-item active" onclick="showSection('games')">🎮 Games</div>
+            <div class="nav-item" onclick="showSection('leaderboard')">🏆 Leaderboard</div>
+            <div class="nav-item" onclick="showSection('settings')">⚙️ Settings</div>
+        </div>
         <div class="live-badge">🔴 LIVE ON CORE</div>
         <div class="wallet-section">
             <div class="wallet-info">
@@ -185,41 +402,193 @@
         </div>
     </div>
     
-    <div class="main-content">
-        <div class="fee-info">
-            <h3>🏆 Fair Play Guarantee</h3>
-            <p><strong>97% of every stake goes directly to the winner!</strong></p>
-            <p>Only 3% platform fee ensures sustainable gaming ecosystem 🎮</p>
-            <p>Transparent blockchain payouts • Zero hidden fees • Instant rewards</p>
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="global-chat">
+                <h3>💬 Global Chat</h3>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="chat-message">
+                        <strong>CryptoKing:</strong> Just won 2.5 CORE in Chess! 🎉
+                    </div>
+                    <div class="chat-message">
+                        <strong>GameMaster:</strong> New high stakes game starting soon!
+                    </div>
+                    <div class="chat-message">
+                        <strong>BlockchainBro:</strong> Anyone up for Word Battle?
+                    </div>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" class="chat-input" placeholder="Type your message..." id="chatInput" onkeypress="handleChatKeyPress(event)">
+                    <button class="chat-send-btn" onclick="sendChatMessage()">Send</button>
+                </div>
+            </div>
         </div>
         
-        <h2>🎮 Blockchain Games (LIVE)</h2>
-        <div class="games-grid">
-            <div class="game-card">
-                <h3>♟️ Chess Masters</h3>
-                <p>Stake CORE tokens and play against real opponents on the blockchain! Winner takes 97%, platform earns 3%.</p>
-                <button class="create-game-btn" onclick="alert('🎮 Game creation coming soon! Connect wallet to be ready.')">Create Game (0.1 CORE)</button>
+        <div class="content-area">
+            <!-- Games Section -->
+            <div id="gamesSection">
+                <div class="fee-info">
+                    <h3>🏆 Fair Play Guarantee</h3>
+                    <p><strong>97% of every stake goes directly to the winner!</strong></p>
+                    <p>Only 3% platform fee ensures sustainable gaming ecosystem 🎮</p>
+                    <p>Transparent blockchain payouts • Zero hidden fees • Instant rewards</p>
+                </div>
+                
+                <h2>🎮 Blockchain Games (LIVE)</h2>
+                <div class="games-grid">
+                    <div class="game-card">
+                        <h3>♟️ Chess Masters</h3>
+                        <p>Stake CORE tokens and play against real opponents on the blockchain! Winner takes 97%, platform earns 3%.</p>
+                        <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01">
+                        <button class="create-game-btn" onclick="createGame('chess')">Create Chess Game</button>
+                    </div>
+                    
+                    <div class="game-card">
+                        <h3>⚫ Checkers Pro</h3>
+                        <p>Fast-paced checkers with real money stakes! Quick games, instant payouts via smart contract.</p>
+                        <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01">
+                        <button class="create-game-btn" onclick="createGame('checkers')">Create Checkers Game</button>
+                    </div>
+                    
+                    <div class="game-card">
+                        <h3>📝 Word Battle</h3>
+                        <p>Compete in word games with cryptocurrency stakes. Test your vocabulary and earn CORE tokens!</p>
+                        <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01">
+                        <button class="create-game-btn" onclick="createGame('words')">Create Word Game</button>
+                    </div>
+                    
+                    <div class="game-card coming-soon">
+                        <h3>⚔️ Crypto Kombat</h3>
+                        <p>Epic fighting game with NFT characters! Stake tokens, collect rare fighters, and battle for supremacy in the blockchain arena.</p>
+                        <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01" disabled>
+                        <button class="create-game-btn" onclick="alert('⚔️ Crypto Kombat launching soon! Epic battles await.')" disabled>Coming Soon</button>
+                    </div>
+                    
+                    <div class="game-card coming-soon">
+                        <h3>⚽ Block League</h3>
+                        <p>FIFA-style soccer with blockchain stakes! Build your team with NFT players, compete in tournaments, and win CORE tokens.</p>
+                        <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01" disabled>
+                        <button class="create-game-btn" onclick="alert('⚽ Block League coming soon! Build your dream team.')" disabled>Coming Soon</button>
+                    </div>
+                </div>
             </div>
             
-            <div class="game-card">
-                <h3>⚫ Checkers Pro</h3>
-                <p>Fast-paced checkers with real money stakes! Quick games, instant payouts via smart contract.</p>
-                <button class="create-game-btn" onclick="alert('🎮 Game creation coming soon! Connect wallet to be ready.')">Create Game (0.05 CORE)</button>
+            <!-- Leaderboard Section -->
+            <div id="leaderboardSection" class="hidden">
+                <div class="leaderboard">
+                    <h3>🏆 Top Players This Week</h3>
+                    <div class="leaderboard-item">
+                        <div>
+                            <strong>🥇 CryptoKing</strong>
+                            <div style="font-size: 0.9rem; color: #4ecdc4;">23 wins • 156.7 CORE earned</div>
+                        </div>
+                        <div style="color: #ffd700; font-weight: bold;">156.7 CORE</div>
+                    </div>
+                    <div class="leaderboard-item">
+                        <div>
+                            <strong>🥈 BlockMaster</strong>
+                            <div style="font-size: 0.9rem; color: #4ecdc4;">19 wins • 134.2 CORE earned</div>
+                        </div>
+                        <div style="color: #ffd700; font-weight: bold;">134.2 CORE</div>
+                    </div>
+                    <div class="leaderboard-item">
+                        <div>
+                            <strong>🥉 GameWarrior</strong>
+                            <div style="font-size: 0.9rem; color: #4ecdc4;">17 wins • 98.5 CORE earned</div>
+                        </div>
+                        <div style="color: #ffd700; font-weight: bold;">98.5 CORE</div>
+                    </div>
+                    <div class="leaderboard-item">
+                        <div>
+                            <strong>ChessQueen</strong>
+                            <div style="font-size: 0.9rem; color: #4ecdc4;">15 wins • 87.3 CORE earned</div>
+                        </div>
+                        <div style="color: #ffd700; font-weight: bold;">87.3 CORE</div>
+                    </div>
+                    <div class="leaderboard-item">
+                        <div>
+                            <strong>TokenTitan</strong>
+                            <div style="font-size: 0.9rem; color: #4ecdc4;">12 wins • 76.8 CORE earned</div>
+                        </div>
+                        <div style="color: #ffd700; font-weight: bold;">76.8 CORE</div>
+                    </div>
+                </div>
+                
+                <div class="leaderboard">
+                    <h3>🎯 Highest Single Win</h3>
+                    <div class="leaderboard-item">
+                        <div>
+                            <strong>🔥 MegaStaker</strong>
+                            <div style="font-size: 0.9rem; color: #4ecdc4;">Chess Masters • Yesterday</div>
+                        </div>
+                        <div style="color: #ff6b6b; font-weight: bold;">45.6 CORE</div>
+                    </div>
+                </div>
             </div>
             
-            <div class="game-card">
-                <h3>📝 Word Battle</h3>
-                <p>Compete in word games with cryptocurrency stakes. Test your vocabulary and earn CORE tokens!</p>
-                <button class="create-game-btn" onclick="alert('🎮 Game creation coming soon! Connect wallet to be ready.')">Create Game (0.02 CORE)</button>
+            <!-- Settings Section -->
+            <div id="settingsSection" class="hidden">
+                <div class="settings-panel">
+                    <h3>⚙️ Platform Settings</h3>
+                    <div class="setting-item">
+                        <div>
+                            <strong>Sound Effects</strong>
+                            <div style="font-size: 0.9rem; color: #aaa;">Game sounds and notifications</div>
+                        </div>
+                        <div class="toggle-switch active" onclick="toggleSetting(this)"></div>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <strong>Chat Notifications</strong>
+                            <div style="font-size: 0.9rem; color: #aaa;">Global chat message alerts</div>
+                        </div>
+                        <div class="toggle-switch active" onclick="toggleSetting(this)"></div>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <strong>Auto-Connect Wallet</strong>
+                            <div style="font-size: 0.9rem; color: #aaa;">Remember wallet for future sessions</div>
+                        </div>
+                        <div class="toggle-switch" onclick="toggleSetting(this)"></div>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <strong>High Stakes Warnings</strong>
+                            <div style="font-size: 0.9rem; color: #aaa;">Confirm games over 1 CORE</div>
+                        </div>
+                        <div class="toggle-switch active" onclick="toggleSetting(this)"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     
     <script>
-        // Basic wallet connection functionality
+        // Global variables
         let provider = null;
         let userAddress = null;
+        let currentSection = 'games';
         
+        // Navigation
+        function showSection(section) {
+            // Hide all sections
+            document.getElementById('gamesSection').classList.add('hidden');
+            document.getElementById('leaderboardSection').classList.add('hidden');
+            document.getElementById('settingsSection').classList.add('hidden');
+            
+            // Show selected section
+            document.getElementById(section + 'Section').classList.remove('hidden');
+            
+            // Update nav active state
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            currentSection = section;
+        }
+        
+        // Wallet connection
         document.getElementById('connectBtn').addEventListener('click', async () => {
             try {
                 if (typeof window.ethereum === 'undefined') {
@@ -248,7 +617,7 @@
                     document.getElementById('balanceDisplay').textContent = 
                         parseFloat(balanceInCore).toFixed(4) + ' CORE';
                         
-                    alert('🎉 Wallet connected successfully! Games coming soon.');
+                    alert('🎉 Wallet connected successfully! Ready to play!');
                 } else {
                     throw new Error('No accounts returned from wallet');
                 }
@@ -259,9 +628,117 @@
             }
         });
         
-        // Add some visual feedback on page load
+        // Game creation
+        function createGame(gameType) {
+            if (!userAddress) {
+                alert('Please connect your wallet first!');
+                return;
+            }
+            
+            const gameCard = event.target.closest('.game-card');
+            const stakeInput = gameCard.querySelector('.stake-input');
+            const stakeAmount = parseFloat(stakeInput.value);
+            
+            if (!stakeAmount || stakeAmount < 0.01) {
+                alert('Please enter a valid stake amount (minimum 0.01 CORE)');
+                return;
+            }
+            
+            // High stakes warning
+            if (stakeAmount >= 1.0) {
+                if (!confirm(`⚠️ You're about to stake ${stakeAmount} CORE. Are you sure?`)) {
+                    return;
+                }
+            }
+            
+            const gameNames = {
+                chess: 'Chess Masters',
+                checkers: 'Checkers Pro',
+                words: 'Word Battle'
+            };
+            
+            alert(`🎮 Creating ${gameNames[gameType]} game with ${stakeAmount} CORE stake!\n\n🔄 Game logic and smart contracts coming soon.\n\nFor now, enjoy the platform and connect with other players in chat!`);
+        }
+        
+        // Chat functionality
+        function sendChatMessage() {
+            const chatInput = document.getElementById('chatInput');
+            const message = chatInput.value.trim();
+            
+            if (!message) return;
+            
+            if (!userAddress) {
+                alert('Please connect your wallet to chat!');
+                return;
+            }
+            
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message';
+            messageDiv.innerHTML = `<strong>You:</strong> ${message}`;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            chatInput.value = '';
+            
+            // Simulate response after 2 seconds
+            setTimeout(() => {
+                const responses = [
+                    "Nice! Good luck with your games! 🎮",
+                    "Welcome to Crypticus! Ready to win some CORE? 💰",
+                    "Great to see another player! Let's compete! ⚔️",
+                    "The blockchain gaming revolution is here! 🚀"
+                ];
+                
+                const responseDiv = document.createElement('div');
+                responseDiv.className = 'chat-message';
+                responseDiv.innerHTML = `<strong>GameBot:</strong> ${responses[Math.floor(Math.random() * responses.length)]}`;
+                
+                chatMessages.appendChild(responseDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 2000);
+        }
+        
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+        
+        // Settings toggle
+        function toggleSetting(element) {
+            element.classList.toggle('active');
+        }
+        
+        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 Crypticus platform loaded successfully!');
+            console.log('🚀 Crypticus full platform loaded successfully!');
+            
+            // Add some dynamic chat messages
+            const chatMessages = document.getElementById('chatMessages');
+            
+            setInterval(() => {
+                const messages = [
+                    { user: "StakeHero", message: "Just won big in Checkers! 🎉" },
+                    { user: "WordWizard", message: "Word Battle is so addictive! 📝" },
+                    { user: "ChessMaster", message: "Looking for a chess opponent! ♟️" },
+                    { user: "CryptoGamer", message: "Can't wait for Crypto Kombat! ⚔️" }
+                ];
+                
+                const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'chat-message';
+                messageDiv.innerHTML = `<strong>${randomMessage.user}:</strong> ${randomMessage.message}`;
+                
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // Keep only last 10 messages
+                while (chatMessages.children.length > 10) {
+                    chatMessages.removeChild(chatMessages.firstChild);
+                }
+            }, 15000); // New message every 15 seconds
         });
     </script>
 </body>

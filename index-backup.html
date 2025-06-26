@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypticus - Live Blockchain Gaming</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3a 50%, #0f0f23 100%);
+            color: white;
+            overflow-x: hidden;
+            height: 100vh;
+            position: relative;
+        }
+
+        .status-bar {
+            height: 44px;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 14px;
+            font-weight: 600;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .time { color: white; }
+        .battery-wifi { 
+            display: flex; 
+            gap: 8px; 
+            align-items: center;
+        }
+
+        .app-container {
+            position: fixed;
+            top: 44px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
+            overflow-y: auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b35, #ff8e53, #ff6b35);
+            padding: 20px;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+            pointer-events: none;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .app-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .live-indicator {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .wallet-section {
+            background: rgba(255,255,255,0.15);
+            border-radius: 16px;
+            padding: 16px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .wallet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .wallet-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        .status-dot.connected {
+            background: #4ade80;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+        }
+
+        .connect-btn {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .connect-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .wallet-balance {
+            font-size: 24px;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .contract-info {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 12px;
+        }
+
+        .contract-address {
+            font-family: monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 4px;
+            word-break: break-all;
+        }
+
+        .main-content {
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: white;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .game-card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255,255,255,0.12);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .game-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .game-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ff6b35, #ff8e53);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+
+        .game-info h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .game-stakes {
+            font-size: 12px;
+            color: #94a3b8;
+            background: rgba(148, 163, 184, 0.1);
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .create-game-btn {
+            background: linear-gradient(135deg, #ff6b35, #ff8e53);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        .create-game-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .create-game-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 8px;
+            border-radius: 12px;
+        }
+
+        .nav-item.active {
+            background: rgba(255, 107, 53, 0.2);
+            color: #ff6b35;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        @media (min-width: 768px) {
+            .games-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="status-bar">
+        <div class="time">9:41</div>
+        <div class="battery-wifi">
+            <span>📶</span>
+            <span>🔋 85%</span>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <div class="header">
+            <div class="header-top">
+                <h1 class="app-title">CRYPTICUS</h1>
+                <div class="live-indicator">🔴 LIVE ON CORE</div>
+            </div>
+            
+            <div class="wallet-section">
+                <div class="wallet-header">
+                    <div class="wallet-status">
+                        <div class="status-dot" id="statusDot"></div>
+                        <span id="walletStatus">Not Connected</span>
+                    </div>
+                    <button class="connect-btn" id="connectBtn" onclick="connectWallet()">Connect</button>
+                </div>
+                <div class="wallet-balance" id="walletBalance">0.00 CORE</div>
+                
+                <div class="contract-info">
+                    <strong>🎮 Smart Contract LIVE:</strong>
+                    <div class="contract-address">0x7af2cB8f93D0a75E0ba39E974B4e968EAe49028A</div>
+                    <a href="https://scan.coredao.org/address/0x7af2cB8f93D0a75E0ba39E974B4e968EAe49028A" 
+                       target="_blank" style="color: #10b981; text-decoration: none;">
+                        📊 View on Core Scan
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <h2 class="section-title">🎮 Blockchain Games (LIVE)</h2>
+            
+            <div class="games-grid">
+                <div class="game-card">
+                    <div class="game-header">
+                        <div class="game-icon">♚</div>
+                        <div class="game-info">
+                            <h3>Chess Masters</h3>
+                            <div class="game-stakes">0.01 - 100 CORE</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 12px; color: #94a3b8; margin: 8px 0;">
+                        Stake CORE tokens and play against real opponents on the blockchain!
+                    </div>
+                    <button class="create-game-btn" onclick="createBlockchainGame('chess', 0.1)" id="chessBtn">
+                        Create Game (0.1 CORE)
+                    </button>
+                </div>
+
+                <div class="game-card">
+                    <div class="game-header">
+                        <div class="game-icon">⚫</div>
+                        <div class="game-info">
+                            <h3>Checkers Pro</h3>
+                            <div class="game-stakes">0.01 - 50 CORE</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 12px; color: #94a3b8; margin: 8px 0;">
+                        Fast-paced checkers with real money stakes!
+                    </div>
+                    <button class="create-game-btn" onclick="createBlockchainGame('checkers', 0.05)" id="checkersBtn">
+                        Create Game (0.05 CORE)
+                    </button>
+                </div>
+
+                <div class="game-card">
+                    <div class="game-header">
+                        <div class="game-icon">📝</div>
+                        <div class="game-info">
+                            <h3>Word Battle</h3>
+                            <div class="game-stakes">0.01 - 25 CORE</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 12px; color: #94a3b8; margin: 8px 0;">
+                        Scrabble-style word game with cryptocurrency rewards!
+                    </div>
+                    <button class="create-game-btn" onclick="createBlockchainGame('scrabble', 0.02)" id="scrabbleBtn">
+                        Create Game (0.02 CORE)
+                    </button>
+                </div>
+            </div>
+
+            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 16px; padding: 20px; margin-bottom: 20px;">
+                <h3 style="color: #10b981; margin-bottom: 12px;">🎉 YOUR GAME IS LIVE!</h3>
+                <p style="font-size: 14px; line-height: 1.5;">
+                    This is a real blockchain gaming platform running on Core Chain! 
+                    Your smart contract is deployed and ready for players to stake CORE tokens and play games.
+                </p>
+                <div style="margin-top: 12px; font-size: 12px; color: #94a3b8;">
+                    <strong>Next Steps:</strong> Share this platform, get players to connect wallets, and start earning transaction fees!
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">Home</div>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon">🎮</div>
+                <div class="nav-label">Games</div>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon">🏆</div>
+                <div class="nav-label">Stats</div>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon">💰</div>
+                <div class="nav-label">Wallet</div>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon">⚙️</div>
+                <div class="nav-label">Settings</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Your LIVE smart contract details
+        const CONTRACT_ADDRESS = '0x7af2cB8f93D0a75E0ba39E974B4e968EAe49028A';
+        const CORE_CHAIN_ID = 1116; // Core Chain mainnet
+        
+        let provider = null;
+        let signer = null;
+        let contract = null;
+        let userAccount = null;
+
+        // Basic contract ABI for game creation
+        const CONTRACT_ABI = [
+            "function createGame() external payable",
+            "function joinGame(uint256 gameId) external payable",
+            "function endGame(uint256 gameId, address winner) external",
+            "function games(uint256) external view returns (uint256, address, address, uint256, bool, address)",
+            "function gameCounter() external view returns (uint256)",
+            "event GameCreated(uint256 gameId, address player1, uint256 stake)",
+            "event GameJoined(uint256 gameId, address player2)",
+            "event GameEnded(uint256 gameId, address winner)"
+        ];
+
+        async function connectWallet() {
+            try {
+                if (typeof window.ethereum === 'undefined') {
+                    alert('🦊 Please install MetaMask or Core Wallet to play!');
+                    return;
+                }
+
+                // Request account access
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                
+                // Switch to Core Chain
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: '0x45C' }], // 1116 in hex
+                    });
+                } catch (switchError) {
+                    // Chain not added, add it
+                    if (switchError.code === 4902) {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: '0x45C',
+                                chainName: 'Core Blockchain',
+                                nativeCurrency: {
+                                    name: 'CORE',
+                                    symbol: 'CORE',
+                                    decimals: 18
+                                },
+                                rpcUrls: ['https://rpc.coredao.org'],
+                                blockExplorerUrls: ['https://scan.coredao.org']
+                            }]
+                        });
+                    }
+                }
+
+                // Initialize ethers
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                userAccount = await signer.getAddress();
+                
+                // Initialize contract
+                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+                // Update UI
+                document.getElementById('statusDot').classList.add('connected');
+                document.getElementById('walletStatus').textContent = 'Connected to Core';
+                document.getElementById('connectBtn').textContent = 'Connected';
+                document.getElementById('connectBtn').style.background = '#10b981';
+                
+                // Show wallet address
+                const shortAddress = userAccount.slice(0, 6) + '...' + userAccount.slice(-4);
+                document.getElementById('walletBalance').textContent = shortAddress;
+
+                // Enable game buttons
+                document.querySelectorAll('.create-game-btn').forEach(btn => {
+                    btn.disabled = false;
+                });
+
+                // Get balance
+                const balance = await provider.getBalance(userAccount);
+                const balanceFormatted = ethers.utils.formatEther(balance);
+                document.getElementById('walletBalance').textContent = 
+                    `${parseFloat(balanceFormatted).toFixed(4)} CORE`;
+
+                console.log('✅ Connected to:', userAccount);
+                console.log('💰 Balance:', balanceFormatted, 'CORE');
+
+            } catch (error) {
+                console.error('Connection failed:', error);
+                alert('❌ Connection failed: ' + error.message);
+            }
+        }
+
+        async function createBlockchainGame(gameType, stakeAmount) {
+            if (!contract) {
+                alert('🔗 Please connect your wallet first!');
+                return;
+            }
+
+            try {
+                const button = document.getElementById(gameType + 'Btn');
+                button.textContent = 'Creating Game...';
+                button.disabled = true;
+
+                // Create game on blockchain with stake
+                const stakeWei = ethers.utils.parseEther(stakeAmount.toString());
+                
+                console.log(`🎮 Creating ${gameType} game with ${stakeAmount} CORE stake...`);
+                
+                const tx = await contract.createGame({
+                    value: stakeWei,
+                    gasLimit: 100000
+                });
+
+                console.log('⏳ Transaction sent:', tx.hash);
+                button.textContent = 'Confirming...';
+
+                // Wait for confirmation
+                const receipt = await tx.wait();
+                
+                console.log('✅ Game created! Block:', receipt.blockNumber);
+                
+                // Get game ID from event
+                const gameCreatedEvent = receipt.events?.find(e => e.event === 'GameCreated');
+                const gameId = gameCreatedEvent?.args?.gameId?.toString();
+
+                alert(`🎉 SUCCESS! Game created on blockchain!\n\nGame ID: ${gameId}\nStake: ${stakeAmount} CORE\nTransaction: ${tx.hash}`);
+
+                button.textContent = `Game Created! (ID: ${gameId})`;
+                button.style.background = '#10b981';
+
+            } catch (error) {
+                console.error('Game creation failed:', error);
+                alert('❌ Game creation failed: ' + error.message);
+                
+                // Reset button
+                const button = document.getElementById(gameType + 'Btn');
+                button.textContent = `Create Game (${stakeAmount} CORE)`;
+                button.disabled = false;
+            }
+        }
+
+        // Initialize disabled game buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.create-game-btn').forEach(btn => {
+                btn.disabled = true;
+            });
+        });
+
+        // Bottom navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

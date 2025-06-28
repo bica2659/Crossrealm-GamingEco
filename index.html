@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypticus - Advanced Blockchain Gaming</title>
+    <title>Crypticus - Live Blockchain Gaming Platform</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-    <script src="https://platform.twitter.com/widgets.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -14,26 +12,13 @@
             box-sizing: border-box;
         }
         
-        :root {
-            --primary: #4ecdc4;
-            --secondary: #ff6b6b;
-            --dark: #0f3460;
-            --darker: #16213e;
-            --darkest: #1a1a2e;
-            --gold: #ffd700;
-            --silver: #c0c0c0;
-            --bronze: #cd7f32;
-        }
-        
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, var(--darkest) 0%, var(--darker) 50%, var(--dark) 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             color: #ffffff;
             min-height: 100vh;
-            overflow-x: hidden;
         }
         
-        /* Header Styles */
         .header {
             background: rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(10px);
@@ -42,24 +27,21 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
         }
         
         .logo {
             font-size: 2rem;
             font-weight: bold;
-            background: linear-gradient(45deg, var(--secondary), var(--primary));
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
         }
         
         .mobile-menu-btn {
@@ -71,30 +53,21 @@
             cursor: pointer;
         }
         
-        .nav-menu {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-        
         .nav-item {
             padding: 0.5rem 1rem;
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
             border: 1px solid transparent;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
         }
         
         .nav-item:hover {
             background: rgba(255, 255, 255, 0.1);
-            border-color: var(--primary);
+            border-color: rgba(78, 205, 196, 0.5);
         }
         
         .nav-item.active {
-            background: linear-gradient(45deg, var(--primary), #44a08d);
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
             color: white;
         }
         
@@ -125,7 +98,7 @@
         
         .connection-status {
             font-size: 0.9rem;
-            color: var(--secondary);
+            color: #ff6b6b;
         }
         
         .balance {
@@ -134,7 +107,7 @@
         }
         
         .connect-btn {
-            background: linear-gradient(45deg, var(--primary), #44a08d);
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
             border: none;
             padding: 0.8rem 1.5rem;
             border-radius: 25px;
@@ -144,16 +117,23 @@
             transition: all 0.3s ease;
         }
         
-        .disconnect-btn {
-            background: linear-gradient(45deg, var(--secondary), #ee5a52);
-        }
-        
         .connect-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(78, 205, 196, 0.3);
         }
         
-        /* Main Container */
+        .disconnect-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 0.5rem;
+        }
+        
         .main-container {
             display: flex;
             min-height: calc(100vh - 80px);
@@ -165,9 +145,7 @@
             backdrop-filter: blur(10px);
             border-right: 1px solid rgba(255, 255, 255, 0.1);
             padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
+            overflow-y: auto;
         }
         
         .content-area {
@@ -176,45 +154,6 @@
             overflow-y: auto;
         }
         
-        /* News Feed */
-        .news-feed {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 1.5rem;
-        }
-        
-        .news-feed h3 {
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .news-item {
-            padding: 0.8rem;
-            margin: 0.5rem 0;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            border-left: 3px solid var(--primary);
-        }
-        
-        .news-item h4 {
-            margin-bottom: 0.3rem;
-            color: var(--primary);
-        }
-        
-        .news-item p {
-            font-size: 0.9rem;
-            color: #ccc;
-        }
-        
-        .news-item .timestamp {
-            font-size: 0.75rem;
-            color: #888;
-            margin-top: 0.3rem;
-        }
-        
-        /* Game Cards */
         .fee-info {
             background: rgba(255, 215, 0, 0.1);
             border: 1px solid rgba(255, 215, 0, 0.3);
@@ -225,7 +164,7 @@
         }
         
         .fee-info h3 {
-            color: var(--gold);
+            color: #ffd700;
             margin-bottom: 1rem;
             font-size: 1.5rem;
         }
@@ -249,14 +188,12 @@
             padding: 1.5rem;
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
         }
         
         .game-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-            border-color: var(--primary);
+            border-color: rgba(78, 205, 196, 0.5);
         }
         
         .coming-soon {
@@ -269,7 +206,7 @@
             position: absolute;
             top: 10px;
             right: 10px;
-            background: linear-gradient(45deg, var(--secondary), #ee5a52);
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
             color: white;
             padding: 0.3rem 0.8rem;
             border-radius: 15px;
@@ -279,7 +216,7 @@
         
         .create-game-btn {
             width: 100%;
-            background: linear-gradient(45deg, var(--secondary), var(--primary));
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
             border: none;
             padding: 1rem;
             border-radius: 10px;
@@ -288,7 +225,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 1rem;
-            margin-top: auto;
+            margin-top: 1rem;
         }
         
         .create-game-btn:hover {
@@ -311,122 +248,63 @@
             color: rgba(255, 255, 255, 0.6);
         }
         
-        /* Game Specific Styles */
-        .game-board {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 5px;
-            margin: 1rem 0;
+        .news-feed {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            max-height: 400px;
+            overflow-y: auto;
         }
         
-        .cell {
-            aspect-ratio: 1;
-            background: rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .cell:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .dice-container {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin: 1.5rem 0;
-        }
-        
-        .dice {
-            width: 80px;
-            height: 80px;
-            background: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            color: var(--dark);
-            font-weight: bold;
-        }
-        
-        .roll-btn {
-            background: linear-gradient(45deg, var(--primary), #44a08d);
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 10px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 1.1rem;
-            margin-top: 1rem;
-        }
-        
-        .game-result {
-            margin-top: 1rem;
-            text-align: center;
-            font-size: 1.2rem;
-            font-weight: bold;
+        .news-item {
             padding: 1rem;
+            margin: 0.5rem 0;
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid #4ecdc4;
         }
         
-        /* Mobile Menu */
-        .mobile-menu {
-            position: fixed;
-            top: 0;
-            left: -300px;
-            width: 280px;
-            height: 100vh;
-            background: var(--darker);
-            z-index: 1000;
-            padding: 2rem;
-            transition: left 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
+        .news-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #4ecdc4;
         }
         
-        .mobile-menu.active {
-            left: 0;
+        .news-time {
+            font-size: 0.8rem;
+            color: #aaa;
         }
         
-        .close-menu {
-            align-self: flex-end;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
+        .hidden {
+            display: none;
         }
         
-        .mobile-nav-item {
-            padding: 1rem;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            cursor: pointer;
-        }
-        
-        .mobile-nav-item.active {
-            background: linear-gradient(45deg, var(--primary), #44a08d);
-        }
-        
-        /* Responsive */
         @media (max-width: 768px) {
             .header {
                 padding: 1rem;
+                flex-wrap: wrap;
             }
             
             .nav-menu {
-                display: none;
+                position: fixed;
+                top: 80px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 80px);
+                background: rgba(0, 0, 0, 0.95);
+                backdrop-filter: blur(10px);
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: center;
+                padding-top: 2rem;
+                gap: 2rem;
+                transition: left 0.3s ease;
+                z-index: 1000;
+            }
+            
+            .nav-menu.active {
+                left: 0;
             }
             
             .mobile-menu-btn {
@@ -440,6 +318,7 @@
             .sidebar {
                 width: 100%;
                 order: 2;
+                padding: 1rem;
             }
             
             .content-area {
@@ -451,39 +330,20 @@
                 grid-template-columns: 1fr;
                 gap: 1rem;
             }
-            
-            .wallet-section {
-                flex-direction: column;
-                align-items: flex-end;
-            }
-            
-            .wallet-info {
-                text-align: right;
-            }
         }
-    </style>
+</style>
 </head>
 <body>
     <div class="header">
-        <div class="logo-container">
-            <button class="mobile-menu-btn" id="mobileMenuBtn">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="logo">CRYPTICUS</div>
-        </div>
-        <div class="nav-menu">
-            <div class="nav-item active" onclick="showSection('games')">
-                <i class="fas fa-gamepad"></i> Games
-            </div>
-            <div class="nav-item" onclick="showSection('leaderboard')">
-                <i class="fas fa-trophy"></i> Leaderboard
-            </div>
-            <div class="nav-item" onclick="showSection('settings')">
-                <i class="fas fa-cog"></i> Settings
-            </div>
-            <div class="nav-item" onclick="showSection('profile')">
-                <i class="fas fa-user"></i> Profile
-            </div>
+        <div class="logo">CRYPTICUS</div>
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+        <div class="nav-menu" id="navMenu">
+            <div class="nav-item active" onclick="showSection('games')">🎮 Games</div>
+            <div class="nav-item" onclick="showSection('leaderboard')">🏆 Leaderboard</div>
+            <div class="nav-item" onclick="showSection('profile')">👤 Profile</div>
+            <div class="nav-item" onclick="showSection('chat')">💬 Chat</div>
+            <div class="nav-item" onclick="showSection('news')">📰 News</div>
+            <div class="nav-item" onclick="showSection('settings')">⚙️ Settings</div>
         </div>
         <div class="live-badge">🔴 LIVE ON CORE</div>
         <div class="wallet-section">
@@ -492,77 +352,26 @@
                 <div class="balance" id="balanceDisplay">0.00 CORE</div>
             </div>
             <button class="connect-btn" id="connectBtn">Connect Wallet</button>
-        </div>
-    </div>
-    
-    <!-- Mobile Menu -->
-    <div class="mobile-menu" id="mobileMenu">
-        <button class="close-menu" id="closeMenuBtn">
-            <i class="fas fa-times"></i>
-        </button>
-        <div class="mobile-nav-item active" onclick="showSection('games')">
-            <i class="fas fa-gamepad"></i> Games
-        </div>
-        <div class="mobile-nav-item" onclick="showSection('leaderboard')">
-            <i class="fas fa-trophy"></i> Leaderboard
-        </div>
-        <div class="mobile-nav-item" onclick="showSection('chat')">
-            <i class="fas fa-comments"></i> Global Chat
-        </div>
-        <div class="mobile-nav-item" onclick="showSection('settings')">
-            <i class="fas fa-cog"></i> Settings
-        </div>
-        <div class="mobile-nav-item" onclick="showSection('profile')">
-            <i class="fas fa-user"></i> Profile
-        </div>
-        <div class="mobile-nav-item" onclick="showSection('news')">
-            <i class="fas fa-newspaper"></i> Crypto News
+            <button class="disconnect-btn hidden" id="disconnectBtn">Disconnect</button>
         </div>
     </div>
     
     <div class="main-container">
         <div class="sidebar">
-            <div class="global-chat">
-                <h3><i class="fas fa-comments"></i> Global Chat</h3>
-                <div class="chat-messages" id="chatMessages">
-                    <div class="chat-message">
-                        <strong>CryptoKing:</strong> Just won 2.5 CORE in Chess! 🎉
-                    </div>
-                    <div class="chat-message">
-                        <strong>GameMaster:</strong> New high stakes game starting soon!
-                    </div>
-                    <div class="chat-message">
-                        <strong>BlockchainBro:</strong> Anyone up for Word Battle?
-                    </div>
-                    <div class="chat-message">
-                        <strong>DiceRoller:</strong> Rolled double sixes! 5 CORE win! 🎲🎲
-                    </div>
-                </div>
-                <div class="chat-input-container">
-                    <input type="text" class="chat-input" placeholder="Type your message..." id="chatInput" onkeypress="handleChatKeyPress(event)">
-                    <button class="chat-send-btn" onclick="sendChatMessage()">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-            </div>
-            
             <div class="news-feed">
-                <h3><i class="fas fa-newspaper"></i> Crypto News</h3>
-                <div id="newsContainer">
+                <h3>📰 Crypto Breaking News</h3>
+                <div id="cryptoNews">
                     <div class="news-item">
-                        <h4>Core Chain Mainnet Upgrade</h4>
-                        <p>Major upgrade brings faster transactions and lower fees to Core Chain ecosystem</p>
-                        <div class="timestamp">2 hours ago</div>
+                        <div class="news-title">Bitcoin Breaks $45K Resistance</div>
+                        <div class="news-time">2 hours ago</div>
                     </div>
                     <div class="news-item">
-                        <h4>Bitcoin ETF Approval Expected</h4>
-                        <p>Analysts predict SEC approval could bring $10B into crypto markets</p>
-                        <div class="timestamp">5 hours ago</div>
+                        <div class="news-title">Ethereum Layer 2 Volume Surges</div>
+                        <div class="news-time">4 hours ago</div>
                     </div>
                     <div class="news-item">
-                        <h4>Blockchain Gaming Grows 120%</h4>
-                        <p>New report shows massive growth in play-to-earn gaming sector</p>
-                        <div class="timestamp">1 day ago</div>
+                        <div class="news-title">Major DeFi Protocol Launches</div>
+                        <div class="news-time">6 hours ago</div>
                     </div>
                 </div>
             </div>
@@ -580,81 +389,37 @@
                 
                 <h2>🎮 Blockchain Games (LIVE)</h2>
                 <div class="games-grid">
-                    <!-- Chess -->
                     <div class="game-card">
-                        <h3><i class="fas fa-chess"></i> Chess Masters</h3>
+                        <h3>♟️ Chess Masters</h3>
                         <p>Stake CORE tokens and play against real opponents on the blockchain! Winner takes 97%, platform earns 3%.</p>
-                        <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01" id="chessStake">
+                        <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01">
                         <button class="create-game-btn" onclick="createGame('chess')">Create Chess Game</button>
                     </div>
                     
-                    <!-- Checkers -->
                     <div class="game-card">
-                        <h3><i class="fas fa-check"></i> Checkers Pro</h3>
+                        <h3>⚫ Checkers Pro</h3>
                         <p>Fast-paced checkers with real money stakes! Quick games, instant payouts via smart contract.</p>
-                        <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01" id="checkersStake">
+                        <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01">
                         <button class="create-game-btn" onclick="createGame('checkers')">Create Checkers Game</button>
                     </div>
                     
-                    <!-- Word Battle -->
                     <div class="game-card">
-                        <h3><i class="fas fa-font"></i> Word Battle</h3>
+                        <h3>📝 Word Battle</h3>
                         <p>Compete in word games with cryptocurrency stakes. Test your vocabulary and earn CORE tokens!</p>
-                        <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01" id="wordsStake">
+                        <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01">
                         <button class="create-game-btn" onclick="createGame('words')">Create Word Game</button>
                     </div>
                     
-                    <!-- Tic Tac Toe -->
-                    <div class="game-card">
-                        <h3><i class="fas fa-times"></i> Tic Tac Toe</h3>
-                        <p>Classic game with crypto stakes! Play against opponents in this simple but strategic game.</p>
-                        <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01" id="tictactoeStake">
-                        <button class="create-game-btn" onclick="createGame('tictactoe')">Create Tic Tac Toe</button>
-                        
-                        <div id="tictactoeGame" style="display:none; margin-top:1rem;">
-                            <div class="game-board" id="tictactoeBoard">
-                                <div class="cell" data-index="0"></div>
-                                <div class="cell" data-index="1"></div>
-                                <div class="cell" data-index="2"></div>
-                                <div class="cell" data-index="3"></div>
-                                <div class="cell" data-index="4"></div>
-                                <div class="cell" data-index="5"></div>
-                                <div class="cell" data-index="6"></div>
-                                <div class="cell" data-index="7"></div>
-                                <div class="cell" data-index="8"></div>
-                            </div>
-                            <div class="game-result" id="tictactoeResult"></div>
-                        </div>
-                    </div>
-                    
-                    <!-- Roll the Dice -->
-                    <div class="game-card">
-                        <h3><i class="fas fa-dice"></i> Roll the Dice</h3>
-                        <p>Simple dice game with big rewards! Roll higher than your opponent to win the stake.</p>
-                        <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01" id="diceStake">
-                        <button class="create-game-btn" onclick="createGame('dice')">Roll the Dice</button>
-                        
-                        <div id="diceGame" style="display:none; margin-top:1rem;">
-                            <div class="dice-container">
-                                <div class="dice" id="playerDice">1</div>
-                                <div class="dice" id="opponentDice">1</div>
-                            </div>
-                            <button class="roll-btn" onclick="rollDice()">ROLL DICE</button>
-                            <div class="game-result" id="diceResult"></div>
-                        </div>
-                    </div>
-                    
-                    <!-- Coming Soon Games -->
                     <div class="game-card coming-soon">
-                        <h3><i class="fas fa-fist-raised"></i> Crypto Kombat</h3>
-                        <p>Epic fighting game with NFT characters! Stake tokens, collect rare fighters, and battle for supremacy.</p>
+                        <h3>⚔️ Crypto Kombat</h3>
+                        <p>Epic fighting game with NFT characters! Stake tokens, collect rare fighters, and battle for supremacy in the blockchain arena.</p>
                         <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01" disabled>
                         <button class="create-game-btn" onclick="alert('⚔️ Crypto Kombat launching soon! Epic battles await.')" disabled>Coming Soon</button>
                     </div>
                     
                     <div class="game-card coming-soon">
-                        <h3><i class="fas fa-futbol"></i> Block League</h3>
-                        <p>FIFA-style soccer with blockchain stakes! Build your team with NFT players, compete in tournaments.</p>
+                        <h3>⚽ Block League</h3>
+                        <p>FIFA-style soccer with blockchain stakes! Build your team with NFT players, compete in tournaments, and win CORE tokens.</p>
                         <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01" disabled>
                         <button class="create-game-btn" onclick="alert('⚽ Block League coming soon! Build your dream team.')" disabled>Coming Soon</button>
                     </div>
@@ -663,160 +428,198 @@
             
             <!-- Leaderboard Section -->
             <div id="leaderboardSection" class="hidden">
-                <h2><i class="fas fa-trophy"></i> Leaderboard</h2>
-                
-                <div class="leaderboard">
-                    <h3>🏆 Top Players This Week</h3>
-                    <div class="leaderboard-item">
+                <div style="background: rgba(255, 255, 255, 0.05); border-radius: 15px; padding: 1.5rem; margin-bottom: 2rem;">
+                    <h3 style="color: #ffd700; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">🏆 Top Players This Week</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem; margin: 0.5rem 0; background: rgba(255, 255, 255, 0.05); border-radius: 8px; border-left: 3px solid #4ecdc4;">
                         <div>
                             <strong>🥇 CryptoKing</strong>
-                            <div style="font-size: 0.9rem; color: var(--primary);">23 wins • 156.7 CORE earned</div>
+                            <div style="font-size: 0.9rem; color: #4ecdc4;">23 wins • 156.7 CORE earned</div>
                         </div>
-                        <div style="color: var(--gold); font-weight: bold;">156.7 CORE</div>
+                        <div style="color: #ffd700; font-weight: bold;">156.7 CORE</div>
                     </div>
-                    <div class="leaderboard-item">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem; margin: 0.5rem 0; background: rgba(255, 255, 255, 0.05); border-radius: 8px; border-left: 3px solid #4ecdc4;">
                         <div>
                             <strong>🥈 BlockMaster</strong>
-                            <div style="font-size: 0.9rem; color: var(--primary);">19 wins • 134.2 CORE earned</div>
+                            <div style="font-size: 0.9rem; color: #4ecdc4;">19 wins • 134.2 CORE earned</div>
                         </div>
-                        <div style="color: var(--silver); font-weight: bold;">134.2 CORE</div>
+                        <div style="color: #ffd700; font-weight: bold;">134.2 CORE</div>
                     </div>
-                    <div class="leaderboard-item">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem; margin: 0.5rem 0; background: rgba(255, 255, 255, 0.05); border-radius: 8px; border-left: 3px solid #4ecdc4;">
                         <div>
                             <strong>🥉 GameWarrior</strong>
-                            <div style="font-size: 0.9rem; color: var(--primary);">17 wins • 98.5 CORE earned</div>
+                            <div style="font-size: 0.9rem; color: #4ecdc4;">17 wins • 98.5 CORE earned</div>
                         </div>
-                        <div style="color: var(--bronze); font-weight: bold;">98.5 CORE</div>
-                    </div>
-                    <div class="leaderboard-item">
-                        <div>
-                            <strong>ChessQueen</strong>
-                            <div style="font-size: 0.9rem; color: var(--primary);">15 wins • 87.3 CORE earned</div>
-                        </div>
-                        <div style="color: var(--gold); font-weight: bold;">87.3 CORE</div>
-                    </div>
-                    <div class="leaderboard-item">
-                        <div>
-                            <strong>DiceRoller</strong>
-                            <div style="font-size: 0.9rem; color: var(--primary);">14 wins • 76.8 CORE earned</div>
-                        </div>
-                        <div style="color: var(--gold); font-weight: bold;">76.8 CORE</div>
-                    </div>
-                </div>
-                
-                <div class="leaderboard">
-                    <h3>🎯 Highest Single Win</h3>
-                    <div class="leaderboard-item">
-                        <div>
-                            <strong>🔥 MegaStaker</strong>
-                            <div style="font-size: 0.9rem; color: var(--primary);">Chess Masters • Yesterday</div>
-                        </div>
-                        <div style="color: var(--secondary); font-weight: bold;">45.6 CORE</div>
-                    </div>
-                    <div class="leaderboard-item">
-                        <div>
-                            <strong>🎲 HighRoller</strong>
-                            <div style="font-size: 0.9rem; color: var(--primary);">Roll the Dice • Today</div>
-                        </div>
-                        <div style="color: var(--secondary); font-weight: bold;">32.4 CORE</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Settings Section -->
-            <div id="settingsSection" class="hidden">
-                <h2><i class="fas fa-cog"></i> Settings</h2>
-                
-                <div class="settings-panel">
-                    <h3>⚙️ Platform Settings</h3>
-                    <div class="setting-item">
-                        <div>
-                            <strong>Sound Effects</strong>
-                            <div style="font-size: 0.9rem; color: #aaa;">Game sounds and notifications</div>
-                        </div>
-                        <div class="toggle-switch active" onclick="toggleSetting(this)"></div>
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <strong>Chat Notifications</strong>
-                            <div style="font-size: 0.9rem; color: #aaa;">Global chat message alerts</div>
-                        </div>
-                        <div class="toggle-switch active" onclick="toggleSetting(this)"></div>
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <strong>Auto-Connect Wallet</strong>
-                            <div style="font-size: 0.9rem; color: #aaa;">Remember wallet for future sessions</div>
-                        </div>
-                        <div class="toggle-switch" onclick="toggleSetting(this)"></div>
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <strong>High Stakes Warnings</strong>
-                            <div style="font-size: 0.9rem; color: #aaa;">Confirm games over 1 CORE</div>
-                        </div>
-                        <div class="toggle-switch active" onclick="toggleSetting(this)"></div>
+                        <div style="color: #ffd700; font-weight: bold;">98.5 CORE</div>
                     </div>
                 </div>
             </div>
             
             <!-- Profile Section -->
             <div id="profileSection" class="hidden">
-                <h2><i class="fas fa-user"></i> Player Profile</h2>
-                
-                <div class="settings-panel">
-                    <div class="setting-item">
-                        <div>
-                            <strong>Player Name</strong>
-                            <div style="font-size: 0.9rem; color: #aaa;">CryptoGamer123</div>
+                <div style="background: rgba(255, 255, 255, 0.05); border-radius: 15px; padding: 1.5rem; margin-bottom: 2rem;">
+                    <h3 style="color: #4ecdc4; margin-bottom: 1rem;">👤 Player Profile</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px;">
+                            <h4>Games Played</h4>
+                            <p style="font-size: 2rem; color: #4ecdc4;">0</p>
                         </div>
-                        <button class="connect-btn" style="padding: 0.5rem 1rem;">Edit</button>
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <strong>Wallet Address</strong>
-                            <div style="font-size: 0.9rem; color: #aaa;" id="profileWallet">Not connected</div>
+                        <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px;">
+                            <h4>Games Won</h4>
+                            <p style="font-size: 2rem; color: #00ff88;">0</p>
                         </div>
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <strong>Total Wins</strong>
-                            <div style="font-size: 0.9rem; color: #aaa;">24 games</div>
+                        <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px;">
+                            <h4>Total Earned</h4>
+                            <p style="font-size: 2rem; color: #ffd700;">0 CORE</p>
                         </div>
                     </div>
-                    <div class="setting-item">
-                        <div>
-                            <strong>Total Earnings</strong>
-                            <div style="font-size: 0.9rem; color: #aaa;">86.4 CORE</div>
+                </div>
+            </div>
+            
+            <!-- Chat Section -->
+            <div id="chatSection" class="hidden">
+                <div style="background: rgba(255, 255, 255, 0.05); border-radius: 15px; padding: 1.5rem; height: 500px; display: flex; flex-direction: column;">
+                    <h3 style="margin-bottom: 1rem;">💬 Global Chat</h3>
+                    <div style="flex: 1; overflow-y: auto; margin-bottom: 1rem; padding: 1rem; background: rgba(0, 0, 0, 0.2); border-radius: 8px;" id="chatMessages">
+                        <div style="margin-bottom: 0.8rem; padding: 0.5rem; border-radius: 8px; background: rgba(255, 255, 255, 0.05);">
+                            <strong>CryptoKing:</strong> Just won 2.5 CORE in Chess! 🎉
+                        </div>
+                        <div style="margin-bottom: 0.8rem; padding: 0.5rem; border-radius: 8px; background: rgba(255, 255, 255, 0.05);">
+                            <strong>GameMaster:</strong> New high stakes game starting soon!
+                        </div>
+                        <div style="margin-bottom: 0.8rem; padding: 0.5rem; border-radius: 8px; background: rgba(255, 255, 255, 0.05);">
+                            <strong>BlockchainBro:</strong> Anyone up for Word Battle?
                         </div>
                     </div>
-                    <div class="setting-item">
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" style="flex: 1; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 8px; padding: 0.8rem; color: white;" placeholder="Type your message..." id="chatInput" onkeypress="handleChatKeyPress(event)">
+                        <button style="background: linear-gradient(45deg, #4ecdc4, #44a08d); border: none; padding: 0.8rem 1.5rem; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;" onclick="sendChatMessage()">Send</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- News Section -->
+            <div id="newsSection" class="hidden">
+                <div style="background: rgba(255, 255, 255, 0.05); border-radius: 15px; padding: 1.5rem; margin-bottom: 2rem;">
+                    <h3 style="color: #4ecdc4; margin-bottom: 1rem;">📰 Crypto Breaking News</h3>
+                    <div id="mainNewsDisplay">
+                        <div class="news-item">
+                            <div class="news-title">🚀 Bitcoin Surges Past $45,000 as Institutional Adoption Grows</div>
+                            <p style="margin: 0.5rem 0; font-size: 0.9rem;">Major financial institutions continue to embrace cryptocurrency as a legitimate asset class, driving unprecedented demand.</p>
+                            <div class="news-time">2 hours ago • CoinDesk</div>
+                        </div>
+                        
+                        <div class="news-item">
+                            <div class="news-title">⚡ Ethereum Layer 2 Networks See Record Volume</div>
+                            <p style="margin: 0.5rem 0; font-size: 0.9rem;">Polygon, Arbitrum, and Optimism process over $2B in daily transactions as users seek lower fees.</p>
+                            <div class="news-time">4 hours ago • The Block</div>
+                        </div>
+                        
+                        <div class="news-item">
+                            <div class="news-title">🎮 Gaming NFTs Market Explodes with $500M Monthly Volume</div>
+                            <p style="margin: 0.5rem 0; font-size: 0.9rem;">Blockchain gaming platforms like Axie Infinity and Gods Unchained drive massive NFT trading volumes.</p>
+                            <div class="news-time">6 hours ago • NFT Evening</div>
+                        </div>
+                        
+                        <div class="news-item">
+                            <div class="news-title">🔥 DeFi Total Value Locked Reaches New All-Time High</div>
+                            <p style="margin: 0.5rem 0; font-size: 0.9rem;">Decentralized finance protocols now secure over $100 billion in assets across multiple blockchains.</p>
+                            <div class="news-time">8 hours ago • DeFi Pulse</div>
+                        </div>
+                        
+                        <div class="news-item">
+                            <div class="news-title">💎 Solana Network Upgrades Boost Transaction Speeds</div>
+                            <p style="margin: 0.5rem 0; font-size: 0.9rem;">Latest improvements enable 65,000 TPS capability, positioning Solana as a major Ethereum competitor.</p>
+                            <div class="news-time">12 hours ago • Solana Labs</div>
+                        </div>
+                        
+                        <div class="news-item">
+                            <div class="news-title">🏛️ Central Bank Digital Currencies Gain Global Momentum</div>
+                            <p style="margin: 0.5rem 0; font-size: 0.9rem;">Over 90 countries actively exploring or piloting digital versions of their national currencies.</p>
+                            <div class="news-time">1 day ago • Reuters</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Settings Section -->
+            <div id="settingsSection" class="hidden">
+                <div style="background: rgba(255, 255, 255, 0.05); border-radius: 15px; padding: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem;">⚙️ Platform Settings</h3>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; margin: 0.5rem 0; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
                         <div>
-                            <strong>Favorite Game</strong>
-                            <div style="font-size: 0.9rem; color: #aaa;">Chess Masters</div>
+                            <strong>Sound Effects</strong>
+                            <div style="font-size: 0.9rem; color: #aaa;">Game sounds and notifications</div>
+                        </div>
+                        <div class="toggle-switch active" onclick="toggleSetting(this)" style="position: relative; width: 60px; height: 30px; background: linear-gradient(45deg, #4ecdc4, #44a08d); border-radius: 15px; cursor: pointer; transition: all 0.3s ease;">
+                            <div style="position: absolute; top: 3px; left: 33px; width: 24px; height: 24px; background: white; border-radius: 50%; transition: all 0.3s ease;"></div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; margin: 0.5rem 0; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                        <div>
+                            <strong>Chat Notifications</strong>
+                            <div style="font-size: 0.9rem; color: #aaa;">Global chat message alerts</div>
+                        </div>
+                        <div class="toggle-switch active" onclick="toggleSetting(this)" style="position: relative; width: 60px; height: 30px; background: linear-gradient(45deg, #4ecdc4, #44a08d); border-radius: 15px; cursor: pointer; transition: all 0.3s ease;">
+                            <div style="position: absolute; top: 3px; left: 33px; width: 24px; height: 24px; background: white; border-radius: 50%; transition: all 0.3s ease;"></div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; margin: 0.5rem 0; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                        <div>
+                            <strong>Auto-Connect Wallet</strong>
+                            <div style="font-size: 0.9rem; color: #aaa;">Remember wallet for future sessions</div>
+                        </div>
+                        <div class="toggle-switch" onclick="toggleSetting(this)" style="position: relative; width: 60px; height: 30px; background: rgba(255, 255, 255, 0.2); border-radius: 15px; cursor: pointer; transition: all 0.3s ease;">
+                            <div style="position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; background: white; border-radius: 50%; transition: all 0.3s ease;"></div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; margin: 0.5rem 0; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                        <div>
+                            <strong>High Stakes Warnings</strong>
+                            <div style="font-size: 0.9rem; color: #aaa;">Confirm games over 1 CORE</div>
+                        </div>
+                        <div class="toggle-switch active" onclick="toggleSetting(this)" style="position: relative; width: 60px; height: 30px; background: linear-gradient(45deg, #4ecdc4, #44a08d); border-radius: 15px; cursor: pointer; transition: all 0.3s ease;">
+                            <div style="position: absolute; top: 3px; left: 33px; width: 24px; height: 24px; background: white; border-radius: 50%; transition: all 0.3s ease;"></div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; margin: 0.5rem 0; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                        <div>
+                            <strong>Live News Updates</strong>
+                            <div style="font-size: 0.9rem; color: #aaa;">Real-time crypto news feed</div>
+                        </div>
+                        <div class="toggle-switch active" onclick="toggleSetting(this)" style="position: relative; width: 60px; height: 30px; background: linear-gradient(45deg, #4ecdc4, #44a08d); border-radius: 15px; cursor: pointer; transition: all 0.3s ease;">
+                            <div style="position: absolute; top: 3px; left: 33px; width: 24px; height: 24px; background: white; border-radius: 50%; transition: all 0.3s ease;"></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
     <script>
         // Global variables
         let provider = null;
         let userAddress = null;
         let currentSection = 'games';
-        let tictactoeBoard = ['', '', '', '', '', '', '', '', ''];
-        let currentPlayer = 'X';
-        let gameActive = false;
+        
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const navMenu = document.getElementById('navMenu');
+            navMenu.classList.toggle('active');
+        }
         
         // Navigation
         function showSection(section) {
             // Hide all sections
             document.getElementById('gamesSection').classList.add('hidden');
             document.getElementById('leaderboardSection').classList.add('hidden');
-            document.getElementById('settingsSection').classList.add('hidden');
             document.getElementById('profileSection').classList.add('hidden');
+            document.getElementById('chatSection').classList.add('hidden');
+            document.getElementById('newsSection').classList.add('hidden');
+            document.getElementById('settingsSection').classList.add('hidden');
             
             // Show selected section
             document.getElementById(section + 'Section').classList.remove('hidden');
@@ -825,98 +628,66 @@
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
             });
-            
-            document.querySelectorAll('.mobile-nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            if (event) {
-                event.target.classList.add('active');
-            }
+            event.target.classList.add('active');
             
             currentSection = section;
-            closeMobileMenu();
+            
+            // Close mobile menu
+            document.getElementById('navMenu').classList.remove('active');
         }
-        
-        // Mobile Menu
-        function openMobileMenu() {
-            document.getElementById('mobileMenu').classList.add('active');
-        }
-        
-        function closeMobileMenu() {
-            document.getElementById('mobileMenu').classList.remove('active');
-        }
-        
-        document.getElementById('mobileMenuBtn').addEventListener('click', openMobileMenu);
-        document.getElementById('closeMenuBtn').addEventListener('click', closeMobileMenu);
         
         // Wallet connection
         document.getElementById('connectBtn').addEventListener('click', async () => {
             try {
-                if (!userAddress) {
-                    await connectWallet();
-                } else {
-                    disconnectWallet();
+                if (typeof window.ethereum === 'undefined') {
+                    alert('Please install MetaMask or Core Wallet to play!');
+                    return;
                 }
+                
+                const accounts = await window.ethereum.request({ 
+                    method: 'eth_requestAccounts' 
+                });
+                
+                if (accounts.length > 0) {
+                    userAddress = accounts[0];
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    
+                    // Update UI
+                    document.getElementById('connectionStatus').innerHTML = 
+                        `🟢 ${userAddress.substring(0, 6)}...${userAddress.substring(38)}`;
+                    document.getElementById('connectBtn').classList.add('hidden');
+                    document.getElementById('disconnectBtn').classList.remove('hidden');
+                    
+                    // Update balance
+                    const balance = await provider.getBalance(userAddress);
+                    const balanceInCore = ethers.utils.formatEther(balance);
+                    document.getElementById('balanceDisplay').textContent = 
+                        parseFloat(balanceInCore).toFixed(4) + ' CORE';
+                        
+                    alert('🎉 Wallet connected successfully! Ready to play!');
+                } else {
+                    throw new Error('No accounts returned from wallet');
+                }
+                
             } catch (error) {
-                console.error('Wallet error:', error);
-                alert('Error: ' + error.message);
+                console.error('Error connecting wallet:', error);
+                alert('Error connecting wallet: ' + error.message);
             }
         });
         
-        async function connectWallet() {
-            if (typeof window.ethereum === 'undefined') {
-                alert('Please install MetaMask or Core Wallet to play!');
-                return;
-            }
-            
-            const accounts = await window.ethereum.request({ 
-                method: 'eth_requestAccounts' 
-            });
-            
-            if (accounts.length > 0) {
-                userAddress = accounts[0];
-                provider = new ethers.providers.Web3Provider(window.ethereum);
-                
-                // Update UI
-                document.getElementById('connectionStatus').innerHTML = 
-                    `🟢 ${userAddress.substring(0, 6)}...${userAddress.substring(38)}`;
-                document.getElementById('connectBtn').textContent = 'Disconnect';
-                document.getElementById('connectBtn').classList.add('disconnect-btn');
-                document.getElementById('profileWallet').textContent = 
-                    `${userAddress.substring(0, 6)}...${userAddress.substring(38)}`;
-                
-                // Update balance
-                updateBalance();
-                    
-                alert('🎉 Wallet connected successfully! Ready to play!');
-            } else {
-                throw new Error('No accounts returned from wallet');
-            }
-        }
-        
-        function disconnectWallet() {
+        // Wallet disconnection
+        document.getElementById('disconnectBtn').addEventListener('click', () => {
             userAddress = null;
             provider = null;
             
-            // Update UI
+            // Reset UI
             document.getElementById('connectionStatus').innerHTML = '🔴 Not Connected';
             document.getElementById('balanceDisplay').textContent = '0.00 CORE';
-            document.getElementById('connectBtn').textContent = 'Connect Wallet';
-            document.getElementById('connectBtn').classList.remove('disconnect-btn');
-            document.getElementById('profileWallet').textContent = 'Not connected';
+            document.getElementById('connectBtn').classList.remove('hidden');
+            document.getElementById('disconnectBtn').classList.add('hidden');
             
-            alert('Wallet disconnected successfully.');
-        }
-        
-        async function updateBalance() {
-            if (!userAddress || !provider) return;
-            
-            const balance = await provider.getBalance(userAddress);
-            const balanceInCore = ethers.utils.formatEther(balance);
-            document.getElementById('balanceDisplay').textContent = 
-                parseFloat(balanceInCore).toFixed(4) + ' CORE';
-        }
+            alert('👋 Wallet disconnected successfully!');
+        });
         
         // Game creation
         function createGame(gameType) {
@@ -925,15 +696,8 @@
                 return;
             }
             
-            let stakeInput;
-            switch (gameType) {
-                case 'chess': stakeInput = document.getElementById('chessStake'); break;
-                case 'checkers': stakeInput = document.getElementById('checkersStake'); break;
-                case 'words': stakeInput = document.getElementById('wordsStake'); break;
-                case 'tictactoe': stakeInput = document.getElementById('tictactoeStake'); break;
-                case 'dice': stakeInput = document.getElementById('diceStake'); break;
-            }
-            
+            const gameCard = event.target.closest('.game-card');
+            const stakeInput = gameCard.querySelector('.stake-input');
             const stakeAmount = parseFloat(stakeInput.value);
             
             if (!stakeAmount || stakeAmount < 0.01) {
@@ -951,149 +715,10 @@
             const gameNames = {
                 chess: 'Chess Masters',
                 checkers: 'Checkers Pro',
-                words: 'Word Battle',
-                tictactoe: 'Tic Tac Toe',
-                dice: 'Roll the Dice'
+                words: 'Word Battle'
             };
             
-            // Show game UI if applicable
-            if (gameType === 'tictactoe') {
-                document.getElementById('tictactoeGame').style.display = 'block';
-                resetTicTacToe();
-            } else if (gameType === 'dice') {
-                document.getElementById('diceGame').style.display = 'block';
-                document.getElementById('diceResult').textContent = '';
-            }
-            
-            alert(`🎮 Creating ${gameNames[gameType]} game with ${stakeAmount} CORE stake!\n\nSmart contract initialized and ready for gameplay.`);
-        }
-        
-        // Tic Tac Toe Game Logic
-        function resetTicTacToe() {
-            tictactoeBoard = ['', '', '', '', '', '', '', '', ''];
-            currentPlayer = 'X';
-            gameActive = true;
-            document.querySelectorAll('.cell').forEach(cell => {
-                cell.textContent = '';
-            });
-            document.getElementById('tictactoeResult').textContent = '';
-        }
-        
-        function handleCellClick(index) {
-            if (!gameActive || tictactoeBoard[index] !== '') return;
-            
-            tictactoeBoard[index] = currentPlayer;
-            document.querySelector(`.cell[data-index="${index}"]`).textContent = currentPlayer;
-            
-            if (checkWinner()) {
-                document.getElementById('tictactoeResult').textContent = `Player ${currentPlayer} wins!`;
-                gameActive = false;
-                simulatePayout(currentPlayer);
-                return;
-            }
-            
-            if (checkDraw()) {
-                document.getElementById('tictactoeResult').textContent = "It's a draw!";
-                gameActive = false;
-                return;
-            }
-            
-            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-            
-            // Simulate opponent move
-            if (gameActive) {
-                setTimeout(makeAIMove, 800);
-            }
-        }
-        
-        function makeAIMove() {
-            if (!gameActive) return;
-            
-            // Simple AI: find first empty cell
-            const emptyCells = [];
-            tictactoeBoard.forEach((cell, index) => {
-                if (cell === '') emptyCells.push(index);
-            });
-            
-            if (emptyCells.length > 0) {
-                const randomIndex = Math.floor(Math.random() * emptyCells.length);
-                const aiMove = emptyCells[randomIndex];
-                
-                tictactoeBoard[aiMove] = currentPlayer;
-                document.querySelector(`.cell[data-index="${aiMove}"]`).textContent = currentPlayer;
-                
-                if (checkWinner()) {
-                    document.getElementById('tictactoeResult').textContent = `Player ${currentPlayer} wins!`;
-                    gameActive = false;
-                    simulatePayout(currentPlayer);
-                    return;
-                }
-                
-                if (checkDraw()) {
-                    document.getElementById('tictactoeResult').textContent = "It's a draw!";
-                    gameActive = false;
-                    return;
-                }
-                
-                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-            }
-        }
-        
-        function checkWinner() {
-            const winPatterns = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
-                [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
-                [0, 4, 8], [2, 4, 6]             // diagonals
-            ];
-            
-            for (const pattern of winPatterns) {
-                const [a, b, c] = pattern;
-                if (tictactoeBoard[a] && tictactoeBoard[a] === tictactoeBoard[b] && tictactoeBoard[a] === tictactoeBoard[c]) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        
-        function checkDraw() {
-            return !tictactoeBoard.includes('');
-        }
-        
-        // Roll the Dice Game Logic
-        function rollDice() {
-            if (!gameActive) return;
-            
-            const playerDice = Math.floor(Math.random() * 6) + 1;
-            const opponentDice = Math.floor(Math.random() * 6) + 1;
-            
-            document.getElementById('playerDice').textContent = playerDice;
-            document.getElementById('opponentDice').textContent = opponentDice;
-            
-            let result = '';
-            if (playerDice > opponentDice) {
-                result = `You win! ${playerDice} beats ${opponentDice}`;
-                simulatePayout('player');
-            } else if (opponentDice > playerDice) {
-                result = `Opponent wins! ${opponentDice} beats ${playerDice}`;
-            } else {
-                result = `It's a tie! ${playerDice} vs ${opponentDice}`;
-            }
-            
-            document.getElementById('diceResult').textContent = result;
-            gameActive = false;
-        }
-        
-        // Simulate payout
-        function simulatePayout(winner) {
-            const stakeAmount = parseFloat(document.getElementById('tictactoeStake').value || 
-                                document.getElementById('diceStake').value);
-            
-            if (winner === 'X' || winner === 'player') {
-                setTimeout(() => {
-                    alert(`🎉 Congratulations! You won ${(stakeAmount * 0.97).toFixed(4)} CORE!`);
-                    updateBalance();
-                }, 500);
-            }
+            alert(`🎮 Creating ${gameNames[gameType]} game with ${stakeAmount} CORE stake!\n\n🔄 Game logic and smart contracts coming soon.\n\nFor now, enjoy the platform and connect with other players in chat!`);
         }
         
         // Chat functionality
@@ -1110,7 +735,7 @@
             
             const chatMessages = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
-            messageDiv.className = 'chat-message';
+            messageDiv.style.cssText = 'margin-bottom: 0.8rem; padding: 0.5rem; border-radius: 8px; background: rgba(255, 255, 255, 0.05);';
             messageDiv.innerHTML = `<strong>You:</strong> ${message}`;
             
             chatMessages.appendChild(messageDiv);
@@ -1128,7 +753,7 @@
                 ];
                 
                 const responseDiv = document.createElement('div');
-                responseDiv.className = 'chat-message';
+                responseDiv.style.cssText = 'margin-bottom: 0.8rem; padding: 0.5rem; border-radius: 8px; background: rgba(255, 255, 255, 0.05);';
                 responseDiv.innerHTML = `<strong>GameBot:</strong> ${responses[Math.floor(Math.random() * responses.length)]}`;
                 
                 chatMessages.appendChild(responseDiv);
@@ -1144,36 +769,103 @@
         
         // Settings toggle
         function toggleSetting(element) {
-            element.classList.toggle('active');
+            const isActive = element.classList.contains('active');
+            const toggleDot = element.querySelector('div');
+            
+            if (isActive) {
+                element.classList.remove('active');
+                element.style.background = 'rgba(255, 255, 255, 0.2)';
+                toggleDot.style.left = '3px';
+            } else {
+                element.classList.add('active');
+                element.style.background = 'linear-gradient(45deg, #4ecdc4, #44a08d)';
+                toggleDot.style.left = '33px';
+            }
         }
         
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 Crypticus advanced platform loaded successfully!');
+        // Auto-update crypto news
+        function updateCryptoNews() {
+            const newsItems = [
+                {
+                    title: "🚀 Bitcoin Breaks $50K as ETF Approvals Surge",
+                    content: "Major financial institutions drive unprecedented demand for cryptocurrency exposure.",
+                    time: "1 hour ago",
+                    source: "CoinDesk"
+                },
+                {
+                    title: "⚡ Ethereum 2.0 Staking Reaches New Milestone",
+                    content: "Over 15 million ETH now secured in proof-of-stake consensus mechanism.",
+                    time: "3 hours ago",
+                    source: "Ethereum Foundation"
+                },
+                {
+                    title: "🎮 GameFi Sector Explodes with $2B Market Cap",
+                    content: "Play-to-earn games dominate blockchain gaming landscape with massive adoption.",
+                    time: "5 hours ago",
+                    source: "DappRadar"
+                },
+                {
+                    title: "💎 Layer 2 Solutions Process Record Volume",
+                    content: "Polygon and Arbitrum handle billions in daily transactions as fees drop.",
+                    time: "7 hours ago",
+                    source: "L2Beat"
+                },
+                {
+                    title: "🔥 DeFi TVL Hits $120B All-Time High",
+                    content: "Decentralized finance protocols secure record amounts across all chains.",
+                    time: "9 hours ago",
+                    source: "DefiLlama"
+                }
+            ];
             
-            // Setup Tic Tac Toe board
-            document.querySelectorAll('.cell').forEach(cell => {
-                cell.addEventListener('click', () => {
-                    const index = parseInt(cell.getAttribute('data-index'));
-                    handleCellClick(index);
-                });
+            // Update sidebar news
+            const sidebarNews = document.getElementById('cryptoNews');
+            sidebarNews.innerHTML = '';
+            
+            newsItems.slice(0, 3).forEach(item => {
+                const newsDiv = document.createElement('div');
+                newsDiv.className = 'news-item';
+                newsDiv.innerHTML = `
+                    <div class="news-title">${item.title}</div>
+                    <div class="news-time">${item.time}</div>
+                `;
+                sidebarNews.appendChild(newsDiv);
             });
             
-            // Add dynamic chat messages
-            const chatMessages = document.getElementById('chatMessages');
-            
-            setInterval(() => {
-                const messages = [
-                    { user: "StakeHero", message: "Just won big in Checkers! 🎉" },
-                    { user: "WordWizard", message: "Word Battle is so addictive! 📝" },
-                    { user: "ChessMaster", message: "Looking for a chess opponent! ♟️" },
-                    { user: "CryptoGamer", message: "Can't wait for Crypto Kombat! ⚔️" },
-                    { user: "DiceRoller", message: "Anyone want to roll the dice? 🎲" }
-                ];
+            // Update main news display
+            const mainNews = document.getElementById('mainNewsDisplay');
+            if (mainNews) {
+                mainNews.innerHTML = '';
                 
+                newsItems.forEach(item => {
+                    const newsDiv = document.createElement('div');
+                    newsDiv.className = 'news-item';
+                    newsDiv.innerHTML = `
+                        <div class="news-title">${item.title}</div>
+                        <p style="margin: 0.5rem 0; font-size: 0.9rem;">${item.content}</p>
+                        <div class="news-time">${item.time} • ${item.source}</div>
+                    `;
+                    mainNews.appendChild(newsDiv);
+                });
+            }
+        }
+        
+        // Add dynamic chat messages
+        function addRandomChatMessage() {
+            const messages = [
+                { user: "StakeHero", message: "Just won big in Checkers! 🎉" },
+                { user: "WordWizard", message: "Word Battle is so addictive! 📝" },
+                { user: "ChessMaster", message: "Looking for a chess opponent! ♟️" },
+                { user: "CryptoGamer", message: "Can't wait for Crypto Kombat! ⚔️" },
+                { user: "BlockchainBro", message: "These games are incredible! 🚀" },
+                { user: "TokenTitan", message: "Best blockchain gaming platform! 💰" }
+            ];
+            
+            const chatMessages = document.getElementById('chatMessages');
+            if (chatMessages) {
                 const randomMessage = messages[Math.floor(Math.random() * messages.length)];
                 const messageDiv = document.createElement('div');
-                messageDiv.className = 'chat-message';
+                messageDiv.style.cssText = 'margin-bottom: 0.8rem; padding: 0.5rem; border-radius: 8px; background: rgba(255, 255, 255, 0.05);';
                 messageDiv.innerHTML = `<strong>${randomMessage.user}:</strong> ${randomMessage.message}`;
                 
                 chatMessages.appendChild(messageDiv);
@@ -1183,30 +875,29 @@
                 while (chatMessages.children.length > 10) {
                     chatMessages.removeChild(chatMessages.firstChild);
                 }
-            }, 15000); // New message every 15 seconds
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Crypticus complete platform loaded successfully!');
             
-            // Simulate news updates
-            setInterval(() => {
-                const news = [
-                    { title: "New Crypticus Feature Released", content: "Platform adds Tic Tac Toe and Dice games with real stakes", time: "Just now" },
-                    { title: "CORE Token Reaches New High", content: "Core Chain native token surges 15% in 24 hours", time: "10 mins ago" },
-                    { title: "Blockchain Gaming Conference", content: "Major event scheduled for next month in Dubai", time: "30 mins ago" }
-                ];
+            // Update news every 30 seconds
+            updateCryptoNews();
+            setInterval(updateCryptoNews, 30000);
+            
+            // Add chat messages every 15 seconds
+            setInterval(addRandomChatMessage, 15000);
+            
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', (e) => {
+                const navMenu = document.getElementById('navMenu');
+                const mobileBtn = document.querySelector('.mobile-menu-btn');
                 
-                const newsContainer = document.getElementById('newsContainer');
-                newsContainer.innerHTML = '';
-                
-                news.forEach(item => {
-                    const newsItem = document.createElement('div');
-                    newsItem.className = 'news-item';
-                    newsItem.innerHTML = `
-                        <h4>${item.title}</h4>
-                        <p>${item.content}</p>
-                        <div class="timestamp">${item.time}</div>
-                    `;
-                    newsContainer.appendChild(newsItem);
-                });
-            }, 60000); // Update news every minute
+                if (!navMenu.contains(e.target) && !mobileBtn.contains(e.target)) {
+                    navMenu.classList.remove('active');
+                }
+            });
         });
     </script>
 </body>

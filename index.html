@@ -467,6 +467,101 @@
             color: #4ecdc4;
             margin-top: 0.5rem;
         }
+
+        /* Game Window Styles */
+        .game-window {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(15px);
+            border: 2px solid #4ecdc4;
+            border-radius: 15px;
+            padding: 1.5rem;
+            z-index: 1000;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .game-window.minimized {
+            top: auto;
+            bottom: 20px;
+            right: 20px;
+            left: auto;
+            transform: none;
+            width: 300px;
+            height: 60px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .game-window-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .game-window-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+        
+        .game-window-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .window-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+        
+        .window-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .minimize-btn {
+            background: rgba(255, 193, 7, 0.3);
+        }
+        
+        .close-btn {
+            background: rgba(220, 53, 69, 0.3);
+        }
+        
+        .game-window-content {
+            display: block;
+        }
+        
+        .game-window.minimized .game-window-content {
+            display: none;
+        }
+        
+        .game-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 999;
+        }
+        
+        .game-overlay.hidden {
+            display: none;
+        }
         
         @media (max-width: 768px) {
             .header {
@@ -585,6 +680,73 @@
                 </div>
             </div>
         </div>
+
+        <!-- Game Windows -->
+    <div class="game-overlay hidden" id="gameOverlay"></div>
+
+    <!-- Chess Game Window -->
+    <div class="game-window hidden" id="chessGameWindow">
+        <div class="game-window-header">
+            <div class="game-window-title">♟️ Chess Masters</div>
+            <div class="game-window-controls">
+                <button class="window-btn minimize-btn" onclick="minimizeGame('chess')">−</button>
+                <button class="window-btn close-btn" onclick="closeGame('chess')">×</button>
+            </div>
+        </div>
+        <div class="game-window-content">
+            <div class="game-status" id="chessStatus">Waiting for opponent...</div>
+            <div class="chess-board" id="chessBoard"></div>
+            <div class="game-controls">
+                <button class="game-btn" onclick="resignChess()">Resign</button>
+                <button class="game-btn" onclick="drawChess()">Offer Draw</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkers Game Window -->
+    <div class="game-window hidden" id="checkersGameWindow">
+        <div class="game-window-header">
+            <div class="game-window-title">⚫ Checkers Pro</div>
+            <div class="game-window-controls">
+                <button class="window-btn minimize-btn" onclick="minimizeGame('checkers')">−</button>
+                <button class="window-btn close-btn" onclick="closeGame('checkers')">×</button>
+            </div>
+        </div>
+        <div class="game-window-content">
+            <div class="game-status" id="checkersStatus">Waiting for opponent...</div>
+            <div class="checkers-board" id="checkersBoard"></div>
+            <div class="game-controls">
+                <button class="game-btn" onclick="resignCheckers()">Resign</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Word Game Window -->
+    <div class="game-window hidden" id="wordGameWindow">
+        <div class="game-window-header">
+            <div class="game-window-title">📝 Word Battle</div>
+            <div class="game-window-controls">
+                <button class="window-btn minimize-btn" onclick="minimizeGame('word')">−</button>
+                <button class="window-btn close-btn" onclick="closeGame('word')">×</button>
+            </div>
+        </div>
+        <div class="game-window-content">
+            <div class="game-status" id="wordStatus">Round 1 of 3</div>
+            <div class="word-game">
+                <h4 id="wordPrompt">Make a word with these letters:</h4>
+                <div id="wordLetters" style="font-size: 2rem; color: #4ecdc4; margin: 1rem 0;">BLOCKCHAIN</div>
+                <input type="text" class="word-input" id="wordInput" placeholder="Enter your word..." maxlength="20">
+                <div class="word-score">
+                    <div>Your Score: <span id="playerScore">0</span></div>
+                    <div>Opponent: <span id="opponentScore">0</span></div>
+                </div>
+                <div class="game-controls">
+                    <button class="game-btn" onclick="submitWord()">Submit Word</button>
+                    <button class="game-btn" onclick="skipRound()">Skip Round</button>
+                </div>
+            </div>
+        </div>
+    </div>
         
         <div class="content-area">
             <!-- Games Section -->
@@ -603,58 +765,18 @@
                         <p>Play chess with real CORE stakes! Smart contract ensures fair play.</p>
                         <input type="number" class="stake-input" id="chessStake" placeholder="Enter stake (min 0.01 CORE)" min="0.01" step="0.01">
                         <button class="create-game-btn" onclick="startChessGame()">Start Chess Game</button>
-                        
-                        <!-- Chess Game Area (Hidden initially) -->
-                        <div id="chessGameArea" class="hidden">
-                            <div class="game-status" id="chessStatus">Waiting for opponent...</div>
-                            <div class="chess-board" id="chessBoard"></div>
-                            <div class="game-controls">
-                                <button class="game-btn" onclick="resignChess()">Resign</button>
-                                <button class="game-btn" onclick="drawChess()">Offer Draw</button>
-                            </div>
-                        </div>
-                    </div>
-                    
+                                            
                     <div class="game-card" id="checkersCard">
                         <h3>⚫ Checkers Pro</h3>
                         <p>Fast checkers with blockchain stakes! Quick games, instant rewards.</p>
                         <input type="number" class="stake-input" id="checkersStake" placeholder="Enter stake (min 0.01 CORE)" min="0.01" step="0.01">
                         <button class="create-game-btn" onclick="startCheckersGame()">Start Checkers Game</button>
-                        
-                        <!-- Checkers Game Area (Hidden initially) -->
-                        <div id="checkersGameArea" class="hidden">
-                            <div class="game-status" id="checkersStatus">Waiting for opponent...</div>
-                            <div class="checkers-board" id="checkersBoard"></div>
-                            <div class="game-controls">
-                                <button class="game-btn" onclick="resignCheckers()">Resign</button>
-                            </div>
-                        </div>
-                    </div>
                     
                     <div class="game-card" id="wordCard">
                         <h3>📝 Word Battle</h3>
                         <p>Compete in word games with crypto stakes! Test your vocabulary.</p>
                         <input type="number" class="stake-input" id="wordStake" placeholder="Enter stake (min 0.01 CORE)" min="0.01" step="0.01">
                         <button class="create-game-btn" onclick="startWordGame()">Start Word Game</button>
-                        
-                        <!-- Word Game Area (Hidden initially) -->
-                        <div id="wordGameArea" class="hidden">
-                            <div class="game-status" id="wordStatus">Round 1 of 3</div>
-                            <div class="word-game">
-                                <h4 id="wordPrompt">Make a word with these letters:</h4>
-                                <div id="wordLetters" style="font-size: 2rem; color: #4ecdc4; margin: 1rem 0;">BLOCKCHAIN</div>
-                                <input type="text" class="word-input" id="wordInput" placeholder="Enter your word..." maxlength="20">
-                                <div class="word-score">
-                                    <div>Your Score: <span id="playerScore">0</span></div>
-                                    <div>Opponent: <span id="opponentScore">0</span></div>
-                                </div>
-                                <div class="game-controls">
-                                    <button class="game-btn" onclick="submitWord()">Submit Word</button>
-                                    <button class="game-btn" onclick="skipRound()">Skip Round</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                     
                     <div class="game-card coming-soon">
                         <h3>⚔️ Crypto Kombat</h3>
@@ -1149,6 +1271,63 @@
                 }
             });
         }
+
+        // Game window management
+        function openGameWindow(gameType) {
+            const gameWindow = document.getElementById(gameType + 'GameWindow');
+            const overlay = document.getElementById('gameOverlay');
+            
+            gameWindow.classList.remove('hidden', 'minimized');
+            overlay.classList.remove('hidden');
+            
+            overlay.onclick = () => closeGame(gameType);
+            gameWindow.onclick = (e) => {
+                if (gameWindow.classList.contains('minimized')) {
+                    restoreGame(gameType);
+                    e.stopPropagation();
+                }
+            };
+        }
+
+        function minimizeGame(gameType) {
+            const gameWindow = document.getElementById(gameType + 'GameWindow');
+            const overlay = document.getElementById('gameOverlay');
+            
+            gameWindow.classList.add('minimized');
+            overlay.classList.add('hidden');
+        }
+
+        function restoreGame(gameType) {
+            const gameWindow = document.getElementById(gameType + 'GameWindow');
+            const overlay = document.getElementById('gameOverlay');
+            
+            gameWindow.classList.remove('minimized');
+            overlay.classList.remove('hidden');
+        }
+
+        function closeGame(gameType) {
+            const gameWindow = document.getElementById(gameType + 'GameWindow');
+            const overlay = document.getElementById('gameOverlay');
+            
+            if (confirm('Are you sure you want to close this game?')) {
+                gameWindow.classList.add('hidden');
+                overlay.classList.add('hidden');
+                
+                if (gameType === 'chess') {
+                    selectedSquare = null;
+                    currentPlayer = 'white';
+                } else if (gameType === 'checkers') {
+                    currentPlayer = 'red';
+                } else if (gameType === 'word') {
+                    currentWordRound = 1;
+                    playerScore = 0;
+                    opponentScore = 0;
+                }
+                
+                document.getElementById(gameType + 'Stake').value = '';
+                showTransactionStatus('Game closed');
+            }
+        }
         
         // Chess game functions
         function initializeChessBoard() {
@@ -1288,50 +1467,41 @@
         }
         
         async function startChessGame() {
-            if (!userAddress) {
-                alert('Please connect your wallet first!');
-                return;
-            }
-            
-            const stakeAmount = parseFloat(document.getElementById('chessStake').value);
-            if (!stakeAmount || stakeAmount < 0.01) {
-                alert('Please enter a valid stake amount (minimum 0.01 CORE)');
-                return;
-            }
-            
-            try {
-                showTransactionStatus('Creating chess game...');
-                
-                // Create game on smart contract
-                const stakeWei = ethers.utils.parseEther(stakeAmount.toString());
-                const tx = await gameContract.createGame(0, stakeWei, { value: stakeWei });
-                
-                showTransactionStatus('⏳ Transaction submitted...', tx.hash);
-                
-                const receipt = await tx.wait();
-                console.log('Chess game created:', receipt);
-                
-                // Parse gameId from events
-                const gameCreatedEvent = receipt.events.find(e => e.event === 'GameCreated');
-                if (gameCreatedEvent) {
-                    gameId = gameCreatedEvent.args.gameId.toNumber();
-                }
-                
-                // Show game board
-                document.getElementById('chessGameArea').classList.remove('hidden');
-                document.getElementById('chessStatus').textContent = 'Waiting for opponent...';
-                initializeChessBoard();
-                
-                playerStats.gamesPlayed++;
-                updateProfileDisplay();
-                
-                showTransactionStatus('✅ Chess game created successfully!');
-                
-            } catch (error) {
-                console.error('Error creating chess game:', error);
-                showTransactionStatus('❌ Error creating game: ' + error.message);
-            }
-        }
+    if (!userAddress) {
+        alert('Please connect your wallet first!');
+        return;
+    }
+    
+    const stakeAmount = parseFloat(document.getElementById('chessStake').value);
+    if (!stakeAmount || stakeAmount < 0.01) {
+        alert('Please enter a valid stake amount (minimum 0.01 CORE)');
+        return;
+    }
+    
+    try {
+        showTransactionStatus('Creating chess game...');
+        
+        const stakeWei = ethers.utils.parseEther(stakeAmount.toString());
+        const tx = await gameContract.createGame(0, stakeWei, { value: stakeWei });
+        
+        showTransactionStatus('⏳ Transaction submitted...', tx.hash);
+        const receipt = await tx.wait();
+        
+        // Open game window instead of showing inline
+        openGameWindow('chess');
+        document.getElementById('chessStatus').textContent = 'Waiting for opponent...';
+        initializeChessBoard();
+        
+        playerStats.gamesPlayed++;
+        updateProfileDisplay();
+        
+        showTransactionStatus('✅ Chess game created successfully!');
+        
+    } catch (error) {
+        console.error('Error creating chess game:', error);
+        showTransactionStatus('❌ Error creating game: ' + error.message);
+    }
+}
 
         // Checkers game functions
         function initializeCheckersBoard() {
@@ -1385,40 +1555,41 @@
         }
         
         async function startCheckersGame() {
-            if (!userAddress) {
-                alert('Please connect your wallet first!');
-                return;
-            }
-            
-            const stakeAmount = parseFloat(document.getElementById('checkersStake').value);
-            if (!stakeAmount || stakeAmount < 0.01) {
-                alert('Please enter a valid stake amount (minimum 0.01 CORE)');
-                return;
-            }
-            
-            try {
-                showTransactionStatus('Creating checkers game...');
-                
-                const stakeWei = ethers.utils.parseEther(stakeAmount.toString());
-                const tx = await gameContract.createGame(1, stakeWei, { value: stakeWei });
-                
-                showTransactionStatus('⏳ Transaction submitted...', tx.hash);
-                await tx.wait();
-                
-                document.getElementById('checkersGameArea').classList.remove('hidden');
-                document.getElementById('checkersStatus').textContent = 'Waiting for opponent...';
-                initializeCheckersBoard();
-                
-                playerStats.gamesPlayed++;
-                updateProfileDisplay();
-                
-                showTransactionStatus('✅ Checkers game created!');
-                
-            } catch (error) {
-                console.error('Error creating checkers game:', error);
-                showTransactionStatus('❌ Error: ' + error.message);
-            }
-        }
+    if (!userAddress) {
+        alert('Please connect your wallet first!');
+        return;
+    }
+    
+    const stakeAmount = parseFloat(document.getElementById('checkersStake').value);
+    if (!stakeAmount || stakeAmount < 0.01) {
+        alert('Please enter a valid stake amount (minimum 0.01 CORE)');
+        return;
+    }
+    
+    try {
+        showTransactionStatus('Creating checkers game...');
+        
+        const stakeWei = ethers.utils.parseEther(stakeAmount.toString());
+        const tx = await gameContract.createGame(1, stakeWei, { value: stakeWei });
+        
+        showTransactionStatus('⏳ Transaction submitted...', tx.hash);
+        await tx.wait();
+        
+        // Open game window instead of showing inline
+        openGameWindow('checkers');
+        document.getElementById('checkersStatus').textContent = 'Waiting for opponent...';
+        initializeCheckersBoard();
+        
+        playerStats.gamesPlayed++;
+        updateProfileDisplay();
+        
+        showTransactionStatus('✅ Checkers game created!');
+        
+    } catch (error) {
+        console.error('Error creating checkers game:', error);
+        showTransactionStatus('❌ Error: ' + error.message);
+    }
+}
         
         // Word Battle game functions
         const wordPrompts = [
@@ -1435,39 +1606,40 @@
         let currentPrompt = null;
         
         async function startWordGame() {
-            if (!userAddress) {
-                alert('Please connect your wallet first!');
-                return;
-            }
-            
-            const stakeAmount = parseFloat(document.getElementById('wordStake').value);
-            if (!stakeAmount || stakeAmount < 0.01) {
-                alert('Please enter a valid stake amount (minimum 0.01 CORE)');
-                return;
-            }
-            
-            try {
-                showTransactionStatus('Creating word game...');
-                
-                const stakeWei = ethers.utils.parseEther(stakeAmount.toString());
-                const tx = await gameContract.createGame(2, stakeWei, { value: stakeWei });
-                
-                showTransactionStatus('⏳ Transaction submitted...', tx.hash);
-                await tx.wait();
-                
-                document.getElementById('wordGameArea').classList.remove('hidden');
-                startWordRound();
-                
-                playerStats.gamesPlayed++;
-                updateProfileDisplay();
-                
-                showTransactionStatus('✅ Word game created!');
-                
-            } catch (error) {
-                console.error('Error creating word game:', error);
-                showTransactionStatus('❌ Error: ' + error.message);
-            }
-        }
+    if (!userAddress) {
+        alert('Please connect your wallet first!');
+        return;
+    }
+    
+    const stakeAmount = parseFloat(document.getElementById('wordStake').value);
+    if (!stakeAmount || stakeAmount < 0.01) {
+        alert('Please enter a valid stake amount (minimum 0.01 CORE)');
+        return;
+    }
+    
+    try {
+        showTransactionStatus('Creating word game...');
+        
+        const stakeWei = ethers.utils.parseEther(stakeAmount.toString());
+        const tx = await gameContract.createGame(2, stakeWei, { value: stakeWei });
+        
+        showTransactionStatus('⏳ Transaction submitted...', tx.hash);
+        await tx.wait();
+        
+        // Open game window instead of showing inline
+        openGameWindow('word');
+        startWordRound();
+        
+        playerStats.gamesPlayed++;
+        updateProfileDisplay();
+        
+        showTransactionStatus('✅ Word game created!');
+        
+    } catch (error) {
+        console.error('Error creating word game:', error);
+        showTransactionStatus('❌ Error: ' + error.message);
+    }
+}
         
         function startWordRound() {
             currentPrompt = wordPrompts[Math.floor(Math.random() * wordPrompts.length)];
@@ -1552,24 +1724,36 @@
         
         // Utility functions
         function resignChess() {
-            if (confirm('Are you sure you want to resign?')) {
-                document.getElementById('chessStatus').textContent = 'Game resigned';
-                playerStats.chess.losses++;
-                updateProfileDisplay();
-            }
-        }
+    if (confirm('Are you sure you want to resign?')) {
+        document.getElementById('chessStatus').textContent = 'Game resigned';
+        playerStats.chess.losses++;
+        updateProfileDisplay();
+        addChatMessage('System', 'Chess game resigned');
+        
+        // Close the game window after a short delay
+        setTimeout(() => {
+            closeGame('chess');
+        }, 2000);
+    }
+}
         
         function drawChess() {
             alert('Draw offer sent to opponent');
         }
         
         function resignCheckers() {
-            if (confirm('Are you sure you want to resign?')) {
-                document.getElementById('checkersStatus').textContent = 'Game resigned';
-                playerStats.checkers.losses++;
-                updateProfileDisplay();
-            }
-        }
+    if (confirm('Are you sure you want to resign?')) {
+        document.getElementById('checkersStatus').textContent = 'Game resigned';
+        playerStats.checkers.losses++;
+        updateProfileDisplay();
+        addChatMessage('System', 'Checkers game resigned');
+        
+        // Close the game window after a short delay
+        setTimeout(() => {
+            closeGame('checkers');
+        }, 2000);
+    }
+}
         
         async function sendMoveToContract(gameId, move) {
             try {

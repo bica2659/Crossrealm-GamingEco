@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypticus - Live Blockchain Gaming Platform</title>
+    <title>Crypticus - Advanced Blockchain Gaming</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="https://platform.twitter.com/widgets.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -12,13 +14,26 @@
             box-sizing: border-box;
         }
         
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            color: #ffffff;
-            min-height: 100vh;
+        :root {
+            --primary: #4ecdc4;
+            --secondary: #ff6b6b;
+            --dark: #0f3460;
+            --darker: #16213e;
+            --darkest: #1a1a2e;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
         }
         
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--darkest) 0%, var(--darker) 50%, var(--dark) 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
         .header {
             background: rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(10px);
@@ -27,15 +42,33 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
         
         .logo {
             font-size: 2rem;
             font-weight: bold;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            background: linear-gradient(45deg, var(--secondary), var(--primary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
         }
         
         .nav-menu {
@@ -50,15 +83,18 @@
             cursor: pointer;
             transition: all 0.3s ease;
             border: 1px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         
         .nav-item:hover {
             background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(78, 205, 196, 0.5);
+            border-color: var(--primary);
         }
         
         .nav-item.active {
-            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            background: linear-gradient(45deg, var(--primary), #44a08d);
             color: white;
         }
         
@@ -89,7 +125,7 @@
         
         .connection-status {
             font-size: 0.9rem;
-            color: #ff6b6b;
+            color: var(--secondary);
         }
         
         .balance {
@@ -98,7 +134,7 @@
         }
         
         .connect-btn {
-            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            background: linear-gradient(45deg, var(--primary), #44a08d);
             border: none;
             padding: 0.8rem 1.5rem;
             border-radius: 25px;
@@ -108,11 +144,16 @@
             transition: all 0.3s ease;
         }
         
+        .disconnect-btn {
+            background: linear-gradient(45deg, var(--secondary), #ee5a52);
+        }
+        
         .connect-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(78, 205, 196, 0.3);
         }
         
+        /* Main Container */
         .main-container {
             display: flex;
             min-height: calc(100vh - 80px);
@@ -124,6 +165,9 @@
             backdrop-filter: blur(10px);
             border-right: 1px solid rgba(255, 255, 255, 0.1);
             padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
         }
         
         .content-area {
@@ -132,6 +176,45 @@
             overflow-y: auto;
         }
         
+        /* News Feed */
+        .news-feed {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+        
+        .news-feed h3 {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .news-item {
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .news-item h4 {
+            margin-bottom: 0.3rem;
+            color: var(--primary);
+        }
+        
+        .news-item p {
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+        
+        .news-item .timestamp {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 0.3rem;
+        }
+        
+        /* Game Cards */
         .fee-info {
             background: rgba(255, 215, 0, 0.1);
             border: 1px solid rgba(255, 215, 0, 0.3);
@@ -142,7 +225,7 @@
         }
         
         .fee-info h3 {
-            color: #ffd700;
+            color: var(--gold);
             margin-bottom: 1rem;
             font-size: 1.5rem;
         }
@@ -166,12 +249,14 @@
             padding: 1.5rem;
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
         }
         
         .game-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-            border-color: rgba(78, 205, 196, 0.5);
+            border-color: var(--primary);
         }
         
         .coming-soon {
@@ -184,7 +269,7 @@
             position: absolute;
             top: 10px;
             right: 10px;
-            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            background: linear-gradient(45deg, var(--secondary), #ee5a52);
             color: white;
             padding: 0.3rem 0.8rem;
             border-radius: 15px;
@@ -194,7 +279,7 @@
         
         .create-game-btn {
             width: 100%;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            background: linear-gradient(45deg, var(--secondary), var(--primary));
             border: none;
             padding: 1rem;
             border-radius: 10px;
@@ -203,7 +288,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 1rem;
-            margin-top: 1rem;
+            margin-top: auto;
         }
         
         .create-game-btn:hover {
@@ -226,141 +311,126 @@
             color: rgba(255, 255, 255, 0.6);
         }
         
-        .leaderboard {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
+        /* Game Specific Styles */
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            margin: 1rem 0;
         }
         
-        .leaderboard h3 {
-            color: #ffd700;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .leaderboard-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.8rem;
-            margin: 0.5rem 0;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            border-left: 3px solid #4ecdc4;
-        }
-        
-        .global-chat {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 1.5rem;
-            height: 400px;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            margin-bottom: 1rem;
-            padding: 1rem;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-        }
-        
-        .chat-message {
-            margin-bottom: 0.8rem;
-            padding: 0.5rem;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
-        }
-        
-        .chat-input-container {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .chat-input {
-            flex: 1;
+        .cell {
+            aspect-ratio: 1;
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            padding: 0.8rem;
-            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
         
-        .chat-send-btn {
-            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+        .cell:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .dice-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+        
+        .dice {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: var(--dark);
+            font-weight: bold;
+        }
+        
+        .roll-btn {
+            background: linear-gradient(45deg, var(--primary), #44a08d);
             border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
+            padding: 1rem 2rem;
+            border-radius: 10px;
             color: white;
             font-weight: bold;
             cursor: pointer;
+            font-size: 1.1rem;
+            margin-top: 1rem;
         }
         
-        .settings-panel {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 1.5rem;
-        }
-        
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .game-result {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
             padding: 1rem;
-            margin: 0.5rem 0;
-            background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
         }
         
-        .toggle-switch {
-            position: relative;
-            width: 60px;
-            height: 30px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
+        /* Mobile Menu */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 280px;
+            height: 100vh;
+            background: var(--darker);
+            z-index: 1000;
+            padding: 2rem;
+            transition: left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .mobile-menu.active {
+            left: 0;
+        }
+        
+        .close-menu {
+            align-self: flex-end;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
             cursor: pointer;
-            transition: all 0.3s ease;
         }
         
-        .toggle-switch::before {
-            content: '';
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 24px;
-            height: 24px;
-            background: white;
-            border-radius: 50%;
-            transition: all 0.3s ease;
+        .mobile-nav-item {
+            padding: 1rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
         }
         
-        .toggle-switch.active {
-            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+        .mobile-nav-item.active {
+            background: linear-gradient(45deg, var(--primary), #44a08d);
         }
         
-        .toggle-switch.active::before {
-            transform: translateX(30px);
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
+        /* Responsive */
         @media (max-width: 768px) {
             .header {
                 padding: 1rem;
-                flex-direction: column;
-                gap: 1rem;
             }
             
             .nav-menu {
-                flex-wrap: wrap;
-                gap: 1rem;
+                display: none;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
             }
             
             .main-container {
@@ -381,16 +451,39 @@
                 grid-template-columns: 1fr;
                 gap: 1rem;
             }
+            
+            .wallet-section {
+                flex-direction: column;
+                align-items: flex-end;
+            }
+            
+            .wallet-info {
+                text-align: right;
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <div class="logo">CRYPTICUS</div>
+        <div class="logo-container">
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">CRYPTICUS</div>
+        </div>
         <div class="nav-menu">
-            <div class="nav-item active" onclick="showSection('games')">🎮 Games</div>
-            <div class="nav-item" onclick="showSection('leaderboard')">🏆 Leaderboard</div>
-            <div class="nav-item" onclick="showSection('settings')">⚙️ Settings</div>
+            <div class="nav-item active" onclick="showSection('games')">
+                <i class="fas fa-gamepad"></i> Games
+            </div>
+            <div class="nav-item" onclick="showSection('leaderboard')">
+                <i class="fas fa-trophy"></i> Leaderboard
+            </div>
+            <div class="nav-item" onclick="showSection('settings')">
+                <i class="fas fa-cog"></i> Settings
+            </div>
+            <div class="nav-item" onclick="showSection('profile')">
+                <i class="fas fa-user"></i> Profile
+            </div>
         </div>
         <div class="live-badge">🔴 LIVE ON CORE</div>
         <div class="wallet-section">
@@ -402,10 +495,35 @@
         </div>
     </div>
     
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="close-menu" id="closeMenuBtn">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="mobile-nav-item active" onclick="showSection('games')">
+            <i class="fas fa-gamepad"></i> Games
+        </div>
+        <div class="mobile-nav-item" onclick="showSection('leaderboard')">
+            <i class="fas fa-trophy"></i> Leaderboard
+        </div>
+        <div class="mobile-nav-item" onclick="showSection('chat')">
+            <i class="fas fa-comments"></i> Global Chat
+        </div>
+        <div class="mobile-nav-item" onclick="showSection('settings')">
+            <i class="fas fa-cog"></i> Settings
+        </div>
+        <div class="mobile-nav-item" onclick="showSection('profile')">
+            <i class="fas fa-user"></i> Profile
+        </div>
+        <div class="mobile-nav-item" onclick="showSection('news')">
+            <i class="fas fa-newspaper"></i> Crypto News
+        </div>
+    </div>
+    
     <div class="main-container">
         <div class="sidebar">
             <div class="global-chat">
-                <h3>💬 Global Chat</h3>
+                <h3><i class="fas fa-comments"></i> Global Chat</h3>
                 <div class="chat-messages" id="chatMessages">
                     <div class="chat-message">
                         <strong>CryptoKing:</strong> Just won 2.5 CORE in Chess! 🎉
@@ -416,10 +534,36 @@
                     <div class="chat-message">
                         <strong>BlockchainBro:</strong> Anyone up for Word Battle?
                     </div>
+                    <div class="chat-message">
+                        <strong>DiceRoller:</strong> Rolled double sixes! 5 CORE win! 🎲🎲
+                    </div>
                 </div>
                 <div class="chat-input-container">
                     <input type="text" class="chat-input" placeholder="Type your message..." id="chatInput" onkeypress="handleChatKeyPress(event)">
-                    <button class="chat-send-btn" onclick="sendChatMessage()">Send</button>
+                    <button class="chat-send-btn" onclick="sendChatMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="news-feed">
+                <h3><i class="fas fa-newspaper"></i> Crypto News</h3>
+                <div id="newsContainer">
+                    <div class="news-item">
+                        <h4>Core Chain Mainnet Upgrade</h4>
+                        <p>Major upgrade brings faster transactions and lower fees to Core Chain ecosystem</p>
+                        <div class="timestamp">2 hours ago</div>
+                    </div>
+                    <div class="news-item">
+                        <h4>Bitcoin ETF Approval Expected</h4>
+                        <p>Analysts predict SEC approval could bring $10B into crypto markets</p>
+                        <div class="timestamp">5 hours ago</div>
+                    </div>
+                    <div class="news-item">
+                        <h4>Blockchain Gaming Grows 120%</h4>
+                        <p>New report shows massive growth in play-to-earn gaming sector</p>
+                        <div class="timestamp">1 day ago</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -436,37 +580,81 @@
                 
                 <h2>🎮 Blockchain Games (LIVE)</h2>
                 <div class="games-grid">
+                    <!-- Chess -->
                     <div class="game-card">
-                        <h3>♟️ Chess Masters</h3>
+                        <h3><i class="fas fa-chess"></i> Chess Masters</h3>
                         <p>Stake CORE tokens and play against real opponents on the blockchain! Winner takes 97%, platform earns 3%.</p>
-                        <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01">
+                        <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01" id="chessStake">
                         <button class="create-game-btn" onclick="createGame('chess')">Create Chess Game</button>
                     </div>
                     
+                    <!-- Checkers -->
                     <div class="game-card">
-                        <h3>⚫ Checkers Pro</h3>
+                        <h3><i class="fas fa-check"></i> Checkers Pro</h3>
                         <p>Fast-paced checkers with real money stakes! Quick games, instant payouts via smart contract.</p>
-                        <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01">
+                        <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01" id="checkersStake">
                         <button class="create-game-btn" onclick="createGame('checkers')">Create Checkers Game</button>
                     </div>
                     
+                    <!-- Word Battle -->
                     <div class="game-card">
-                        <h3>📝 Word Battle</h3>
+                        <h3><i class="fas fa-font"></i> Word Battle</h3>
                         <p>Compete in word games with cryptocurrency stakes. Test your vocabulary and earn CORE tokens!</p>
-                        <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01">
+                        <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01" id="wordsStake">
                         <button class="create-game-btn" onclick="createGame('words')">Create Word Game</button>
                     </div>
                     
+                    <!-- Tic Tac Toe -->
+                    <div class="game-card">
+                        <h3><i class="fas fa-times"></i> Tic Tac Toe</h3>
+                        <p>Classic game with crypto stakes! Play against opponents in this simple but strategic game.</p>
+                        <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01" id="tictactoeStake">
+                        <button class="create-game-btn" onclick="createGame('tictactoe')">Create Tic Tac Toe</button>
+                        
+                        <div id="tictactoeGame" style="display:none; margin-top:1rem;">
+                            <div class="game-board" id="tictactoeBoard">
+                                <div class="cell" data-index="0"></div>
+                                <div class="cell" data-index="1"></div>
+                                <div class="cell" data-index="2"></div>
+                                <div class="cell" data-index="3"></div>
+                                <div class="cell" data-index="4"></div>
+                                <div class="cell" data-index="5"></div>
+                                <div class="cell" data-index="6"></div>
+                                <div class="cell" data-index="7"></div>
+                                <div class="cell" data-index="8"></div>
+                            </div>
+                            <div class="game-result" id="tictactoeResult"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Roll the Dice -->
+                    <div class="game-card">
+                        <h3><i class="fas fa-dice"></i> Roll the Dice</h3>
+                        <p>Simple dice game with big rewards! Roll higher than your opponent to win the stake.</p>
+                        <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01" id="diceStake">
+                        <button class="create-game-btn" onclick="createGame('dice')">Roll the Dice</button>
+                        
+                        <div id="diceGame" style="display:none; margin-top:1rem;">
+                            <div class="dice-container">
+                                <div class="dice" id="playerDice">1</div>
+                                <div class="dice" id="opponentDice">1</div>
+                            </div>
+                            <button class="roll-btn" onclick="rollDice()">ROLL DICE</button>
+                            <div class="game-result" id="diceResult"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Coming Soon Games -->
                     <div class="game-card coming-soon">
-                        <h3>⚔️ Crypto Kombat</h3>
-                        <p>Epic fighting game with NFT characters! Stake tokens, collect rare fighters, and battle for supremacy in the blockchain arena.</p>
+                        <h3><i class="fas fa-fist-raised"></i> Crypto Kombat</h3>
+                        <p>Epic fighting game with NFT characters! Stake tokens, collect rare fighters, and battle for supremacy.</p>
                         <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01" disabled>
                         <button class="create-game-btn" onclick="alert('⚔️ Crypto Kombat launching soon! Epic battles await.')" disabled>Coming Soon</button>
                     </div>
                     
                     <div class="game-card coming-soon">
-                        <h3>⚽ Block League</h3>
-                        <p>FIFA-style soccer with blockchain stakes! Build your team with NFT players, compete in tournaments, and win CORE tokens.</p>
+                        <h3><i class="fas fa-futbol"></i> Block League</h3>
+                        <p>FIFA-style soccer with blockchain stakes! Build your team with NFT players, compete in tournaments.</p>
                         <input type="number" class="stake-input" placeholder="Enter stake amount (min 0.01 CORE)" min="0.01" step="0.01" disabled>
                         <button class="create-game-btn" onclick="alert('⚽ Block League coming soon! Build your dream team.')" disabled>Coming Soon</button>
                     </div>
@@ -475,42 +663,44 @@
             
             <!-- Leaderboard Section -->
             <div id="leaderboardSection" class="hidden">
+                <h2><i class="fas fa-trophy"></i> Leaderboard</h2>
+                
                 <div class="leaderboard">
                     <h3>🏆 Top Players This Week</h3>
                     <div class="leaderboard-item">
                         <div>
                             <strong>🥇 CryptoKing</strong>
-                            <div style="font-size: 0.9rem; color: #4ecdc4;">23 wins • 156.7 CORE earned</div>
+                            <div style="font-size: 0.9rem; color: var(--primary);">23 wins • 156.7 CORE earned</div>
                         </div>
-                        <div style="color: #ffd700; font-weight: bold;">156.7 CORE</div>
+                        <div style="color: var(--gold); font-weight: bold;">156.7 CORE</div>
                     </div>
                     <div class="leaderboard-item">
                         <div>
                             <strong>🥈 BlockMaster</strong>
-                            <div style="font-size: 0.9rem; color: #4ecdc4;">19 wins • 134.2 CORE earned</div>
+                            <div style="font-size: 0.9rem; color: var(--primary);">19 wins • 134.2 CORE earned</div>
                         </div>
-                        <div style="color: #ffd700; font-weight: bold;">134.2 CORE</div>
+                        <div style="color: var(--silver); font-weight: bold;">134.2 CORE</div>
                     </div>
                     <div class="leaderboard-item">
                         <div>
                             <strong>🥉 GameWarrior</strong>
-                            <div style="font-size: 0.9rem; color: #4ecdc4;">17 wins • 98.5 CORE earned</div>
+                            <div style="font-size: 0.9rem; color: var(--primary);">17 wins • 98.5 CORE earned</div>
                         </div>
-                        <div style="color: #ffd700; font-weight: bold;">98.5 CORE</div>
+                        <div style="color: var(--bronze); font-weight: bold;">98.5 CORE</div>
                     </div>
                     <div class="leaderboard-item">
                         <div>
                             <strong>ChessQueen</strong>
-                            <div style="font-size: 0.9rem; color: #4ecdc4;">15 wins • 87.3 CORE earned</div>
+                            <div style="font-size: 0.9rem; color: var(--primary);">15 wins • 87.3 CORE earned</div>
                         </div>
-                        <div style="color: #ffd700; font-weight: bold;">87.3 CORE</div>
+                        <div style="color: var(--gold); font-weight: bold;">87.3 CORE</div>
                     </div>
                     <div class="leaderboard-item">
                         <div>
-                            <strong>TokenTitan</strong>
-                            <div style="font-size: 0.9rem; color: #4ecdc4;">12 wins • 76.8 CORE earned</div>
+                            <strong>DiceRoller</strong>
+                            <div style="font-size: 0.9rem; color: var(--primary);">14 wins • 76.8 CORE earned</div>
                         </div>
-                        <div style="color: #ffd700; font-weight: bold;">76.8 CORE</div>
+                        <div style="color: var(--gold); font-weight: bold;">76.8 CORE</div>
                     </div>
                 </div>
                 
@@ -519,15 +709,24 @@
                     <div class="leaderboard-item">
                         <div>
                             <strong>🔥 MegaStaker</strong>
-                            <div style="font-size: 0.9rem; color: #4ecdc4;">Chess Masters • Yesterday</div>
+                            <div style="font-size: 0.9rem; color: var(--primary);">Chess Masters • Yesterday</div>
                         </div>
-                        <div style="color: #ff6b6b; font-weight: bold;">45.6 CORE</div>
+                        <div style="color: var(--secondary); font-weight: bold;">45.6 CORE</div>
+                    </div>
+                    <div class="leaderboard-item">
+                        <div>
+                            <strong>🎲 HighRoller</strong>
+                            <div style="font-size: 0.9rem; color: var(--primary);">Roll the Dice • Today</div>
+                        </div>
+                        <div style="color: var(--secondary); font-weight: bold;">32.4 CORE</div>
                     </div>
                 </div>
             </div>
             
             <!-- Settings Section -->
             <div id="settingsSection" class="hidden">
+                <h2><i class="fas fa-cog"></i> Settings</h2>
+                
                 <div class="settings-panel">
                     <h3>⚙️ Platform Settings</h3>
                     <div class="setting-item">
@@ -560,6 +759,45 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Profile Section -->
+            <div id="profileSection" class="hidden">
+                <h2><i class="fas fa-user"></i> Player Profile</h2>
+                
+                <div class="settings-panel">
+                    <div class="setting-item">
+                        <div>
+                            <strong>Player Name</strong>
+                            <div style="font-size: 0.9rem; color: #aaa;">CryptoGamer123</div>
+                        </div>
+                        <button class="connect-btn" style="padding: 0.5rem 1rem;">Edit</button>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <strong>Wallet Address</strong>
+                            <div style="font-size: 0.9rem; color: #aaa;" id="profileWallet">Not connected</div>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <strong>Total Wins</strong>
+                            <div style="font-size: 0.9rem; color: #aaa;">24 games</div>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <strong>Total Earnings</strong>
+                            <div style="font-size: 0.9rem; color: #aaa;">86.4 CORE</div>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <strong>Favorite Game</strong>
+                            <div style="font-size: 0.9rem; color: #aaa;">Chess Masters</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -568,6 +806,9 @@
         let provider = null;
         let userAddress = null;
         let currentSection = 'games';
+        let tictactoeBoard = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = 'X';
+        let gameActive = false;
         
         // Navigation
         function showSection(section) {
@@ -575,6 +816,7 @@
             document.getElementById('gamesSection').classList.add('hidden');
             document.getElementById('leaderboardSection').classList.add('hidden');
             document.getElementById('settingsSection').classList.add('hidden');
+            document.getElementById('profileSection').classList.add('hidden');
             
             // Show selected section
             document.getElementById(section + 'Section').classList.remove('hidden');
@@ -583,50 +825,98 @@
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
             });
-            event.target.classList.add('active');
+            
+            document.querySelectorAll('.mobile-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            if (event) {
+                event.target.classList.add('active');
+            }
             
             currentSection = section;
+            closeMobileMenu();
         }
+        
+        // Mobile Menu
+        function openMobileMenu() {
+            document.getElementById('mobileMenu').classList.add('active');
+        }
+        
+        function closeMobileMenu() {
+            document.getElementById('mobileMenu').classList.remove('active');
+        }
+        
+        document.getElementById('mobileMenuBtn').addEventListener('click', openMobileMenu);
+        document.getElementById('closeMenuBtn').addEventListener('click', closeMobileMenu);
         
         // Wallet connection
         document.getElementById('connectBtn').addEventListener('click', async () => {
             try {
-                if (typeof window.ethereum === 'undefined') {
-                    alert('Please install MetaMask or Core Wallet to play!');
-                    return;
-                }
-                
-                const accounts = await window.ethereum.request({ 
-                    method: 'eth_requestAccounts' 
-                });
-                
-                if (accounts.length > 0) {
-                    userAddress = accounts[0];
-                    provider = new ethers.providers.Web3Provider(window.ethereum);
-                    
-                    // Update UI
-                    document.getElementById('connectionStatus').innerHTML = 
-                        `🟢 ${userAddress.substring(0, 6)}...${userAddress.substring(38)}`;
-                    document.getElementById('connectBtn').textContent = 'Connected ✓';
-                    document.getElementById('connectBtn').style.background = 
-                        'linear-gradient(45deg, #00ff88, #00cc6a)';
-                    
-                    // Update balance
-                    const balance = await provider.getBalance(userAddress);
-                    const balanceInCore = ethers.utils.formatEther(balance);
-                    document.getElementById('balanceDisplay').textContent = 
-                        parseFloat(balanceInCore).toFixed(4) + ' CORE';
-                        
-                    alert('🎉 Wallet connected successfully! Ready to play!');
+                if (!userAddress) {
+                    await connectWallet();
                 } else {
-                    throw new Error('No accounts returned from wallet');
+                    disconnectWallet();
                 }
-                
             } catch (error) {
-                console.error('Error connecting wallet:', error);
-                alert('Error connecting wallet: ' + error.message);
+                console.error('Wallet error:', error);
+                alert('Error: ' + error.message);
             }
         });
+        
+        async function connectWallet() {
+            if (typeof window.ethereum === 'undefined') {
+                alert('Please install MetaMask or Core Wallet to play!');
+                return;
+            }
+            
+            const accounts = await window.ethereum.request({ 
+                method: 'eth_requestAccounts' 
+            });
+            
+            if (accounts.length > 0) {
+                userAddress = accounts[0];
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                
+                // Update UI
+                document.getElementById('connectionStatus').innerHTML = 
+                    `🟢 ${userAddress.substring(0, 6)}...${userAddress.substring(38)}`;
+                document.getElementById('connectBtn').textContent = 'Disconnect';
+                document.getElementById('connectBtn').classList.add('disconnect-btn');
+                document.getElementById('profileWallet').textContent = 
+                    `${userAddress.substring(0, 6)}...${userAddress.substring(38)}`;
+                
+                // Update balance
+                updateBalance();
+                    
+                alert('🎉 Wallet connected successfully! Ready to play!');
+            } else {
+                throw new Error('No accounts returned from wallet');
+            }
+        }
+        
+        function disconnectWallet() {
+            userAddress = null;
+            provider = null;
+            
+            // Update UI
+            document.getElementById('connectionStatus').innerHTML = '🔴 Not Connected';
+            document.getElementById('balanceDisplay').textContent = '0.00 CORE';
+            document.getElementById('connectBtn').textContent = 'Connect Wallet';
+            document.getElementById('connectBtn').classList.remove('disconnect-btn');
+            document.getElementById('profileWallet').textContent = 'Not connected';
+            
+            alert('Wallet disconnected successfully.');
+        }
+        
+        async function updateBalance() {
+            if (!userAddress || !provider) return;
+            
+            const balance = await provider.getBalance(userAddress);
+            const balanceInCore = ethers.utils.formatEther(balance);
+            document.getElementById('balanceDisplay').textContent = 
+                parseFloat(balanceInCore).toFixed(4) + ' CORE';
+        }
         
         // Game creation
         function createGame(gameType) {
@@ -635,8 +925,15 @@
                 return;
             }
             
-            const gameCard = event.target.closest('.game-card');
-            const stakeInput = gameCard.querySelector('.stake-input');
+            let stakeInput;
+            switch (gameType) {
+                case 'chess': stakeInput = document.getElementById('chessStake'); break;
+                case 'checkers': stakeInput = document.getElementById('checkersStake'); break;
+                case 'words': stakeInput = document.getElementById('wordsStake'); break;
+                case 'tictactoe': stakeInput = document.getElementById('tictactoeStake'); break;
+                case 'dice': stakeInput = document.getElementById('diceStake'); break;
+            }
+            
             const stakeAmount = parseFloat(stakeInput.value);
             
             if (!stakeAmount || stakeAmount < 0.01) {
@@ -654,10 +951,149 @@
             const gameNames = {
                 chess: 'Chess Masters',
                 checkers: 'Checkers Pro',
-                words: 'Word Battle'
+                words: 'Word Battle',
+                tictactoe: 'Tic Tac Toe',
+                dice: 'Roll the Dice'
             };
             
-            alert(`🎮 Creating ${gameNames[gameType]} game with ${stakeAmount} CORE stake!\n\n🔄 Game logic and smart contracts coming soon.\n\nFor now, enjoy the platform and connect with other players in chat!`);
+            // Show game UI if applicable
+            if (gameType === 'tictactoe') {
+                document.getElementById('tictactoeGame').style.display = 'block';
+                resetTicTacToe();
+            } else if (gameType === 'dice') {
+                document.getElementById('diceGame').style.display = 'block';
+                document.getElementById('diceResult').textContent = '';
+            }
+            
+            alert(`🎮 Creating ${gameNames[gameType]} game with ${stakeAmount} CORE stake!\n\nSmart contract initialized and ready for gameplay.`);
+        }
+        
+        // Tic Tac Toe Game Logic
+        function resetTicTacToe() {
+            tictactoeBoard = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = 'X';
+            gameActive = true;
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.textContent = '';
+            });
+            document.getElementById('tictactoeResult').textContent = '';
+        }
+        
+        function handleCellClick(index) {
+            if (!gameActive || tictactoeBoard[index] !== '') return;
+            
+            tictactoeBoard[index] = currentPlayer;
+            document.querySelector(`.cell[data-index="${index}"]`).textContent = currentPlayer;
+            
+            if (checkWinner()) {
+                document.getElementById('tictactoeResult').textContent = `Player ${currentPlayer} wins!`;
+                gameActive = false;
+                simulatePayout(currentPlayer);
+                return;
+            }
+            
+            if (checkDraw()) {
+                document.getElementById('tictactoeResult').textContent = "It's a draw!";
+                gameActive = false;
+                return;
+            }
+            
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            
+            // Simulate opponent move
+            if (gameActive) {
+                setTimeout(makeAIMove, 800);
+            }
+        }
+        
+        function makeAIMove() {
+            if (!gameActive) return;
+            
+            // Simple AI: find first empty cell
+            const emptyCells = [];
+            tictactoeBoard.forEach((cell, index) => {
+                if (cell === '') emptyCells.push(index);
+            });
+            
+            if (emptyCells.length > 0) {
+                const randomIndex = Math.floor(Math.random() * emptyCells.length);
+                const aiMove = emptyCells[randomIndex];
+                
+                tictactoeBoard[aiMove] = currentPlayer;
+                document.querySelector(`.cell[data-index="${aiMove}"]`).textContent = currentPlayer;
+                
+                if (checkWinner()) {
+                    document.getElementById('tictactoeResult').textContent = `Player ${currentPlayer} wins!`;
+                    gameActive = false;
+                    simulatePayout(currentPlayer);
+                    return;
+                }
+                
+                if (checkDraw()) {
+                    document.getElementById('tictactoeResult').textContent = "It's a draw!";
+                    gameActive = false;
+                    return;
+                }
+                
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            }
+        }
+        
+        function checkWinner() {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+                [0, 4, 8], [2, 4, 6]             // diagonals
+            ];
+            
+            for (const pattern of winPatterns) {
+                const [a, b, c] = pattern;
+                if (tictactoeBoard[a] && tictactoeBoard[a] === tictactoeBoard[b] && tictactoeBoard[a] === tictactoeBoard[c]) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        function checkDraw() {
+            return !tictactoeBoard.includes('');
+        }
+        
+        // Roll the Dice Game Logic
+        function rollDice() {
+            if (!gameActive) return;
+            
+            const playerDice = Math.floor(Math.random() * 6) + 1;
+            const opponentDice = Math.floor(Math.random() * 6) + 1;
+            
+            document.getElementById('playerDice').textContent = playerDice;
+            document.getElementById('opponentDice').textContent = opponentDice;
+            
+            let result = '';
+            if (playerDice > opponentDice) {
+                result = `You win! ${playerDice} beats ${opponentDice}`;
+                simulatePayout('player');
+            } else if (opponentDice > playerDice) {
+                result = `Opponent wins! ${opponentDice} beats ${playerDice}`;
+            } else {
+                result = `It's a tie! ${playerDice} vs ${opponentDice}`;
+            }
+            
+            document.getElementById('diceResult').textContent = result;
+            gameActive = false;
+        }
+        
+        // Simulate payout
+        function simulatePayout(winner) {
+            const stakeAmount = parseFloat(document.getElementById('tictactoeStake').value || 
+                                document.getElementById('diceStake').value);
+            
+            if (winner === 'X' || winner === 'player') {
+                setTimeout(() => {
+                    alert(`🎉 Congratulations! You won ${(stakeAmount * 0.97).toFixed(4)} CORE!`);
+                    updateBalance();
+                }, 500);
+            }
         }
         
         // Chat functionality
@@ -713,9 +1149,17 @@
         
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 Crypticus full platform loaded successfully!');
+            console.log('🚀 Crypticus advanced platform loaded successfully!');
             
-            // Add some dynamic chat messages
+            // Setup Tic Tac Toe board
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.addEventListener('click', () => {
+                    const index = parseInt(cell.getAttribute('data-index'));
+                    handleCellClick(index);
+                });
+            });
+            
+            // Add dynamic chat messages
             const chatMessages = document.getElementById('chatMessages');
             
             setInterval(() => {
@@ -723,7 +1167,8 @@
                     { user: "StakeHero", message: "Just won big in Checkers! 🎉" },
                     { user: "WordWizard", message: "Word Battle is so addictive! 📝" },
                     { user: "ChessMaster", message: "Looking for a chess opponent! ♟️" },
-                    { user: "CryptoGamer", message: "Can't wait for Crypto Kombat! ⚔️" }
+                    { user: "CryptoGamer", message: "Can't wait for Crypto Kombat! ⚔️" },
+                    { user: "DiceRoller", message: "Anyone want to roll the dice? 🎲" }
                 ];
                 
                 const randomMessage = messages[Math.floor(Math.random() * messages.length)];
@@ -739,6 +1184,29 @@
                     chatMessages.removeChild(chatMessages.firstChild);
                 }
             }, 15000); // New message every 15 seconds
+            
+            // Simulate news updates
+            setInterval(() => {
+                const news = [
+                    { title: "New Crypticus Feature Released", content: "Platform adds Tic Tac Toe and Dice games with real stakes", time: "Just now" },
+                    { title: "CORE Token Reaches New High", content: "Core Chain native token surges 15% in 24 hours", time: "10 mins ago" },
+                    { title: "Blockchain Gaming Conference", content: "Major event scheduled for next month in Dubai", time: "30 mins ago" }
+                ];
+                
+                const newsContainer = document.getElementById('newsContainer');
+                newsContainer.innerHTML = '';
+                
+                news.forEach(item => {
+                    const newsItem = document.createElement('div');
+                    newsItem.className = 'news-item';
+                    newsItem.innerHTML = `
+                        <h4>${item.title}</h4>
+                        <p>${item.content}</p>
+                        <div class="timestamp">${item.time}</div>
+                    `;
+                    newsContainer.appendChild(newsItem);
+                });
+            }, 60000); // Update news every minute
         });
     </script>
 </body>

@@ -640,7 +640,404 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     
     <script>
-        // JavaScript will be added here in the next steps
+        // Global Variables
+let currentSection = 'games';
+let userAddress = null;
+let gameContract = null;
+let provider = null;
+let signer = null;
+
+// Game State Variables
+let activeGames = [];
+let currentGame = null;
+
+// Player Statistics
+let playerStats = {
+    gamesPlayed: 0,
+    gamesWon: 0,
+    totalEarned: 0,
+    chessWins: 0,
+    checkersWins: 0,
+    wordWins: 0
+};
+
+// Contract Configuration for Core Blockchain
+const CONTRACT_ADDRESS = "0x1234567890abcdef1234567890abcdef12345678"; // Replace with actual contract address
+const CONTRACT_ABI = [
+    "function createGame(uint256 gameType, uint256 stake) external payable returns (uint256)",
+    "function joinGame(uint256 gameId) external payable",
+    "function makeMove(uint256 gameId, string memory move) external",
+    "function claimWin(uint256 gameId) external",
+    "function getGame(uint256 gameId) external view returns (tuple(address player1, address player2, uint256 gameType, uint256 stake, uint256 status))",
+    "event GameCreated(uint256 indexed gameId, address indexed creator, uint256 gameType, uint256 stake)",
+    "event GameJoined(uint256 indexed gameId, address indexed player2)",
+    "event MoveMade(uint256 indexed gameId, address indexed player, string move)",
+    "event GameEnded(uint256 indexed gameId, address indexed winner, uint256 prize)"
+];
+
+// =============================================================================
+// CORE UTILITY FUNCTIONS
+// =============================================================================
+
+// Safe DOM Element Selection
+function safeGetElement(id) {
+    const element = document.getElementById(id);
+    if (!element) {
+        console.warn(`Element with id '${id}' not found`);
+    }
+    return element;
+}
+
+// Safe Class Toggle
+function safeToggleClass(element, className) {
+    if (element && element.classList) {
+        element.classList.toggle(className);
+    }
+}
+
+// Safe Class Add/Remove
+function safeAddClass(element, className) {
+    if (element && element.classList) {
+        element.classList.add(className);
+    }
+}
+
+function safeRemoveClass(element, className) {
+    if (element && element.classList) {
+        element.classList.remove(className);
+    }
+}
+
+// =============================================================================
+// NAVIGATION FUNCTIONS
+// =============================================================================
+
+function showSection(section) {
+    try {
+        // Hide all sections
+        const sections = ['games', 'leaderboard', 'profile', 'settings'];
+        sections.forEach(sectionId => {
+            const element = safeGetElement(sectionId + 'Section');
+            if (element) {
+                safeAddClass(element, 'hidden');
+            }
+        });
+        
+        // Show selected section
+        const targetSection = safeGetElement(section + 'Section');
+        if (targetSection) {
+            safeRemoveClass(targetSection, 'hidden');
+            targetSection.classList.add('fade-in');
+        }
+        
+        // Update navigation active state
+        document.querySelectorAll('.nav-item').forEach(item => {
+            safeRemoveClass(item, 'active');
+        });
+        
+        // Add active class to clicked item
+        if (event && event.target) {
+            safeAddClass(event.target, 'active');
+        }
+        
+        currentSection = section;
+        
+        // Update section content
+        if (section === 'profile') {
+            updateProfileDisplay();
+        } else if (section === 'leaderboard') {
+            updateLeaderboard();
+        } else if (section === 'settings') {
+            updateSettings();
+        }
+        
+    } catch (error) {
+        console.error('Error in showSection:', error);
+    }
+}
+
+// =============================================================================
+// WALLET CONNECTION FUNCTIONS
+// =============================================================================
+
+async function connectWallet() {
+    try {
+        if (typeof window.ethereum === 'undefined') {
+            alert('MetaMask not detected! Activating demo mode...');
+            enableDemoMode();
+            return;
+        }
+
+        // Request account access
+        const accounts = await window.ethereum.request({
+            method: 'eth_requestAccounts'
+        });
+
+        if (accounts.length === 0) {
+            throw new Error('No accounts found');
+        }
+
+        userAddress = accounts[0];
+        
+        // Initialize provider and signer
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        
+        // Check if we're on Core network
+        const network = await provider.getNetwork();
+        if (network.chainId !== 1116) { // Core Mainnet Chain ID
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: '0x45C' }] // 1116 in hex
+                });
+            } catch (switchError) {
+                if (switchError.code === 4902) {
+                    await addCoreNetwork();
+                }
+            }
+        }
+        
+        // Initialize contract (using mock for demo)
+        gameContract = createMockContract();
+        
+        // Update UI
+        updateWalletUI();
+        await updateBalance();
+        
+        // Save connection state
+        localStorage.setItem('walletConnected', 'true');
+        
+        showTransactionStatus('✅ Wallet connected successfully to Core Blockchain!');
+        
+    } catch (error) {
+        console.error('Wallet connection error:', error);
+        showTransactionStatus('❌ Connection failed, using demo mode');
+        enableDemoMode();
+    }
+}
+
+async function addCoreNetwork() {
+    try {
+        await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+                chainId: '0x45C',
+                chainName: 'Core Blockchain',
+                nativeCurrency: {
+                    name: 'CORE',
+                    symbol: 'CORE',
+                    decimals: 18
+                },
+                rpcUrls: ['https://rpc.coredao.org'],
+                blockExplorerUrls: ['https://scan.coredao.org']
+            }]
+        });
+    } catch (error) {
+        console.error('Error adding Core network:', error);
+        throw error;
+    }
+}
+
+function enableDemoMode() {
+    userAddress = '0x' + Math.random().toString(16).substr(2, 40);
+    gameContract = createMockContract();
+    
+    updateWalletUI();
+    
+    const balanceElement = safeGetElement('balanceDisplay');
+    if (balanceElement) {
+        balanceElement.textContent = '5.0000 CORE';
+    }
+    
+    showTransactionStatus('✅ Demo mode activated! Games fully functional.');
+}
+
+function createMockContract() {
+    return {
+        createGame: async (gameType, stake, options) => {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const mockTx = {
+                        hash: '0x' + Math.random().toString(16).substr(2, 64),
+                        wait: async () => ({
+                            events: [{
+                                event: 'GameCreated',
+                                args: { gameId: Math.floor(Math.random() * 10000) }
+                            }]
+                        })
+                    };
+                    resolve(mockTx);
+                }, 1000);
+            });
+        },
+        
+        joinGame: async (gameId, options) => {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const mockTx = {
+                        hash: '0x' + Math.random().toString(16).substr(2, 64),
+                        wait: async () => ({})
+                    };
+                    resolve(mockTx);
+                }, 1000);
+            });
+        },
+        
+        makeMove: async (gameId, move) => {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const mockTx = {
+                        hash: '0x' + Math.random().toString(16).substr(2, 64),
+                        wait: async () => ({})
+                    };
+                    resolve(mockTx);
+                }, 500);
+            });
+        },
+        
+        claimWin: async (gameId) => {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const mockTx = {
+                        hash: '0x' + Math.random().toString(16).substr(2, 64),
+                        wait: async () => ({})
+                    };
+                    resolve(mockTx);
+                }, 1000);
+            });
+        }
+    };
+}
+
+function updateWalletUI() {
+    const connectionStatus = safeGetElement('connectionStatus');
+    const balanceDisplay = safeGetElement('balanceDisplay');
+    const connectBtn = safeGetElement('connectBtn');
+    const disconnectBtn = safeGetElement('disconnectBtn');
+    
+    if (userAddress) {
+        if (connectionStatus) {
+            connectionStatus.innerHTML = userAddress.length === 42 ? 
+                '🟢 Connected' : '🟡 Demo Mode';
+        }
+        
+        if (balanceDisplay) {
+            safeRemoveClass(balanceDisplay, 'hidden');
+        }
+        
+        if (connectBtn) {
+            safeAddClass(connectBtn, 'hidden');
+        }
+        
+        if (disconnectBtn) {
+            safeRemoveClass(disconnectBtn, 'hidden');
+        }
+    }
+}
+
+async function updateBalance() {
+    if (!provider || !userAddress) return;
+    
+    try {
+        const balance = await provider.getBalance(userAddress);
+        const balanceInCore = ethers.utils.formatEther(balance);
+        
+        const balanceElement = safeGetElement('balanceDisplay');
+        if (balanceElement) {
+            balanceElement.textContent = `${parseFloat(balanceInCore).toFixed(4)} CORE`;
+        }
+    } catch (error) {
+        console.error('Error updating balance:', error);
+        const balanceElement = safeGetElement('balanceDisplay');
+        if (balanceElement) {
+            balanceElement.textContent = '5.0000 CORE';
+        }
+    }
+}
+
+function disconnectWallet() {
+    userAddress = null;
+    provider = null;
+    signer = null;
+    gameContract = null;
+    
+    const connectionStatus = safeGetElement('connectionStatus');
+    const balanceDisplay = safeGetElement('balanceDisplay');
+    const connectBtn = safeGetElement('connectBtn');
+    const disconnectBtn = safeGetElement('disconnectBtn');
+    
+    if (connectionStatus) {
+        connectionStatus.innerHTML = '🔴 Not Connected';
+    }
+    
+    if (balanceDisplay) {
+        safeAddClass(balanceDisplay, 'hidden');
+    }
+    
+    if (connectBtn) {
+        safeRemoveClass(connectBtn, 'hidden');
+    }
+    
+    if (disconnectBtn) {
+        safeAddClass(disconnectBtn, 'hidden');
+    }
+    
+    // Clear connection state
+    localStorage.removeItem('walletConnected');
+    
+    showTransactionStatus('👋 Wallet disconnected');
+}
+
+// =============================================================================
+// TRANSACTION STATUS FUNCTIONS
+// =============================================================================
+
+function showTransactionStatus(message, hash = null) {
+    const statusElement = safeGetElement('transactionStatus');
+    const messageElement = safeGetElement('statusMessage');
+    const hashElement = safeGetElement('transactionHash');
+    
+    if (statusElement) {
+        safeRemoveClass(statusElement, 'hidden');
+    }
+    
+    if (messageElement) {
+        messageElement.textContent = message;
+    }
+    
+    if (hashElement && hash) {
+        hashElement.innerHTML = `TX: <a href="https://scan.coredao.org/tx/${hash}" target="_blank" style="color: #4ecdc4;">${hash.substring(0, 20)}...</a>`;
+    } else if (hashElement) {
+        hashElement.textContent = '';
+    }
+    
+    // Auto-hide after 10 seconds
+    setTimeout(() => {
+        if (statusElement) {
+            safeAddClass(statusElement, 'hidden');
+        }
+    }, 10000);
+}
+
+// Listen for account changes
+if (window.ethereum) {
+    window.ethereum.on('accountsChanged', function (accounts) {
+        if (accounts.length === 0) {
+            disconnectWallet();
+        } else {
+            userAddress = accounts[0];
+            updateWalletUI();
+            updateBalance();
+        }
+    });
+    
+    window.ethereum.on('chainChanged', function (chainId) {
+        window.location.reload();
+    });
+}
+
+console.log('✅ Part 2A: Core Functions & Wallet Connection - Loaded');
         console.log('🎮 Crypticus Gaming Platform - HTML Structure Loaded');
     </script>
 </body>

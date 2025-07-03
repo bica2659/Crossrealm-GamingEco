@@ -1,0 +1,4145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypticus - Play & Earn on Core Blockchain</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .wallet-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .balance {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: fixed;
+            top: 80px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .nav-item {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        main {
+            margin-top: 160px;
+            padding: 2rem 0;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section h2 {
+            color: #4ecdc4;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .game-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(78, 205, 196, 0.2);
+        }
+
+        .game-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .game-icon {
+            font-size: 2rem;
+            margin-right: 1rem;
+        }
+
+        .game-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .stake-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 0.8rem;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .stake-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Game Board Styles */
+        .game-board {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1rem;
+            margin-top: 1rem;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chess-board {
+            display: grid;
+            grid-template-columns: repeat(8, 40px);
+            grid-template-rows: repeat(8, 40px);
+            gap: 1px;
+            border: 2px solid #4ecdc4;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .chess-square {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chess-square.light {
+            background: #f0d9b5;
+            color: #333;
+        }
+
+        .chess-square.dark {
+            background: #b58863;
+            color: #fff;
+        }
+
+        .chess-square:hover {
+            box-shadow: inset 0 0 0 2px #4ecdc4;
+        }
+
+        .chess-square.selected {
+            background: #4ecdc4 !important;
+            color: white;
+        }
+
+        .checkers-board {
+            display: grid;
+            grid-template-columns: repeat(8, 45px);
+            grid-template-rows: repeat(8, 45px);
+            gap: 1px;
+            border: 2px solid #4ecdc4;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .checkers-square {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .checkers-square.light {
+            background: #f0d9b5;
+        }
+
+        .checkers-square.dark {
+            background: #b58863;
+        }
+
+        .checkers-square:hover {
+            box-shadow: inset 0 0 0 2px #4ecdc4;
+        }
+
+        .word-game-area {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .word-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            color: white;
+            font-size: 1.2rem;
+            text-align: center;
+            margin: 1rem 0;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .word-display {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4ecdc4;
+            margin: 1rem 0;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Status and Transaction Display */
+        .status-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #4ecdc4;
+        }
+
+        .transaction-hash {
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #4ecdc4;
+            word-break: break-all;
+            margin-top: 0.5rem;
+        }
+
+        /* Active Games */
+        .active-games {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .game-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 3px solid #4ecdc4;
+        }
+
+        .game-info {
+            flex: 1;
+        }
+
+        .game-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+        }
+
+        .toggle-switch:not(.active) {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .toggle-switch div {
+            position: absolute;
+            top: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active div {
+            left: 33px;
+        }
+
+        .toggle-switch:not(.active) div {
+            left: 3px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-menu {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .game-controls {
+                flex-direction: column;
+            }
+
+            .chess-board {
+                grid-template-columns: repeat(8, 35px);
+                grid-template-rows: repeat(8, 35px);
+            }
+
+            .chess-square {
+                width: 35px;
+                height: 35px;
+                font-size: 20px;
+            }
+
+            .checkers-board {
+                grid-template-columns: repeat(8, 40px);
+                grid-template-rows: repeat(8, 40px);
+            }
+
+            .checkers-square {
+                width: 40px;
+                height: 40px;
+                font-size: 24px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .wallet-info {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #4ecdc4;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="logo">🎮 Crypticus</div>
+            <div class="wallet-info">
+                <div class="balance">
+                    <span id="connectionStatus">🔴 Not Connected</span>
+                    <span id="balanceDisplay" class="hidden">0.0000 CORE</span>
+                </div>
+                <button id="connectBtn" class="btn" onclick="connectWallet()">Connect Wallet</button>
+                <button id="disconnectBtn" class="btn btn-danger hidden" onclick="disconnectWallet()">Disconnect</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav>
+        <ul class="nav-menu" id="navMenu">
+            <li class="nav-item active" onclick="showSection('games')">🎮 Games</li>
+            <li class="nav-item" onclick="showSection('leaderboard')">🏆 Leaderboard</li>
+            <li class="nav-item" onclick="showSection('profile')">👤 Profile</li>
+            <li class="nav-item" onclick="showSection('settings')">⚙️ Settings</li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <!-- Transaction Status -->
+            <div id="transactionStatus" class="status-bar hidden">
+                <div id="statusMessage">Ready to play!</div>
+                <div id="transactionHash" class="transaction-hash"></div>
+            </div>
+
+            <!-- Games Section -->
+            <div id="gamesSection" class="section">
+                <h2>🎮 Available Games</h2>
+                
+                <!-- Active Games Display -->
+                <div class="active-games">
+                    <h3 style="color: #4ecdc4; margin-bottom: 1rem;">🎯 Active Games</h3>
+                    <div id="activeGamesList">
+                        <div style="text-align: center; color: #aaa; padding: 2rem;">
+                            No active games. Create one to start playing!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="games-grid">
+                    <!-- Chess Game -->
+                    <div class="game-card">
+                        <div class="game-header">
+                            <div class="game-icon">♟️</div>
+                            <div>
+                                <div class="game-title">Chess</div>
+                                <div style="color: #aaa; font-size: 0.9rem;">Strategic board game</div>
+                            </div>
+                        </div>
+                        <div class="game-controls">
+                            <input type="number" id="chessStake" class="stake-input" placeholder="Stake (CORE)" min="0.01" step="0.01" value="0.1">
+                            <button class="btn" onclick="startChessGame()">Create Game</button>
+                        </div>
+                        <div class="game-board">
+                            <div id="chessBoard" class="chess-board"></div>
+                        </div>
+                    </div>
+
+                    <!-- Checkers Game -->
+                    <div class="game-card">
+                        <div class="game-header">
+                            <div class="game-icon">⚫</div>
+                            <div>
+                                <div class="game-title">Checkers</div>
+                                <div style="color: #aaa; font-size: 0.9rem;">Classic strategy game</div>
+                            </div>
+                        </div>
+                        <div class="game-controls">
+                            <input type="number" id="checkersStake" class="stake-input" placeholder="Stake (CORE)" min="0.01" step="0.01" value="0.1">
+                            <button class="btn" onclick="startCheckersGame()">Create Game</button>
+                        </div>
+                        <div class="game-board">
+                            <div id="checkersBoard" class="checkers-board"></div>
+                        </div>
+                    </div>
+
+                    <!-- Word Challenge Game -->
+                    <div class="game-card">
+                        <div class="game-header">
+                            <div class="game-icon">📝</div>
+                            <div>
+                                <div class="game-title">Word Challenge</div>
+                                <div style="color: #aaa; font-size: 0.9rem;">Test your vocabulary</div>
+                            </div>
+                        </div>
+                        <div class="game-controls">
+                            <input type="number" id="wordStake" class="stake-input" placeholder="Stake (CORE)" min="0.01" step="0.01" value="0.1">
+                            <button class="btn" onclick="startWordGame()">Create Game</button>
+                        </div>
+                        <div class="game-board">
+                            <div class="word-game-area">
+                                <div class="word-display" id="wordDisplay">Click "Create Game" to start!</div>
+                                <input type="text" id="wordInput" class="word-input" placeholder="Enter your word..." maxlength="20">
+                                <div>
+                                    <button class="btn btn-small" onclick="submitWord()">Submit Word</button>
+                                    <button class="btn btn-small" onclick="skipWord()">Skip</button>
+                                </div>
+                                <div id="wordScore" style="margin-top: 1rem; font-size: 1.2rem; color: #ffd700;">Score: 0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leaderboard Section -->
+            <div id="leaderboardSection" class="hidden">
+                <div class="section">
+                    <h2>🏆 Leaderboard</h2>
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <div id="profileSection" class="hidden">
+                <div class="section">
+                    <h2>👤 Player Profile</h2>
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="settingsSection" class="hidden">
+                <div class="section">
+                    <h2>⚙️ Settings</h2>
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Core Blockchain Integration Script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    
+    <script>
+        // Global Variables
+let currentSection = 'games';
+let userAddress = null;
+let gameContract = null;
+let provider = null;
+let signer = null;
+
+// Game State Variables
+let activeGames = [];
+let currentGame = null;
+
+// Player Statistics
+let playerStats = {
+    gamesPlayed: 0,
+    gamesWon: 0,
+    totalEarned: 0,
+    chessWins: 0,
+    checkersWins: 0,
+    wordWins: 0
+};
+
+// Contract Configuration for Core Blockchain
+const CONTRACT_ADDRESS = "0x1234567890abcdef1234567890abcdef12345678"; // Replace with actual contract address
+const CONTRACT_ABI = [
+    "function createGame(uint256 gameType, uint256 stake) external payable returns (uint256)",
+    "function joinGame(uint256 gameId) external payable",
+    "function makeMove(uint256 gameId, string memory move) external",
+    "function claimWin(uint256 gameId) external",
+    "function getGame(uint256 gameId) external view returns (tuple(address player1, address player2, uint256 gameType, uint256 stake, uint256 status))",
+    "event GameCreated(uint256 indexed gameId, address indexed creator, uint256 gameType, uint256 stake)",
+    "event GameJoined(uint256 indexed gameId, address indexed player2)",
+    "event MoveMade(uint256 indexed gameId, address indexed player, string move)",
+    "event GameEnded(uint256 indexed gameId, address indexed winner, uint256 prize)"
+];
+
+// =============================================================================
+// CORE UTILITY FUNCTIONS
+// =============================================================================
+
+// Safe DOM Element Selection
+function safeGetElement(id) {
+    const element = document.getElementById(id);
+    if (!element) {
+        console.warn(`Element with id '${id}' not found`);
+    }
+    return element;
+}
+
+// Safe Class Toggle
+function safeToggleClass(element, className) {
+    if (element && element.classList) {
+        element.classList.toggle(className);
+    }
+}
+
+// Safe Class Add/Remove
+function safeAddClass(element, className) {
+    if (element && element.classList) {
+        element.classList.add(className);
+    }
+}
+
+function safeRemoveClass(element, className) {
+    if (element && element.classList) {
+        element.classList.remove(className);
+    }
+}
+
+// =============================================================================
+// NAVIGATION FUNCTIONS
+// =============================================================================
+
+function showSection(section) {
+    try {
+        // Hide all sections
+        const sections = ['games', 'leaderboard', 'profile', 'settings'];
+        sections.forEach(sectionId => {
+            const element = safeGetElement(sectionId + 'Section');
+            if (element) {
+                safeAddClass(element, 'hidden');
+            }
+        });
+        
+        // Show selected section
+        const targetSection = safeGetElement(section + 'Section');
+        if (targetSection) {
+            safeRemoveClass(targetSection, 'hidden');
+            targetSection.classList.add('fade-in');
+        }
+        
+        // Update navigation active state
+        document.querySelectorAll('.nav-item').forEach(item => {
+            safeRemoveClass(item, 'active');
+        });
+        
+        // Add active class to clicked item
+        if (event && event.target) {
+            safeAddClass(event.target, 'active');
+        }
+        
+        currentSection = section;
+        
+        // Update section content
+        if (section === 'profile') {
+            updateProfileDisplay();
+        } else if (section === 'leaderboard') {
+            updateLeaderboard();
+        } else if (section === 'settings') {
+            updateSettings();
+        }
+        
+    } catch (error) {
+        console.error('Error in showSection:', error);
+    }
+}
+
+// =============================================================================
+// WALLET CONNECTION FUNCTIONS
+// =============================================================================
+
+async function connectWallet() {
+    try {
+        if (typeof window.ethereum === 'undefined') {
+            alert('MetaMask not detected! Activating demo mode...');
+            enableDemoMode();
+            return;
+        }
+
+        // Request account access
+        const accounts = await window.ethereum.request({
+            method: 'eth_requestAccounts'
+        });
+
+        if (accounts.length === 0) {
+            throw new Error('No accounts found');
+        }
+
+        userAddress = accounts[0];
+        
+        // Initialize provider and signer
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        
+        // Check if we're on Core network
+        const network = await provider.getNetwork();
+        if (network.chainId !== 1116) { // Core Mainnet Chain ID
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: '0x45C' }] // 1116 in hex
+                });
+            } catch (switchError) {
+                if (switchError.code === 4902) {
+                    await addCoreNetwork();
+                }
+            }
+        }
+        
+        // Initialize contract (using mock for demo)
+        gameContract = createMockContract();
+        
+        // Update UI
+        updateWalletUI();
+        await updateBalance();
+        
+        // Save connection state
+        localStorage.setItem('walletConnected', 'true');
+        
+        showTransactionStatus('✅ Wallet connected successfully to Core Blockchain!');
+        
+    } catch (error) {
+        console.error('Wallet connection error:', error);
+        showTransactionStatus('❌ Connection failed, using demo mode');
+        enableDemoMode();
+    }
+}
+
+async function addCoreNetwork() {
+    try {
+        await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+                chainId: '0x45C',
+                chainName: 'Core Blockchain',
+                nativeCurrency: {
+                    name: 'CORE',
+                    symbol: 'CORE',
+                    decimals: 18
+                },
+                rpcUrls: ['https://rpc.coredao.org'],
+                blockExplorerUrls: ['https://scan.coredao.org']
+            }]
+        });
+    } catch (error) {
+        console.error('Error adding Core network:', error);
+        throw error;
+    }
+}
+
+function enableDemoMode() {
+    userAddress = '0x' + Math.random().toString(16).substr(2, 40);
+    gameContract = createMockContract();
+    
+    updateWalletUI();
+    
+    const balanceElement = safeGetElement('balanceDisplay');
+    if (balanceElement) {
+        balanceElement.textContent = '5.0000 CORE';
+    }
+    
+    showTransactionStatus('✅ Demo mode activated! Games fully functional.');
+}
+
+function createMockContract() {
+    return {
+        createGame: async (gameType, stake, options) => {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const mockTx = {
+                        hash: '0x' + Math.random().toString(16).substr(2, 64),
+                        wait: async () => ({
+                            events: [{
+                                event: 'GameCreated',
+                                args: { gameId: Math.floor(Math.random() * 10000) }
+                            }]
+                        })
+                    };
+                    resolve(mockTx);
+                }, 1000);
+            });
+        },
+        
+        joinGame: async (gameId, options) => {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const mockTx = {
+                        hash: '0x' + Math.random().toString(16).substr(2, 64),
+                        wait: async () => ({})
+                    };
+                    resolve(mockTx);
+                }, 1000);
+            });
+        },
+        
+        makeMove: async (gameId, move) => {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const mockTx = {
+                        hash: '0x' + Math.random().toString(16).substr(2, 64),
+                        wait: async () => ({})
+                    };
+                    resolve(mockTx);
+                }, 500);
+            });
+        },
+        
+        claimWin: async (gameId) => {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const mockTx = {
+                        hash: '0x' + Math.random().toString(16).substr(2, 64),
+                        wait: async () => ({})
+                    };
+                    resolve(mockTx);
+                }, 1000);
+            });
+        }
+    };
+}
+
+function updateWalletUI() {
+    const connectionStatus = safeGetElement('connectionStatus');
+    const balanceDisplay = safeGetElement('balanceDisplay');
+    const connectBtn = safeGetElement('connectBtn');
+    const disconnectBtn = safeGetElement('disconnectBtn');
+    
+    if (userAddress) {
+        if (connectionStatus) {
+            connectionStatus.innerHTML = userAddress.length === 42 ? 
+                '🟢 Connected' : '🟡 Demo Mode';
+        }
+        
+        if (balanceDisplay) {
+            safeRemoveClass(balanceDisplay, 'hidden');
+        }
+        
+        if (connectBtn) {
+            safeAddClass(connectBtn, 'hidden');
+        }
+        
+        if (disconnectBtn) {
+            safeRemoveClass(disconnectBtn, 'hidden');
+        }
+    }
+}
+
+async function updateBalance() {
+    if (!provider || !userAddress) return;
+    
+    try {
+        const balance = await provider.getBalance(userAddress);
+        const balanceInCore = ethers.utils.formatEther(balance);
+        
+        const balanceElement = safeGetElement('balanceDisplay');
+        if (balanceElement) {
+            balanceElement.textContent = `${parseFloat(balanceInCore).toFixed(4)} CORE`;
+        }
+    } catch (error) {
+        console.error('Error updating balance:', error);
+        const balanceElement = safeGetElement('balanceDisplay');
+        if (balanceElement) {
+            balanceElement.textContent = '5.0000 CORE';
+        }
+    }
+}
+
+function disconnectWallet() {
+    userAddress = null;
+    provider = null;
+    signer = null;
+    gameContract = null;
+    
+    const connectionStatus = safeGetElement('connectionStatus');
+    const balanceDisplay = safeGetElement('balanceDisplay');
+    const connectBtn = safeGetElement('connectBtn');
+    const disconnectBtn = safeGetElement('disconnectBtn');
+    
+    if (connectionStatus) {
+        connectionStatus.innerHTML = '🔴 Not Connected';
+    }
+    
+    if (balanceDisplay) {
+        safeAddClass(balanceDisplay, 'hidden');
+    }
+    
+    if (connectBtn) {
+        safeRemoveClass(connectBtn, 'hidden');
+    }
+    
+    if (disconnectBtn) {
+        safeAddClass(disconnectBtn, 'hidden');
+    }
+    
+    // Clear connection state
+    localStorage.removeItem('walletConnected');
+    
+    showTransactionStatus('👋 Wallet disconnected');
+}
+
+// =============================================================================
+// TRANSACTION STATUS FUNCTIONS
+// =============================================================================
+
+function showTransactionStatus(message, hash = null) {
+    const statusElement = safeGetElement('transactionStatus');
+    const messageElement = safeGetElement('statusMessage');
+    const hashElement = safeGetElement('transactionHash');
+    
+    if (statusElement) {
+        safeRemoveClass(statusElement, 'hidden');
+    }
+    
+    if (messageElement) {
+        messageElement.textContent = message;
+    }
+    
+    if (hashElement && hash) {
+        hashElement.innerHTML = `TX: <a href="https://scan.coredao.org/tx/${hash}" target="_blank" style="color: #4ecdc4;">${hash.substring(0, 20)}...</a>`;
+    } else if (hashElement) {
+        hashElement.textContent = '';
+    }
+    
+    // Auto-hide after 10 seconds
+    setTimeout(() => {
+        if (statusElement) {
+            safeAddClass(statusElement, 'hidden');
+        }
+    }, 10000);
+}
+
+// Listen for account changes
+if (window.ethereum) {
+    window.ethereum.on('accountsChanged', function (accounts) {
+        if (accounts.length === 0) {
+            disconnectWallet();
+        } else {
+            userAddress = accounts[0];
+            updateWalletUI();
+            updateBalance();
+        }
+    });
+    
+    window.ethereum.on('chainChanged', function (chainId) {
+        window.location.reload();
+    });
+}
+
+console.log('✅ Part 2A: Core Functions & Wallet Connection - Loaded');
+        console.log('🎮 Crypticus Gaming Platform - HTML Structure Loaded');
+
+        // ACTIVE GAMES DISPLAY AND MANAGEMENT
+// =============================================================================
+
+function updateActiveGames() {
+    const activeGamesList = safeGetElement('activeGamesList');
+    if (!activeGamesList) return;
+    
+    if (activeGames.length === 0) {
+        activeGamesList.innerHTML = `
+            <div style="text-align: center; color: #aaa; padding: 2rem;">
+                No active games. Create one to start playing!
+            </div>
+        `;
+        return;
+    }
+    
+    activeGamesList.innerHTML = activeGames.map(game => {
+        const gameIcon = game.type === 'chess' ? '♟️' : game.type === 'checkers' ? '⚫' : '📝';
+        const gameTitle = game.type.charAt(0).toUpperCase() + game.type.slice(1);
+        const statusColor = game.status === 'waiting' ? '#ffd700' : 
+                           game.status === 'in_progress' ? '#4ecdc4' : '#aaa';
+        
+        return `
+            <div class="game-item" style="background: rgba(255, 255, 255, 0.05); border-radius: 10px; padding: 1rem; margin: 0.5rem 0; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #4ecdc4;">
+                <div class="game-info">
+                    <div style="font-size: 1.1rem; font-weight: bold;">
+                        ${gameIcon} ${gameTitle} Game
+                    </div>
+                    <div style="font-size: 0.9rem; color: #aaa;">
+                        Creator: ${game.creator} | Stake: ${game.stake} CORE
+                    </div>
+                    <div style="font-size: 0.9rem; color: ${statusColor};">
+                        Status: ${game.status.replace('_', ' ')}
+                    </div>
+                </div>
+                <div class="game-actions" style="display: flex; gap: 0.5rem;">
+                    ${game.status === 'waiting' && game.creator !== 'You' ? 
+                        `<button class="btn btn-small" onclick="joinGame(${game.id}, '${game.type}')">Join Game</button>` : 
+                        ''
+                    }
+                    ${game.status === 'in_progress' ? 
+                        `<button class="btn btn-small" onclick="openGame(${game.id}, '${game.type}')">Play Game</button>` : 
+                        ''
+                    }
+                    ${game.status === 'waiting' && game.creator === 'You' ? 
+                        `<button class="btn btn-small btn-danger" onclick="cancelGame(${game.id})">Cancel</button>` : 
+                        ''
+                    }
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// =============================================================================
+// GAME JOINING AND MANAGEMENT FUNCTIONS
+// =============================================================================
+
+// Join any game
+async function joinGame(gameId, gameType) {
+    try {
+        const game = activeGames.find(g => g.id === gameId);
+        if (!game) {
+            alert('Game not found!');
+            return;
+        }
+        
+        if (game.status !== 'waiting') {
+            alert('Game is not available to join!');
+            return;
+        }
+        
+        showTransactionStatus(`Joining ${gameType} game...`);
+        
+        const contract = gameContract || createMockContract();
+        const stakeAmount = game.stake;
+        
+        // Convert stake to wei if ethers is available
+        const stakeWei = window.ethers && ethers.utils ? 
+            ethers.utils.parseEther(stakeAmount.toString()) : 
+            stakeAmount;
+            
+        const tx = await contract.joinGame(gameId, { value: stakeWei });
+        showTransactionStatus('⏳ Transaction submitted...', tx.hash);
+        
+        await tx.wait();
+        
+        game.status = 'in_progress';
+        game.opponent = userAddress ? userAddress.substring(0, 8) + '...' : 'Player';
+        
+        showTransactionStatus('✅ Successfully joined game!');
+        updateActiveGames();
+        
+        // Start the appropriate game
+        if (gameType === 'chess') {
+            startChessGameplay(game);
+        } else if (gameType === 'checkers') {
+            startCheckersGameplay(game);
+        } else if (gameType === 'word') {
+            startWordGameplay(game);
+        }
+        
+    } catch (error) {
+        console.error('Error joining game:', error);
+        showTransactionStatus('❌ Demo: Successfully joined game!');
+        
+        // Demo fallback
+        const game = activeGames.find(g => g.id === gameId);
+        if (game) {
+            game.status = 'in_progress';
+            game.opponent = 'Demo Player';
+            updateActiveGames();
+            
+            if (gameType === 'chess') {
+                startChessGameplay(game);
+            } else if (gameType === 'checkers') {
+                startCheckersGameplay(game);
+            } else if (gameType === 'word') {
+                startWordGameplay(game);
+            }
+        }
+    }
+}
+
+// Open existing game
+function openGame(gameId, gameType) {
+    const game = activeGames.find(g => g.id === gameId);
+    if (!game) {
+        alert('Game not found!');
+        return;
+    }
+    
+    if (gameType === 'chess') {
+        startChessGameplay(game);
+    } else if (gameType === 'checkers') {
+        startCheckersGameplay(game);
+    } else if (gameType === 'word') {
+        startWordGameplay(game);
+    }
+}
+
+// Cancel game
+function cancelGame(gameId) {
+    if (confirm('Are you sure you want to cancel this game?')) {
+        activeGames = activeGames.filter(g => g.id !== gameId);
+        updateActiveGames();
+        showTransactionStatus('Game cancelled');
+    }
+}
+
+// =============================================================================
+// GAME MODAL FUNCTIONS
+// =============================================================================
+
+function createGameModal() {
+    // Create modal if it doesn't exist
+    let modal = safeGetElement('gameModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'gameModal';
+        modal.className = 'hidden';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        `;
+        
+        modal.innerHTML = `
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 2rem; max-width: 90vw; max-height: 90vh; overflow-y: auto; position: relative; border: 1px solid rgba(255, 255, 255, 0.2);">
+                <button onclick="closeGameModal()" style="position: absolute; top: 15px; right: 20px; background: none; border: none; color: white; font-size: 28px; cursor: pointer; z-index: 1;">×</button>
+                <div id="gameInterface">
+                    <div style="text-align: center; padding: 2rem; color: white;">
+                        <h3>Loading Game...</h3>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+    }
+    
+    return modal;
+}
+
+function closeGameModal() {
+    const modal = safeGetElement('gameModal');
+    if (modal) {
+        safeAddClass(modal, 'hidden');
+    }
+}
+
+// =============================================================================
+// PLACEHOLDER GAME FUNCTIONS (TO BE IMPLEMENTED IN NEXT STEPS)
+// =============================================================================
+
+// These will be implemented in the next steps
+function startChessGameplay(game) {
+    createGameModal();
+    const gameInterface = safeGetElement('gameInterface');
+    if (gameInterface) {
+        gameInterface.innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: white;">
+                <h3>♟️ Chess Game Starting...</h3>
+                <p>Chess gameplay will be implemented in the next step!</p>
+                <p><strong>Stake:</strong> ${game.stake} CORE</p>
+                <p><strong>Status:</strong> ${game.status}</p>
+                <button class="btn" onclick="closeGameModal()">Close</button>
+            </div>
+        `;
+    }
+    
+    const modal = safeGetElement('gameModal');
+    if (modal) {
+        safeRemoveClass(modal, 'hidden');
+    }
+}
+
+function startCheckersGameplay(game) {
+    createGameModal();
+    const gameInterface = safeGetElement('gameInterface');
+    if (gameInterface) {
+        gameInterface.innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: white;">
+                <h3>⚫ Checkers Game Starting...</h3>
+                <p>Checkers gameplay will be implemented soon!</p>
+                <p><strong>Stake:</strong> ${game.stake} CORE</p>
+                <p><strong>Status:</strong> ${game.status}</p>
+                <button class="btn" onclick="closeGameModal()">Close</button>
+            </div>
+        `;
+    }
+    
+    const modal = safeGetElement('gameModal');
+    if (modal) {
+        safeRemoveClass(modal, 'hidden');
+    }
+}
+
+function startWordGameplay(game) {
+    createGameModal();
+    const gameInterface = safeGetElement('gameInterface');
+    if (gameInterface) {
+        gameInterface.innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: white;">
+                <h3>📝 Word Challenge Starting...</h3>
+                <p>Word game will be implemented soon!</p>
+                <p><strong>Stake:</strong> ${game.stake} CORE</p>
+                <p><strong>Status:</strong> ${game.status}</p>
+                <button class="btn" onclick="closeGameModal()">Close</button>
+            </div>
+        `;
+    }
+    
+    const modal = safeGetElement('gameModal');
+    if (modal) {
+        safeRemoveClass(modal, 'hidden');
+    }
+}
+
+console.log('✅ Part 2B1: Active Games Management - Loaded');
+
+        // =============================================================================
+// LEADERBOARD SECTION
+// =============================================================================
+
+function updateLeaderboard() {
+    const leaderboardSection = safeGetElement('leaderboardSection');
+    if (!leaderboardSection) return;
+    
+    leaderboardSection.innerHTML = `
+        <div class="section">
+            <h2>🏆 Leaderboard</h2>
+            <div style="background: rgba(255, 255, 255, 0.05); border-radius: 15px; padding: 1.5rem; margin-bottom: 2rem;">
+                <h3 style="color: #ffd700; margin-bottom: 1rem;">🏆 Top Players This Week</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem; margin: 0.5rem 0; background: rgba(255, 255, 255, 0.05); border-radius: 8px; border-left: 3px solid #4ecdc4;">
+                    <div>
+                        <strong>🥇 CryptoKing</strong>
+                        <div style="font-size: 0.9rem; color: #4ecdc4;">23 wins • 156.7 CORE earned</div>
+                    </div>
+                    <div style="color: #ffd700; font-weight: bold;">156.7 CORE</div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem; margin: 0.5rem 0; background: rgba(255, 255, 255, 0.05); border-radius: 8px; border-left: 3px solid #4ecdc4;">
+                    <div>
+                        <strong>🥈 GameMaster</strong>
+                        <div style="font-size: 0.9rem; color: #4ecdc4;">19 wins • 134.2 CORE earned</div>
+                    </div>
+                    <div style="color: #ffd700; font-weight: bold;">134.2 CORE</div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem; margin: 0.5rem 0; background: rgba(255, 255, 255, 0.05); border-radius: 8px; border-left: 3px solid #4ecdc4;">
+                    <div>
+                        <strong>🥉 WordWizard</strong>
+                        <div style="font-size: 0.9rem; color: #4ecdc4;">17 wins • 98.5 CORE earned</div>
+                    </div>
+                    <div style="color: #ffd700; font-weight: bold;">98.5 CORE</div>
+                </div>
+                
+                <h3 style="color: #4ecdc4; margin: 2rem 0 1rem 0;">🎯 Recent Matches</h3>
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin: 0.5rem 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>♟️ Chess:</strong> CryptoKing vs GameMaster
+                            <div style="font-size: 0.8rem; color: #aaa;">5 minutes ago</div>
+                        </div>
+                        <div style="color: #00ff88;">Winner: CryptoKing (+2.3 CORE)</div>
+                    </div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin: 0.5rem 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>⚫ Checkers:</strong> WordWizard vs TokenMaster
+                            <div style="font-size: 0.8rem; color: #aaa;">12 minutes ago</div>
+                        </div>
+                        <div style="color: #00ff88;">Winner: WordWizard (+1.8 CORE)</div>
+                    </div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin: 0.5rem 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>📝 Word:</strong> TokenMaster vs CryptoKing
+                            <div style="font-size: 0.8rem; color: #aaa;">18 minutes ago</div>
+                        </div>
+                        <div style="color: #00ff88;">Winner: TokenMaster (+1.2 CORE)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// =============================================================================
+// PROFILE SECTION
+// =============================================================================
+
+function updateProfileDisplay() {
+    const profileSection = safeGetElement('profileSection');
+    if (!profileSection) return;
+    
+    const winRate = playerStats.gamesPlayed > 0 ? 
+        Math.round((playerStats.gamesWon / playerStats.gamesPlayed) * 100) : 0;
+    
+    profileSection.innerHTML = `
+        <div class="section">
+            <h2>👤 Player Profile</h2>
+            <div style="background: rgba(255, 255, 255, 0.05); border-radius: 15px; padding: 1.5rem; margin-bottom: 2rem;">
+                <h3 style="color: #4ecdc4; margin-bottom: 1rem;">👤 Player Statistics</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; text-align: center;">
+                        <h4>Games Played</h4>
+                        <p style="font-size: 2rem; color: #4ecdc4;">${playerStats.gamesPlayed}</p>
+                    </div>
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; text-align: center;">
+                        <h4>Games Won</h4>
+                        <p style="font-size: 2rem; color: #00ff88;">${playerStats.gamesWon}</p>
+                    </div>
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; text-align: center;">
+                        <h4>Total Earned</h4>
+                        <p style="font-size: 2rem; color: #ffd700;">${playerStats.totalEarned.toFixed(4)} CORE</p>
+                    </div>
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; text-align: center;">
+                        <h4>Win Rate</h4>
+                        <p style="font-size: 2rem; color: #ff6b6b;">${winRate}%</p>
+                    </div>
+                </div>
+                
+                <h4 style="color: #4ecdc4; margin-bottom: 1rem;">🎮 Game Breakdown</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.5rem;">♟️</div>
+                        <div><strong>Chess</strong></div>
+                        <div style="font-size: 0.9rem; color: #aaa;">${playerStats.chessWins} wins</div>
+                    </div>
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.5rem;">⚫</div>
+                        <div><strong>Checkers</strong></div>
+                        <div style="font-size: 0.9rem; color: #aaa;">${playerStats.checkersWins} wins</div>
+                    </div>
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.5rem;">📝</div>
+                        <div><strong>Words</strong></div>
+                        <div style="font-size: 0.9rem; color: #aaa;">${playerStats.wordWins} wins</div>
+                    </div>
+                </div>
+                
+                <h4 style="color: #4ecdc4; margin: 2rem 0 1rem 0;">🏆 Recent Achievements</h4>
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px;">
+                    <div style="display: flex; align-items: center; margin: 0.5rem 0;">
+                        <span style="font-size: 1.2rem; margin-right: 0.5rem;">🎯</span>
+                        <span>Platform Explorer</span>
+                    </div>
+                    ${playerStats.gamesPlayed > 0 ? `
+                    <div style="display: flex; align-items: center; margin: 0.5rem 0;">
+                        <span style="font-size: 1.2rem; margin-right: 0.5rem;">🎮</span>
+                        <span>First Game Played</span>
+                    </div>
+                    ` : ''}
+                    ${playerStats.gamesWon > 0 ? `
+                    <div style="display: flex; align-items: center; margin: 0.5rem 0;">
+                        <span style="font-size: 1.2rem; margin-right: 0.5rem;">🏆</span>
+                        <span>First Victory</span>
+                    </div>
+                    ` : ''}
+                    ${playerStats.totalEarned > 0 ? `
+                    <div style="display: flex; align-items: center; margin: 0.5rem 0;">
+                        <span style="font-size: 1.2rem; margin-right: 0.5rem;">💰</span>
+                        <span>First CORE Earned</span>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// =============================================================================
+// SETTINGS SECTION
+// =============================================================================
+
+function updateSettings() {
+    const settingsSection = safeGetElement('settingsSection');
+    if (!settingsSection) return;
+    
+    settingsSection.innerHTML = `
+        <div class="section">
+            <h2>⚙️ Settings</h2>
+            <div style="background: rgba(255, 255, 255, 0.05); border-radius: 15px; padding: 1.5rem; margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem;">⚙️ Gaming Settings</h3>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; margin: 0.5rem 0; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                    <div>
+                        <strong>Sound Effects</strong>
+                        <div style="font-size: 0.9rem; color: #aaa;">Game sounds and notifications</div>
+                    </div>
+                    <div class="toggle-switch active" onclick="toggleSetting(this)">
+                        <div></div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; margin: 0.5rem 0; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                    <div>
+                        <strong>Auto-play Mode</strong>
+                        <div style="font-size: 0.9rem; color: #aaa;">Automatically join available games</div>
+                    </div>
+                    <div class="toggle-switch" onclick="toggleSetting(this)">
+                        <div></div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; margin: 0.5rem 0; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                    <div>
+                        <strong>Notifications</strong>
+                        <div style="font-size: 0.9rem; color: #aaa;">Game invites and match results</div>
+                    </div>
+                    <div class="toggle-switch active" onclick="toggleSetting(this)">
+                        <div></div>
+                    </div>
+                </div>
+                
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                    <strong>Daily Spending Limit:</strong>
+                    <input type="number" id="dailyLimit" style="width: 100%; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 5px; padding: 0.5rem; color: white; margin-top: 0.5rem;" placeholder="Enter daily limit in CORE" value="5.0">
+                </div>
+                
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                    <strong>Preferred Game Mode:</strong>
+                    <select style="width: 100%; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 5px; padding: 0.5rem; color: white; margin-top: 0.5rem;">
+                        <option value="all">All Games</option>
+                        <option value="chess">Chess Only</option>
+                        <option value="checkers">Checkers Only</option>
+                        <option value="word">Word Games Only</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div style="background: rgba(255, 255, 255, 0.05); border-radius: 15px; padding: 1.5rem;">
+                <h3 style="color: #4ecdc4; margin-bottom: 1rem;">🔧 Network Info</h3>
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin: 0.5rem 0;">
+                    <strong>Network Status:</strong>
+                    <div style="margin-top: 0.5rem; color: #00ff88;">🟢 Core Blockchain - Connected</div>
+                    <div style="font-size: 0.9rem; color: #aaa;">Block: 1,234,567 | Gas: 15 GWEI</div>
+                </div>
+                
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin: 0.5rem 0;">
+                    <strong>Contract Address:</strong>
+                    <div style="font-family: monospace; font-size: 0.8rem; color: #4ecdc4; margin-top: 0.5rem; word-break: break-all;">
+                        ${CONTRACT_ADDRESS}
+                    </div>
+                </div>
+                
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin: 0.5rem 0;">
+                    <strong>Platform Version:</strong>
+                    <div style="color: #aaa; margin-top: 0.5rem;">v1.0.0 Beta - DoraHacks Build</div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// =============================================================================
+// SETTINGS TOGGLE FUNCTION
+// =============================================================================
+
+function toggleSetting(element) {
+    if (element.classList.contains('active')) {
+        element.classList.remove('active');
+        element.style.background = 'rgba(255, 255, 255, 0.2)';
+        element.children[0].style.left = '3px';
+    } else {
+        element.classList.add('active');
+        element.style.background = 'linear-gradient(45deg, #4ecdc4, #44a08d)';
+        element.children[0].style.left = '33px';
+    }
+}
+
+console.log('✅ Part 2B2: Section Content Updates - Loaded');
+
+        // =============================================================================
+// CHESS BOARD INITIALIZATION
+// =============================================================================
+
+function initializeChessBoard() {
+    const chessBoard = safeGetElement('chessBoard');
+    if (!chessBoard) return;
+    
+    // Clear existing board
+    chessBoard.innerHTML = '';
+    
+    // Create chess board squares
+    for (let row = 8; row >= 1; row--) {
+        for (let col = 0; col < 8; col++) {
+            const square = document.createElement('div');
+            square.className = 'chess-square';
+            square.dataset.row = row;
+            square.dataset.col = col;
+            
+            // Determine square color
+            if ((row + col) % 2 === 0) {
+                square.classList.add('dark');
+            } else {
+                square.classList.add('light');
+            }
+            
+            // Add initial pieces
+            const piece = getInitialChessPiece(row, col);
+            if (piece) {
+                square.textContent = piece;
+                square.dataset.piece = piece;
+            }
+            
+            chessBoard.appendChild(square);
+        }
+    }
+}
+
+function getInitialChessPiece(row, col) {
+    const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+    const position = files[col] + row;
+    
+    // Initial chess position
+    const initialPosition = {
+        'a8': '♜', 'b8': '♞', 'c8': '♝', 'd8': '♛', 'e8': '♚', 'f8': '♝', 'g8': '♞', 'h8': '♜',
+        'a7': '♟', 'b7': '♟', 'c7': '♟', 'd7': '♟', 'e7': '♟', 'f7': '♟', 'g7': '♟', 'h7': '♟',
+        'a2': '♙', 'b2': '♙', 'c2': '♙', 'd2': '♙', 'e2': '♙', 'f2': '♙', 'g2': '♙', 'h2': '♙',
+        'a1': '♖', 'b1': '♘', 'c1': '♗', 'd1': '♕', 'e1': '♔', 'f1': '♗', 'g1': '♘', 'h1': '♖'
+    };
+    
+    return initialPosition[position] || '';
+}
+
+// =============================================================================
+// CHECKERS BOARD INITIALIZATION
+// =============================================================================
+
+function initializeCheckersBoard() {
+    const checkersBoard = safeGetElement('checkersBoard');
+    if (!checkersBoard) return;
+    
+    // Clear existing board
+    checkersBoard.innerHTML = '';
+    
+    // Create checkers board squares
+    for (let row = 8; row >= 1; row--) {
+        for (let col = 0; col < 8; col++) {
+            const square = document.createElement('div');
+            square.className = 'checkers-square';
+            square.dataset.row = row;
+            square.dataset.col = col;
+            
+            // Determine square color
+            if ((row + col) % 2 === 0) {
+                square.classList.add('dark');
+            } else {
+                square.classList.add('light');
+            }
+            
+            // Add initial pieces
+            const piece = getInitialCheckersPiece(row, col);
+            if (piece) {
+                square.textContent = piece;
+                square.dataset.piece = piece;
+            }
+            
+            checkersBoard.appendChild(square);
+        }
+    }
+}
+
+function getInitialCheckersPiece(row, col) {
+    // Only place pieces on dark squares
+    if ((row + col) % 2 === 1) return '';
+    
+    // Red pieces on top (rows 7-8)
+    if (row >= 7) {
+        return '🔴';
+    }
+    
+    // Black pieces on bottom (rows 1-2)
+    if (row <= 2) {
+        return '⚫';
+    }
+    
+    return '';
+}
+
+// =============================================================================
+// WORD GAME INITIALIZATION
+// =============================================================================
+
+function initializeWordGame() {
+    const wordDisplay = safeGetElement('wordDisplay');
+    const wordInput = safeGetElement('wordInput');
+    const wordScore = safeGetElement('wordScore');
+    
+    if (wordDisplay) {
+        wordDisplay.textContent = 'Click "Create Game" to start!';
+    }
+    
+    if (wordInput) {
+        wordInput.value = '';
+        wordInput.disabled = true;
+    }
+    
+    if (wordScore) {
+        wordScore.textContent = 'Score: 0';
+    }
+}
+
+// =============================================================================
+// GAME CREATION FUNCTIONS
+// =============================================================================
+
+// Chess Game Creation
+async function startChessGame() {
+    if (!userAddress) {
+        alert('Please connect your wallet first!');
+        return;
+    }
+    
+    const stakeAmount = parseFloat(safeGetElement('chessStake').value);
+    if (!stakeAmount || stakeAmount < 0.01) {
+        alert('Please enter a valid stake amount (minimum 0.01 CORE)');
+        return;
+    }
+    
+    try {
+        showTransactionStatus('Creating chess game...');
+        
+        const contract = gameContract || createMockContract();
+        
+        // Convert stake to wei if ethers is available
+        const stakeWei = window.ethers && ethers.utils ? 
+            ethers.utils.parseEther(stakeAmount.toString()) : 
+            stakeAmount;
+            
+        const tx = await contract.createGame(0, stakeWei, { value: stakeWei });
+        showTransactionStatus('⏳ Transaction submitted...', tx.hash);
+        
+        const receipt = await tx.wait();
+        
+        const newGame = {
+            id: Date.now(),
+            type: 'chess',
+            creator: 'You',
+            stake: stakeAmount,
+            status: 'waiting',
+            board: getInitialChessPosition(),
+            currentPlayer: 'white',
+            moves: []
+        };
+        
+        activeGames.push(newGame);
+        updateActiveGames();
+        playerStats.gamesPlayed++;
+        
+        showTransactionStatus('✅ Chess game created! Waiting for opponent...');
+        
+    } catch (error) {
+        console.error('Error creating chess game:', error);
+        showTransactionStatus('❌ Demo: Chess game created locally');
+        
+        const newGame = {
+            id: Date.now(),
+            type: 'chess',
+            creator: 'You',
+            stake: stakeAmount,
+            status: 'waiting',
+            board: getInitialChessPosition(),
+            currentPlayer: 'white',
+            moves: []
+        };
+        
+        activeGames.push(newGame);
+        updateActiveGames();
+    }
+}
+
+// Checkers Game Creation
+async function startCheckersGame() {
+    if (!userAddress) {
+        alert('Please connect your wallet first!');
+        return;
+    }
+    
+    const stakeAmount = parseFloat(safeGetElement('checkersStake').value);
+    if (!stakeAmount || stakeAmount < 0.01) {
+        alert('Please enter a valid stake amount (minimum 0.01 CORE)');
+        return;
+    }
+    
+    try {
+        showTransactionStatus('Creating checkers game...');
+        
+        const contract = gameContract || createMockContract();
+        
+        const stakeWei = window.ethers && ethers.utils ? 
+            ethers.utils.parseEther(stakeAmount.toString()) : 
+            stakeAmount;
+            
+        const tx = await contract.createGame(1, stakeWei, { value: stakeWei });
+        showTransactionStatus('⏳ Transaction submitted...', tx.hash);
+        
+        const receipt = await tx.wait();
+        
+        const newGame = {
+            id: Date.now(),
+            type: 'checkers',
+            creator: 'You',
+            stake: stakeAmount,
+            status: 'waiting',
+            board: getInitialCheckersPosition(),
+            currentPlayer: 'red',
+            moves: []
+        };
+        
+        activeGames.push(newGame);
+        updateActiveGames();
+        playerStats.gamesPlayed++;
+        
+        showTransactionStatus('✅ Checkers game created! Waiting for opponent...');
+        
+    } catch (error) {
+        console.error('Error creating checkers game:', error);
+        showTransactionStatus('❌ Demo: Checkers game created locally');
+        
+        const newGame = {
+            id: Date.now(),
+            type: 'checkers',
+            creator: 'You',
+            stake: stakeAmount,
+            status: 'waiting',
+            board: getInitialCheckersPosition(),
+            currentPlayer: 'red',
+            moves: []
+        };
+        
+        activeGames.push(newGame);
+        updateActiveGames();
+    }
+}
+
+// Word Game Creation
+async function startWordGame() {
+    if (!userAddress) {
+        alert('Please connect your wallet first!');
+        return;
+    }
+    
+    const stakeAmount = parseFloat(safeGetElement('wordStake').value);
+    if (!stakeAmount || stakeAmount < 0.01) {
+        alert('Please enter a valid stake amount (minimum 0.01 CORE)');
+        return;
+    }
+    
+    try {
+        showTransactionStatus('Creating word game...');
+        
+        const contract = gameContract || createMockContract();
+        
+        const stakeWei = window.ethers && ethers.utils ? 
+            ethers.utils.parseEther(stakeAmount.toString()) : 
+            stakeAmount;
+            
+        const tx = await contract.createGame(2, stakeWei, { value: stakeWei });
+        showTransactionStatus('⏳ Transaction submitted...', tx.hash);
+        
+        const receipt = await tx.wait();
+        
+        const newGame = {
+            id: Date.now(),
+            type: 'word',
+            creator: 'You',
+            stake: stakeAmount,
+            status: 'waiting',
+            score: 0,
+            timeLeft: 60,
+            wordsFound: []
+        };
+        
+        activeGames.push(newGame);
+        updateActiveGames();
+        playerStats.gamesPlayed++;
+        
+        showTransactionStatus('✅ Word game created! Waiting for opponent...');
+        
+    } catch (error) {
+        console.error('Error creating word game:', error);
+        showTransactionStatus('❌ Demo: Word game created locally');
+        
+        const newGame = {
+            id: Date.now(),
+            type: 'word',
+            creator: 'You',
+            stake: stakeAmount,
+            status: 'waiting',
+            score: 0,
+            timeLeft: 60,
+            wordsFound: []
+        };
+        
+        activeGames.push(newGame);
+        updateActiveGames();
+    }
+}
+
+// =============================================================================
+// HELPER FUNCTIONS FOR INITIAL POSITIONS
+// =============================================================================
+
+function getInitialChessPosition() {
+    return {
+        'a8': '♜', 'b8': '♞', 'c8': '♝', 'd8': '♛', 'e8': '♚', 'f8': '♝', 'g8': '♞', 'h8': '♜',
+        'a7': '♟', 'b7': '♟', 'c7': '♟', 'd7': '♟', 'e7': '♟', 'f7': '♟', 'g7': '♟', 'h7': '♟',
+        'a2': '♙', 'b2': '♙', 'c2': '♙', 'd2': '♙', 'e2': '♙', 'f2': '♙', 'g2': '♙', 'h2': '♙',
+        'a1': '♖', 'b1': '♘', 'c1': '♗', 'd1': '♕', 'e1': '♔', 'f1': '♗', 'g1': '♘', 'h1': '♖'
+    };
+}
+
+function getInitialCheckersPosition() {
+    const position = {};
+    
+    // Red pieces (top)
+    for (let row = 7; row <= 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            if ((row + col) % 2 === 0) {
+                const square = String.fromCharCode(97 + col) + row;
+                position[square] = '🔴';
+            }
+        }
+    }
+    
+    // Black pieces (bottom)
+    for (let row = 1; row <= 2; row++) {
+        for (let col = 0; col < 8; col++) {
+            if ((row + col) % 2 === 0) {
+                const square = String.fromCharCode(97 + col) + row;
+                position[square] = '⚫';
+            }
+        }
+    }
+    
+    return position;
+}
+
+// =============================================================================
+// WORD GAME FUNCTIONS FOR HTML INTERFACE
+// =============================================================================
+
+// Functions to work with existing HTML elements
+function submitWord() {
+    const wordInput = safeGetElement('wordInput');
+    if (wordInput && !wordInput.disabled) {
+        const word = wordInput.value.trim().toUpperCase();
+        if (word.length > 0) {
+            showTransactionStatus(`Word submitted: ${word}`);
+            wordInput.value = '';
+        }
+    } else {
+        showTransactionStatus('Create a word game first!');
+    }
+}
+
+function skipWord() {
+    const wordInput = safeGetElement('wordInput');
+    if (wordInput && !wordInput.disabled) {
+        showTransactionStatus('Word skipped');
+        // In actual gameplay, this would skip to next word
+    } else {
+        showTransactionStatus('Create a word game first!');
+    }
+}
+
+console.log('✅ Part 2C1: Game Initialization Functions - Loaded');
+        // Chess Game State Variables
+let chessGameState = {
+    board: {},
+    currentPlayer: 'white',
+    selectedSquare: null,
+    possibleMoves: [],
+    gameHistory: [],
+    gameActive: false,
+    gameId: null
+};
+
+// =============================================================================
+// CHESS GAMEPLAY FUNCTIONS
+// =============================================================================
+
+function startChessGameplay(game) {
+    currentGame = game;
+    chessGameState.board = {...game.board};
+    chessGameState.currentPlayer = game.currentPlayer;
+    chessGameState.gameHistory = [...game.moves];
+    chessGameState.gameActive = true;
+    chessGameState.gameId = game.id;
+    
+    createGameModal();
+    const gameInterface = safeGetElement('gameInterface');
+    if (gameInterface) {
+        gameInterface.innerHTML = `
+            <div style="text-align: center; color: white;">
+                <h3>♟️ Chess Game</h3>
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
+                    <div><strong>Stake:</strong> ${game.stake} CORE</div>
+                    <div><strong>Current Player:</strong> <span id="currentPlayerDisplay">${chessGameState.currentPlayer}</span></div>
+                    <div><strong>Status:</strong> <span id="gameStatusDisplay">In Progress</span></div>
+                </div>
+                <div id="chessGameBoard" style="display: grid; grid-template-columns: repeat(8, 50px); grid-template-rows: repeat(8, 50px); gap: 0; margin: 1rem auto; border: 3px solid #8b4513; width: fit-content;"></div>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button class="btn btn-danger" onclick="forfeitChessGame()">Forfeit Game</button>
+                    <button class="btn" onclick="offerChessDraw()">Offer Draw</button>
+                    <button class="btn" onclick="closeGameModal()">Close</button>
+                </div>
+                <div id="chessMoveHistory" style="max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
+                    <h4>Move History:</h4>
+                    <div id="chessMoveList"></div>
+                </div>
+            </div>
+        `;
+    }
+    
+    renderChessGameBoard();
+    updateChessMoveHistory();
+    
+    const modal = safeGetElement('gameModal');
+    if (modal) {
+        safeRemoveClass(modal, 'hidden');
+    }
+}
+
+function renderChessGameBoard() {
+    const board = safeGetElement('chessGameBoard');
+    if (!board) return;
+    
+    board.innerHTML = '';
+    
+    for (let row = 8; row >= 1; row--) {
+        for (let col = 0; col < 8; col++) {
+            const square = String.fromCharCode(97 + col) + row;
+            const squareElement = document.createElement('div');
+            squareElement.className = 'chess-square';
+            squareElement.style.cssText = `
+                width: 50px; height: 50px; 
+                display: flex; align-items: center; justify-content: center; 
+                font-size: 28px; cursor: pointer; 
+                transition: background-color 0.2s;
+                ${(row + col) % 2 === 0 ? 'background: #b58863; color: white;' : 'background: #f0d9b5; color: black;'}
+            `;
+            
+            squareElement.dataset.square = square;
+            squareElement.textContent = chessGameState.board[square] || '';
+            squareElement.onclick = () => handleChessSquareClick(square);
+            
+            // Highlight selected square
+            if (chessGameState.selectedSquare === square) {
+                squareElement.style.background = '#ffff00';
+                squareElement.style.color = 'black';
+            }
+            
+            // Highlight possible moves
+            if (chessGameState.possibleMoves.includes(square)) {
+                squareElement.style.background = '#90ee90';
+                squareElement.style.color = 'black';
+            }
+            
+            board.appendChild(squareElement);
+        }
+    }
+}
+
+function handleChessSquareClick(square) {
+    if (!chessGameState.gameActive) return;
+    
+    if (chessGameState.selectedSquare === square) {
+        // Deselect
+        chessGameState.selectedSquare = null;
+        chessGameState.possibleMoves = [];
+    } else if (chessGameState.possibleMoves.includes(square)) {
+        // Make move
+        makeChessMove(chessGameState.selectedSquare, square);
+    } else if (chessGameState.board[square] && isPlayerPiece(chessGameState.board[square], chessGameState.currentPlayer)) {
+        // Select piece
+        chessGameState.selectedSquare = square;
+        chessGameState.possibleMoves = getValidChessMoves(square);
+    }
+    
+    renderChessGameBoard();
+}
+
+function isPlayerPiece(piece, player) {
+    const whitePieces = ['♔', '♕', '♖', '♗', '♘', '♙'];
+    const blackPieces = ['♚', '♛', '♜', '♝', '♞', '♟'];
+    
+    if (player === 'white') return whitePieces.includes(piece);
+    return blackPieces.includes(piece);
+}
+
+function getValidChessMoves(square) {
+    const moves = [];
+    const piece = chessGameState.board[square];
+    const [col, row] = [square.charCodeAt(0) - 97, parseInt(square[1])];
+    
+    switch (piece) {
+        case '♙': // White pawn
+            // Move forward
+            if (row < 8 && !chessGameState.board[String.fromCharCode(97 + col) + (row + 1)]) {
+                moves.push(String.fromCharCode(97 + col) + (row + 1));
+                // Double move from starting position
+                if (row === 2 && !chessGameState.board[String.fromCharCode(97 + col) + (row + 2)]) {
+                    moves.push(String.fromCharCode(97 + col) + (row + 2));
+                }
+            }
+            // Capture diagonally
+            if (col > 0 && row < 8) {
+                const target = String.fromCharCode(96 + col) + (row + 1);
+                if (chessGameState.board[target] && !isPlayerPiece(chessGameState.board[target], 'white')) {
+                    moves.push(target);
+                }
+            }
+            if (col < 7 && row < 8) {
+                const target = String.fromCharCode(98 + col) + (row + 1);
+                if (chessGameState.board[target] && !isPlayerPiece(chessGameState.board[target], 'white')) {
+                    moves.push(target);
+                }
+            }
+            break;
+            
+        case '♟': // Black pawn
+            // Move forward
+            if (row > 1 && !chessGameState.board[String.fromCharCode(97 + col) + (row - 1)]) {
+                moves.push(String.fromCharCode(97 + col) + (row - 1));
+                // Double move from starting position
+                if (row === 7 && !chessGameState.board[String.fromCharCode(97 + col) + (row - 2)]) {
+                    moves.push(String.fromCharCode(97 + col) + (row - 2));
+                }
+            }
+            // Capture diagonally
+            if (col > 0 && row > 1) {
+                const target = String.fromCharCode(96 + col) + (row - 1);
+                if (chessGameState.board[target] && !isPlayerPiece(chessGameState.board[target], 'black')) {
+                    moves.push(target);
+                }
+            }
+            if (col < 7 && row > 1) {
+                const target = String.fromCharCode(98 + col) + (row - 1);
+                if (chessGameState.board[target] && !isPlayerPiece(chessGameState.board[target], 'black')) {
+                    moves.push(target);
+                }
+            }
+            break;
+            
+        case '♖': case '♜': // Rook
+            // Horizontal and vertical moves
+            const directions = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+            for (const [dx, dy] of directions) {
+                for (let i = 1; i < 8; i++) {
+                    const newCol = col + dx * i;
+                    const newRow = row + dy * i;
+                    if (newCol < 0 || newCol > 7 || newRow < 1 || newRow > 8) break;
+                    
+                    const target = String.fromCharCode(97 + newCol) + newRow;
+                    if (!chessGameState.board[target]) {
+                        moves.push(target);
+                    } else {
+                        if (!isPlayerPiece(chessGameState.board[target], chessGameState.currentPlayer)) {
+                            moves.push(target);
+                        }
+                        break;
+                    }
+                }
+            }
+            break;
+            
+        case '♗': case '♝': // Bishop
+            // Diagonal moves
+            const diagonalDirections = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
+            for (const [dx, dy] of diagonalDirections) {
+                for (let i = 1; i < 8; i++) {
+                    const newCol = col + dx * i;
+                    const newRow = row + dy * i;
+                    if (newCol < 0 || newCol > 7 || newRow < 1 || newRow > 8) break;
+                    
+                    const target = String.fromCharCode(97 + newCol) + newRow;
+                    if (!chessGameState.board[target]) {
+                        moves.push(target);
+                    } else {
+                        if (!isPlayerPiece(chessGameState.board[target], chessGameState.currentPlayer)) {
+                            moves.push(target);
+                        }
+                        break;
+                    }
+                }
+            }
+            break;
+            
+        case '♕': case '♛': // Queen
+            // Combination of rook and bishop moves
+            const allDirections = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
+            for (const [dx, dy] of allDirections) {
+                for (let i = 1; i < 8; i++) {
+                    const newCol = col + dx * i;
+                    const newRow = row + dy * i;
+                    if (newCol < 0 || newCol > 7 || newRow < 1 || newRow > 8) break;
+                    
+                    const target = String.fromCharCode(97 + newCol) + newRow;
+                    if (!chessGameState.board[target]) {
+                        moves.push(target);
+                    } else {
+                        if (!isPlayerPiece(chessGameState.board[target], chessGameState.currentPlayer)) {
+                            moves.push(target);
+                        }
+                        break;
+                    }
+                }
+            }
+            break;
+            
+        case '♘': case '♞': // Knight
+            const knightMoves = [
+                [2, 1], [2, -1], [-2, 1], [-2, -1],
+                [1, 2], [1, -2], [-1, 2], [-1, -2]
+            ];
+            for (const [dx, dy] of knightMoves) {
+                const newCol = col + dx;
+                const newRow = row + dy;
+                if (newCol >= 0 && newCol < 8 && newRow >= 1 && newRow <= 8) {
+                    const target = String.fromCharCode(97 + newCol) + newRow;
+                    if (!chessGameState.board[target] || !isPlayerPiece(chessGameState.board[target], chessGameState.currentPlayer)) {
+                        moves.push(target);
+                    }
+                }
+            }
+            break;
+            
+        case '♔': case '♚': // King
+            const kingMoves = [
+                [1, 0], [-1, 0], [0, 1], [0, -1],
+                [1, 1], [1, -1], [-1, 1], [-1, -1]
+            ];
+            for (const [dx, dy] of kingMoves) {
+                const newCol = col + dx;
+                const newRow = row + dy;
+                if (newCol >= 0 && newCol < 8 && newRow >= 1 && newRow <= 8) {
+                    const target = String.fromCharCode(97 + newCol) + newRow;
+                    if (!chessGameState.board[target] || !isPlayerPiece(chessGameState.board[target], chessGameState.currentPlayer)) {
+                        moves.push(target);
+                    }
+                }
+            }
+            break;
+    }
+    
+    return moves;
+}
+
+function makeChessMove(from, to) {
+    const capturedPiece = chessGameState.board[to];
+    const movingPiece = chessGameState.board[from];
+    
+    // Record move
+    const moveNotation = `${movingPiece} ${from}-${to}${capturedPiece ? ' captures ' + capturedPiece : ''}`;
+    chessGameState.gameHistory.push(moveNotation);
+    
+    // Make the move
+    chessGameState.board[to] = chessGameState.board[from];
+    delete chessGameState.board[from];
+    
+    // Switch players
+    chessGameState.currentPlayer = chessGameState.currentPlayer === 'white' ? 'black' : 'white';
+    
+    // Update UI
+    const currentPlayerDisplay = safeGetElement('currentPlayerDisplay');
+    if (currentPlayerDisplay) {
+        currentPlayerDisplay.textContent = chessGameState.currentPlayer;
+    }
+    
+    // Clear selection
+    chessGameState.selectedSquare = null;
+    chessGameState.possibleMoves = [];
+    
+    // Update move history
+    updateChessMoveHistory();
+    
+    // Check for game end
+    if (isChessGameOver()) {
+        endChessGame();
+    }
+    
+    // Send move to blockchain (in a real implementation)
+    if (gameContract && gameContract.makeMove) {
+        gameContract.makeMove(chessGameState.gameId, moveNotation).catch(console.error);
+    }
+    
+    // Show move notification
+    showTransactionStatus(`Move: ${moveNotation}`);
+}
+
+function updateChessMoveHistory() {
+    const moveList = safeGetElement('chessMoveList');
+    if (moveList) {
+        moveList.innerHTML = chessGameState.gameHistory.map((move, index) => 
+            `<div>${index + 1}. ${move}</div>`
+        ).join('');
+    }
+}
+
+function isChessGameOver() {
+    // Simple check - if king is captured
+    const whiteKing = Object.values(chessGameState.board).includes('♔');
+    const blackKing = Object.values(chessGameState.board).includes('♚');
+    
+    return !whiteKing || !blackKing;
+}
+
+function endChessGame() {
+    chessGameState.gameActive = false;
+    
+    const whiteKing = Object.values(chessGameState.board).includes('♔');
+    const blackKing = Object.values(chessGameState.board).includes('♚');
+    
+    let winner = 'draw';
+    if (!whiteKing) winner = 'black';
+    if (!blackKing) winner = 'white';
+    
+    const gameStatusDisplay = safeGetElement('gameStatusDisplay');
+    if (gameStatusDisplay) {
+        gameStatusDisplay.textContent = `Game Over! ${winner} wins!`;
+    }
+    
+    showTransactionStatus(`🎉 Chess Game Over! ${winner} wins!`);
+    
+    // Update stats
+    playerStats.gamesPlayed++;
+    if (winner === 'white') {
+        playerStats.gamesWon++;
+        playerStats.chessWins++;
+        playerStats.totalEarned += currentGame.stake * 2;
+    }
+    
+    // Update game status
+    if (currentGame) {
+        currentGame.status = 'completed';
+        updateActiveGames();
+    }
+    
+    // Auto-close modal after 3 seconds
+    setTimeout(() => {
+        closeGameModal();
+    }, 3000);
+}
+
+// Chess Game Actions
+function forfeitChessGame() {
+    if (confirm('Are you sure you want to forfeit this chess game?')) {
+        chessGameState.gameActive = false;
+        
+        const gameStatusDisplay = safeGetElement('gameStatusDisplay');
+        if (gameStatusDisplay) {
+            gameStatusDisplay.textContent = 'Game Forfeited';
+        }
+        
+        showTransactionStatus('Chess game forfeited. Opponent wins!');
+        
+        // Update stats
+        playerStats.gamesPlayed++;
+        if (currentGame) {
+            currentGame.status = 'completed';
+            updateActiveGames();
+        }
+        
+        setTimeout(() => {
+            closeGameModal();
+        }, 2000);
+    }
+}
+
+function offerChessDraw() {
+    if (confirm('Offer a draw to your opponent in this chess game?')) {
+        showTransactionStatus('Draw offer sent to opponent');
+        
+        // In a real implementation, this would notify the opponent
+        // For demo purposes, we'll auto-accept after 2 seconds
+        setTimeout(() => {
+            if (confirm('Opponent accepted the draw offer. End game as draw?')) {
+                chessGameState.gameActive = false;
+                
+                const gameStatusDisplay = safeGetElement('gameStatusDisplay');
+                if (gameStatusDisplay) {
+                    gameStatusDisplay.textContent = 'Game Ended - Draw';
+                }
+                
+                showTransactionStatus('Chess game ended in a draw!');
+                
+                // Update stats
+                playerStats.gamesPlayed++;
+                if (currentGame) {
+                    currentGame.status = 'completed';
+                    updateActiveGames();
+                }
+                
+                setTimeout(() => {
+                    closeGameModal();
+                }, 2000);
+            }
+        }, 2000);
+    }
+}
+
+console.log('✅ Part 3A: Full Chess Game Logic - Loaded');// Chess Game State Variables
+let chessGameState = {
+    board: {},
+    currentPlayer: 'white',
+    selectedSquare: null,
+    possibleMoves: [],
+    gameHistory: [],
+    gameActive: false,
+    gameId: null
+};
+
+// =============================================================================
+// CHESS GAMEPLAY FUNCTIONS
+// =============================================================================
+
+function startChessGameplay(game) {
+    currentGame = game;
+    chessGameState.board = {...game.board};
+    chessGameState.currentPlayer = game.currentPlayer;
+    chessGameState.gameHistory = [...game.moves];
+    chessGameState.gameActive = true;
+    chessGameState.gameId = game.id;
+    
+    createGameModal();
+    const gameInterface = safeGetElement('gameInterface');
+    if (gameInterface) {
+        gameInterface.innerHTML = `
+            <div style="text-align: center; color: white;">
+                <h3>♟️ Chess Game</h3>
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
+                    <div><strong>Stake:</strong> ${game.stake} CORE</div>
+                    <div><strong>Current Player:</strong> <span id="currentPlayerDisplay">${chessGameState.currentPlayer}</span></div>
+                    <div><strong>Status:</strong> <span id="gameStatusDisplay">In Progress</span></div>
+                </div>
+                <div id="chessGameBoard" style="display: grid; grid-template-columns: repeat(8, 50px); grid-template-rows: repeat(8, 50px); gap: 0; margin: 1rem auto; border: 3px solid #8b4513; width: fit-content;"></div>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button class="btn btn-danger" onclick="forfeitChessGame()">Forfeit Game</button>
+                    <button class="btn" onclick="offerChessDraw()">Offer Draw</button>
+                    <button class="btn" onclick="closeGameModal()">Close</button>
+                </div>
+                <div id="chessMoveHistory" style="max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
+                    <h4>Move History:</h4>
+                    <div id="chessMoveList"></div>
+                </div>
+            </div>
+        `;
+    }
+    
+    renderChessGameBoard();
+    updateChessMoveHistory();
+    
+    const modal = safeGetElement('gameModal');
+    if (modal) {
+        safeRemoveClass(modal, 'hidden');
+    }
+}
+
+function renderChessGameBoard() {
+    const board = safeGetElement('chessGameBoard');
+    if (!board) return;
+    
+    board.innerHTML = '';
+    
+    for (let row = 8; row >= 1; row--) {
+        for (let col = 0; col < 8; col++) {
+            const square = String.fromCharCode(97 + col) + row;
+            const squareElement = document.createElement('div');
+            squareElement.className = 'chess-square';
+            squareElement.style.cssText = `
+                width: 50px; height: 50px; 
+                display: flex; align-items: center; justify-content: center; 
+                font-size: 28px; cursor: pointer; 
+                transition: background-color 0.2s;
+                ${(row + col) % 2 === 0 ? 'background: #b58863; color: white;' : 'background: #f0d9b5; color: black;'}
+            `;
+            
+            squareElement.dataset.square = square;
+            squareElement.textContent = chessGameState.board[square] || '';
+            squareElement.onclick = () => handleChessSquareClick(square);
+            
+            // Highlight selected square
+            if (chessGameState.selectedSquare === square) {
+                squareElement.style.background = '#ffff00';
+                squareElement.style.color = 'black';
+            }
+            
+            // Highlight possible moves
+            if (chessGameState.possibleMoves.includes(square)) {
+                squareElement.style.background = '#90ee90';
+                squareElement.style.color = 'black';
+            }
+            
+            board.appendChild(squareElement);
+        }
+    }
+}
+
+function handleChessSquareClick(square) {
+    if (!chessGameState.gameActive) return;
+    
+    if (chessGameState.selectedSquare === square) {
+        // Deselect
+        chessGameState.selectedSquare = null;
+        chessGameState.possibleMoves = [];
+    } else if (chessGameState.possibleMoves.includes(square)) {
+        // Make move
+        makeChessMove(chessGameState.selectedSquare, square);
+    } else if (chessGameState.board[square] && isPlayerPiece(chessGameState.board[square], chessGameState.currentPlayer)) {
+        // Select piece
+        chessGameState.selectedSquare = square;
+        chessGameState.possibleMoves = getValidChessMoves(square);
+    }
+    
+    renderChessGameBoard();
+}
+
+function isPlayerPiece(piece, player) {
+    const whitePieces = ['♔', '♕', '♖', '♗', '♘', '♙'];
+    const blackPieces = ['♚', '♛', '♜', '♝', '♞', '♟'];
+    
+    if (player === 'white') return whitePieces.includes(piece);
+    return blackPieces.includes(piece);
+}
+
+function getValidChessMoves(square) {
+    const moves = [];
+    const piece = chessGameState.board[square];
+    const [col, row] = [square.charCodeAt(0) - 97, parseInt(square[1])];
+    
+    switch (piece) {
+        case '♙': // White pawn
+            // Move forward
+            if (row < 8 && !chessGameState.board[String.fromCharCode(97 + col) + (row + 1)]) {
+                moves.push(String.fromCharCode(97 + col) + (row + 1));
+                // Double move from starting position
+                if (row === 2 && !chessGameState.board[String.fromCharCode(97 + col) + (row + 2)]) {
+                    moves.push(String.fromCharCode(97 + col) + (row + 2));
+                }
+            }
+            // Capture diagonally
+            if (col > 0 && row < 8) {
+                const target = String.fromCharCode(96 + col) + (row + 1);
+                if (chessGameState.board[target] && !isPlayerPiece(chessGameState.board[target], 'white')) {
+                    moves.push(target);
+                }
+            }
+            if (col < 7 && row < 8) {
+                const target = String.fromCharCode(98 + col) + (row + 1);
+                if (chessGameState.board[target] && !isPlayerPiece(chessGameState.board[target], 'white')) {
+                    moves.push(target);
+                }
+            }
+            break;
+            
+        case '♟': // Black pawn
+            // Move forward
+            if (row > 1 && !chessGameState.board[String.fromCharCode(97 + col) + (row - 1)]) {
+                moves.push(String.fromCharCode(97 + col) + (row - 1));
+                // Double move from starting position
+                if (row === 7 && !chessGameState.board[String.fromCharCode(97 + col) + (row - 2)]) {
+                    moves.push(String.fromCharCode(97 + col) + (row - 2));
+                }
+            }
+            // Capture diagonally
+            if (col > 0 && row > 1) {
+                const target = String.fromCharCode(96 + col) + (row - 1);
+                if (chessGameState.board[target] && !isPlayerPiece(chessGameState.board[target], 'black')) {
+                    moves.push(target);
+                }
+            }
+            if (col < 7 && row > 1) {
+                const target = String.fromCharCode(98 + col) + (row - 1);
+                if (chessGameState.board[target] && !isPlayerPiece(chessGameState.board[target], 'black')) {
+                    moves.push(target);
+                }
+            }
+            break;
+            
+        case '♖': case '♜': // Rook
+            // Horizontal and vertical moves
+            const directions = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+            for (const [dx, dy] of directions) {
+                for (let i = 1; i < 8; i++) {
+                    const newCol = col + dx * i;
+                    const newRow = row + dy * i;
+                    if (newCol < 0 || newCol > 7 || newRow < 1 || newRow > 8) break;
+                    
+                    const target = String.fromCharCode(97 + newCol) + newRow;
+                    if (!chessGameState.board[target]) {
+                        moves.push(target);
+                    } else {
+                        if (!isPlayerPiece(chessGameState.board[target], chessGameState.currentPlayer)) {
+                            moves.push(target);
+                        }
+                        break;
+                    }
+                }
+            }
+            break;
+            
+        case '♗': case '♝': // Bishop
+            // Diagonal moves
+            const diagonalDirections = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
+            for (const [dx, dy] of diagonalDirections) {
+                for (let i = 1; i < 8; i++) {
+                    const newCol = col + dx * i;
+                    const newRow = row + dy * i;
+                    if (newCol < 0 || newCol > 7 || newRow < 1 || newRow > 8) break;
+                    
+                    const target = String.fromCharCode(97 + newCol) + newRow;
+                    if (!chessGameState.board[target]) {
+                        moves.push(target);
+                    } else {
+                        if (!isPlayerPiece(chessGameState.board[target], chessGameState.currentPlayer)) {
+                            moves.push(target);
+                        }
+                        break;
+                    }
+                }
+            }
+            break;
+            
+        case '♕': case '♛': // Queen
+            // Combination of rook and bishop moves
+            const allDirections = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
+            for (const [dx, dy] of allDirections) {
+                for (let i = 1; i < 8; i++) {
+                    const newCol = col + dx * i;
+                    const newRow = row + dy * i;
+                    if (newCol < 0 || newCol > 7 || newRow < 1 || newRow > 8) break;
+                    
+                    const target = String.fromCharCode(97 + newCol) + newRow;
+                    if (!chessGameState.board[target]) {
+                        moves.push(target);
+                    } else {
+                        if (!isPlayerPiece(chessGameState.board[target], chessGameState.currentPlayer)) {
+                            moves.push(target);
+                        }
+                        break;
+                    }
+                }
+            }
+            break;
+            
+        case '♘': case '♞': // Knight
+            const knightMoves = [
+                [2, 1], [2, -1], [-2, 1], [-2, -1],
+                [1, 2], [1, -2], [-1, 2], [-1, -2]
+            ];
+            for (const [dx, dy] of knightMoves) {
+                const newCol = col + dx;
+                const newRow = row + dy;
+                if (newCol >= 0 && newCol < 8 && newRow >= 1 && newRow <= 8) {
+                    const target = String.fromCharCode(97 + newCol) + newRow;
+                    if (!chessGameState.board[target] || !isPlayerPiece(chessGameState.board[target], chessGameState.currentPlayer)) {
+                        moves.push(target);
+                    }
+                }
+            }
+            break;
+            
+        case '♔': case '♚': // King
+            const kingMoves = [
+                [1, 0], [-1, 0], [0, 1], [0, -1],
+                [1, 1], [1, -1], [-1, 1], [-1, -1]
+            ];
+            for (const [dx, dy] of kingMoves) {
+                const newCol = col + dx;
+                const newRow = row + dy;
+                if (newCol >= 0 && newCol < 8 && newRow >= 1 && newRow <= 8) {
+                    const target = String.fromCharCode(97 + newCol) + newRow;
+                    if (!chessGameState.board[target] || !isPlayerPiece(chessGameState.board[target], chessGameState.currentPlayer)) {
+                        moves.push(target);
+                    }
+                }
+            }
+            break;
+    }
+    
+    return moves;
+}
+
+function makeChessMove(from, to) {
+    const capturedPiece = chessGameState.board[to];
+    const movingPiece = chessGameState.board[from];
+    
+    // Record move
+    const moveNotation = `${movingPiece} ${from}-${to}${capturedPiece ? ' captures ' + capturedPiece : ''}`;
+    chessGameState.gameHistory.push(moveNotation);
+    
+    // Make the move
+    chessGameState.board[to] = chessGameState.board[from];
+    delete chessGameState.board[from];
+    
+    // Switch players
+    chessGameState.currentPlayer = chessGameState.currentPlayer === 'white' ? 'black' : 'white';
+    
+    // Update UI
+    const currentPlayerDisplay = safeGetElement('currentPlayerDisplay');
+    if (currentPlayerDisplay) {
+        currentPlayerDisplay.textContent = chessGameState.currentPlayer;
+    }
+    
+    // Clear selection
+    chessGameState.selectedSquare = null;
+    chessGameState.possibleMoves = [];
+    
+    // Update move history
+    updateChessMoveHistory();
+    
+    // Check for game end
+    if (isChessGameOver()) {
+        endChessGame();
+    }
+    
+    // Send move to blockchain (in a real implementation)
+    if (gameContract && gameContract.makeMove) {
+        gameContract.makeMove(chessGameState.gameId, moveNotation).catch(console.error);
+    }
+    
+    // Show move notification
+    showTransactionStatus(`Move: ${moveNotation}`);
+}
+
+function updateChessMoveHistory() {
+    const moveList = safeGetElement('chessMoveList');
+    if (moveList) {
+        moveList.innerHTML = chessGameState.gameHistory.map((move, index) => 
+            `<div>${index + 1}. ${move}</div>`
+        ).join('');
+    }
+}
+
+function isChessGameOver() {
+    // Simple check - if king is captured
+    const whiteKing = Object.values(chessGameState.board).includes('♔');
+    const blackKing = Object.values(chessGameState.board).includes('♚');
+    
+    return !whiteKing || !blackKing;
+}
+
+function endChessGame() {
+    chessGameState.gameActive = false;
+    
+    const whiteKing = Object.values(chessGameState.board).includes('♔');
+    const blackKing = Object.values(chessGameState.board).includes('♚');
+    
+    let winner = 'draw';
+    if (!whiteKing) winner = 'black';
+    if (!blackKing) winner = 'white';
+    
+    const gameStatusDisplay = safeGetElement('gameStatusDisplay');
+    if (gameStatusDisplay) {
+        gameStatusDisplay.textContent = `Game Over! ${winner} wins!`;
+    }
+    
+    showTransactionStatus(`🎉 Chess Game Over! ${winner} wins!`);
+    
+    // Update stats
+    playerStats.gamesPlayed++;
+    if (winner === 'white') {
+        playerStats.gamesWon++;
+        playerStats.chessWins++;
+        playerStats.totalEarned += currentGame.stake * 2;
+    }
+    
+    // Update game status
+    if (currentGame) {
+        currentGame.status = 'completed';
+        updateActiveGames();
+    }
+    
+    // Auto-close modal after 3 seconds
+    setTimeout(() => {
+        closeGameModal();
+    }, 3000);
+}
+
+// Chess Game Actions
+function forfeitChessGame() {
+    if (confirm('Are you sure you want to forfeit this chess game?')) {
+        chessGameState.gameActive = false;
+        
+        const gameStatusDisplay = safeGetElement('gameStatusDisplay');
+        if (gameStatusDisplay) {
+            gameStatusDisplay.textContent = 'Game Forfeited';
+        }
+        
+        showTransactionStatus('Chess game forfeited. Opponent wins!');
+        
+        // Update stats
+        playerStats.gamesPlayed++;
+        if (currentGame) {
+            currentGame.status = 'completed';
+            updateActiveGames();
+        }
+        
+        setTimeout(() => {
+            closeGameModal();
+        }, 2000);
+    }
+}
+
+function offerChessDraw() {
+    if (confirm('Offer a draw to your opponent in this chess game?')) {
+        showTransactionStatus('Draw offer sent to opponent');
+        
+        // In a real implementation, this would notify the opponent
+        // For demo purposes, we'll auto-accept after 2 seconds
+        setTimeout(() => {
+            if (confirm('Opponent accepted the draw offer. End game as draw?')) {
+                chessGameState.gameActive = false;
+                
+                const gameStatusDisplay = safeGetElement('gameStatusDisplay');
+                if (gameStatusDisplay) {
+                    gameStatusDisplay.textContent = 'Game Ended - Draw';
+                }
+                
+                showTransactionStatus('Chess game ended in a draw!');
+                
+                // Update stats
+                playerStats.gamesPlayed++;
+                if (currentGame) {
+                    currentGame.status = 'completed';
+                    updateActiveGames();
+                }
+                
+                setTimeout(() => {
+                    closeGameModal();
+                }, 2000);
+            }
+        }, 2000);
+    }
+}
+
+console.log('✅ Part 3A: Full Chess Game Logic - Loaded');
+        // Checkers Game State Variables
+let checkersGameState = {
+    board: {},
+    currentPlayer: 'red',
+    selectedSquare: null,
+    possibleMoves: [],
+    gameHistory: [],
+    gameActive: false,
+    gameId: null,
+    mustCapture: false
+};
+
+// =============================================================================
+// CHECKERS GAMEPLAY FUNCTIONS
+// =============================================================================
+
+function startCheckersGameplay(game) {
+    currentGame = game;
+    checkersGameState.board = {...game.board};
+    checkersGameState.currentPlayer = game.currentPlayer;
+    checkersGameState.gameHistory = [...game.moves];
+    checkersGameState.gameActive = true;
+    checkersGameState.gameId = game.id;
+    
+    createGameModal();
+    const gameInterface = safeGetElement('gameInterface');
+    if (gameInterface) {
+        gameInterface.innerHTML = `
+            <div style="text-align: center; color: white;">
+                <h3>⚫ Checkers Game</h3>
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
+                    <div><strong>Stake:</strong> ${game.stake} CORE</div>
+                    <div><strong>Current Player:</strong> <span id="checkersCurrentPlayer">${checkersGameState.currentPlayer}</span></div>
+                    <div><strong>Status:</strong> <span id="checkersGameStatus">In Progress</span></div>
+                </div>
+                <div id="checkersGameBoard" style="display: grid; grid-template-columns: repeat(8, 50px); grid-template-rows: repeat(8, 50px); gap: 0; margin: 1rem auto; border: 3px solid #8b4513; width: fit-content;"></div>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button class="btn btn-danger" onclick="forfeitCheckersGame()">Forfeit Game</button>
+                    <button class="btn" onclick="offerCheckersDraw()">Offer Draw</button>
+                    <button class="btn" onclick="closeGameModal()">Close</button>
+                </div>
+                <div id="checkersMoveHistory" style="max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
+                    <h4>Move History:</h4>
+                    <div id="checkersMoveList"></div>
+                </div>
+            </div>
+        `;
+    }
+    
+    renderCheckersGameBoard();
+    updateCheckersMoveHistory();
+    
+    const modal = safeGetElement('gameModal');
+    if (modal) {
+        safeRemoveClass(modal, 'hidden');
+    }
+}
+
+function renderCheckersGameBoard() {
+    const board = safeGetElement('checkersGameBoard');
+    if (!board) return;
+    
+    board.innerHTML = '';
+    
+    for (let row = 8; row >= 1; row--) {
+        for (let col = 0; col < 8; col++) {
+            const square = String.fromCharCode(97 + col) + row;
+            const squareElement = document.createElement('div');
+            squareElement.className = 'checkers-square';
+            squareElement.style.cssText = `
+                width: 50px; height: 50px; 
+                display: flex; align-items: center; justify-content: center; 
+                font-size: 28px; cursor: pointer; 
+                transition: background-color 0.2s;
+                ${(row + col) % 2 === 0 ? 'background: #8b4513;' : 'background: #deb887;'}
+            `;
+            
+            squareElement.dataset.square = square;
+            squareElement.textContent = checkersGameState.board[square] || '';
+            squareElement.onclick = () => handleCheckersSquareClick(square);
+            
+            // Highlight selected square
+            if (checkersGameState.selectedSquare === square) {
+                squareElement.style.background = '#ffff00';
+            }
+            
+            // Highlight possible moves
+            if (checkersGameState.possibleMoves.includes(square)) {
+                squareElement.style.background = '#90ee90';
+            }
+            
+            board.appendChild(squareElement);
+        }
+    }
+}
+
+function handleCheckersSquareClick(square) {
+    if (!checkersGameState.gameActive) return;
+    
+    if (checkersGameState.selectedSquare === square) {
+        // Deselect
+        checkersGameState.selectedSquare = null;
+        checkersGameState.possibleMoves = [];
+    } else if (checkersGameState.possibleMoves.includes(square)) {
+        // Make move
+        makeCheckersMove(checkersGameState.selectedSquare, square);
+    } else if (checkersGameState.board[square] && isCheckersPlayerPiece(checkersGameState.board[square], checkersGameState.currentPlayer)) {
+        // Select piece
+        checkersGameState.selectedSquare = square;
+        checkersGameState.possibleMoves = getValidCheckersMovesForPiece(square);
+    }
+    
+    renderCheckersGameBoard();
+}
+
+function isCheckersPlayerPiece(piece, player) {
+    if (player === 'red') return piece === '🔴' || piece === '👑'; // Red king
+    return piece === '⚫' || piece === '⚪'; // Black king
+}
+
+function getValidCheckersMovesForPiece(square) {
+    const moves = [];
+    const piece = checkersGameState.board[square];
+    const [col, row] = [square.charCodeAt(0) - 97, parseInt(square[1])];
+    
+    // Only pieces can move on dark squares
+    if ((row + col) % 2 === 1) return moves;
+    
+    const isRed = piece === '🔴' || piece === '👑';
+    const isKing = piece === '👑' || piece === '⚪';
+    
+    // Direction vectors for moves
+    const directions = [];
+    if (isRed || isKing) {
+        directions.push([-1, -1], [1, -1]); // Red moves down
+    }
+    if (!isRed || isKing) {
+        directions.push([-1, 1], [1, 1]); // Black moves up
+    }
+    
+    // Check for captures first (mandatory)
+    const captures = [];
+    for (const [dx, dy] of directions) {
+        const jumpSquare = String.fromCharCode(97 + col + dx) + (row + dy);
+        const landSquare = String.fromCharCode(97 + col + dx * 2) + (row + dy * 2);
+        
+        if (col + dx * 2 >= 0 && col + dx * 2 < 8 && row + dy * 2 >= 1 && row + dy * 2 <= 8) {
+            const jumpPiece = checkersGameState.board[jumpSquare];
+            const landPiece = checkersGameState.board[landSquare];
+            
+            if (jumpPiece && !isCheckersPlayerPiece(jumpPiece, checkersGameState.currentPlayer) && !landPiece) {
+                captures.push(landSquare);
+            }
+        }
+    }
+    
+    // If captures are available, only return captures
+    if (captures.length > 0) {
+        checkersGameState.mustCapture = true;
+        return captures;
+    }
+    
+    // Otherwise, check for regular moves
+    checkersGameState.mustCapture = false;
+    for (const [dx, dy] of directions) {
+        const newCol = col + dx;
+        const newRow = row + dy;
+        
+        if (newCol >= 0 && newCol < 8 && newRow >= 1 && newRow <= 8) {
+            const targetSquare = String.fromCharCode(97 + newCol) + newRow;
+            if (!checkersGameState.board[targetSquare]) {
+                moves.push(targetSquare);
+            }
+        }
+    }
+    
+    return moves;
+}
+
+function makeCheckersMove(from, to) {
+    const piece = checkersGameState.board[from];
+    const [fromCol, fromRow] = [from.charCodeAt(0) - 97, parseInt(from[1])];
+    const [toCol, toRow] = [to.charCodeAt(0) - 97, parseInt(to[1])];
+    
+    let moveNotation = `${piece} ${from}-${to}`;
+    
+    // Check if this is a capture
+    if (Math.abs(fromCol - toCol) === 2) {
+        const captureCol = fromCol + (toCol - fromCol) / 2;
+        const captureRow = fromRow + (toRow - fromRow) / 2;
+        const captureSquare = String.fromCharCode(97 + captureCol) + captureRow;
+        const capturedPiece = checkersGameState.board[captureSquare];
+        
+        delete checkersGameState.board[captureSquare];
+        moveNotation += ` captures ${capturedPiece}`;
+    }
+    
+    // Make the move
+    checkersGameState.board[to] = piece;
+    delete checkersGameState.board[from];
+    
+    // Check for king promotion
+    if (piece === '🔴' && toRow === 1) {
+        checkersGameState.board[to] = '👑';
+        moveNotation += ' (promoted to King)';
+    } else if (piece === '⚫' && toRow === 8) {
+        checkersGameState.board[to] = '⚪';
+        moveNotation += ' (promoted to King)';
+    }
+    
+    // Record move
+    checkersGameState.gameHistory.push(moveNotation);
+    
+    // Switch players
+    checkersGameState.currentPlayer = checkersGameState.currentPlayer === 'red' ? 'black' : 'red';
+    
+    // Update UI
+    const currentPlayerDisplay = safeGetElement('checkersCurrentPlayer');
+    if (currentPlayerDisplay) {
+        currentPlayerDisplay.textContent = checkersGameState.currentPlayer;
+    }
+    
+    // Clear selection
+    checkersGameState.selectedSquare = null;
+    checkersGameState.possibleMoves = [];
+    
+    // Update move history
+    updateCheckersMoveHistory();
+    
+    // Check for game end
+    if (isCheckersGameOver()) {
+        endCheckersGame();
+    }
+    
+    // Send move to blockchain
+    if (gameContract && gameContract.makeMove) {
+        gameContract.makeMove(checkersGameState.gameId, moveNotation).catch(console.error);
+    }
+    
+    // Show move notification
+    showTransactionStatus(`Move: ${moveNotation}`);
+}
+
+function updateCheckersMoveHistory() {
+    const moveList = safeGetElement('checkersMoveList');
+    if (moveList) {
+        moveList.innerHTML = checkersGameState.gameHistory.map((move, index) => 
+            `<div>${index + 1}. ${move}</div>`
+        ).join('');
+    }
+}
+
+function isCheckersGameOver() {
+    // Count pieces for each player
+    const redPieces = Object.values(checkersGameState.board).filter(piece => 
+        piece === '🔴' || piece === '👑'
+    ).length;
+    const blackPieces = Object.values(checkersGameState.board).filter(piece => 
+        piece === '⚫' || piece === '⚪'
+    ).length;
+    
+    return redPieces === 0 || blackPieces === 0;
+}
+
+function endCheckersGame() {
+    checkersGameState.gameActive = false;
+    
+    const redPieces = Object.values(checkersGameState.board).filter(piece => 
+        piece === '🔴' || piece === '👑'
+    ).length;
+    const blackPieces = Object.values(checkersGameState.board).filter(piece => 
+        piece === '⚫' || piece === '⚪'
+    ).length;
+    
+    let winner = 'draw';
+    if (redPieces === 0) winner = 'black';
+    if (blackPieces === 0) winner = 'red';
+    
+    const gameStatusDisplay = safeGetElement('checkersGameStatus');
+    if (gameStatusDisplay) {
+        gameStatusDisplay.textContent = `Game Over! ${winner} wins!`;
+    }
+    
+    showTransactionStatus(`🎉 Checkers Game Over! ${winner} wins!`);
+    
+    // Update stats
+    playerStats.gamesPlayed++;
+    if (winner === 'red') {
+        playerStats.gamesWon++;
+        playerStats.checkersWins++;
+        playerStats.totalEarned += currentGame.stake * 2;
+    }
+    
+    // Update game status
+    if (currentGame) {
+        currentGame.status = 'completed';
+        updateActiveGames();
+    }
+    
+    setTimeout(() => {
+        closeGameModal();
+    }, 3000);
+}
+
+// Checkers Game Actions
+function forfeitCheckersGame() {
+    if (confirm('Are you sure you want to forfeit this checkers game?')) {
+        checkersGameState.gameActive = false;
+        showTransactionStatus('Checkers game forfeited!');
+        
+        playerStats.gamesPlayed++;
+        if (currentGame) {
+            currentGame.status = 'completed';
+            updateActiveGames();
+        }
+        
+        setTimeout(() => {
+            closeGameModal();
+        }, 2000);
+    }
+}
+
+function offerCheckersDraw() {
+    if (confirm('Offer a draw in this checkers game?')) {
+        showTransactionStatus('Draw offer sent to opponent');
+        
+        setTimeout(() => {
+            if (confirm('Opponent accepted the draw. End game?')) {
+                checkersGameState.gameActive = false;
+                showTransactionStatus('Checkers game ended in a draw!');
+                
+                playerStats.gamesPlayed++;
+                if (currentGame) {
+                    currentGame.status = 'completed';
+                    updateActiveGames();
+                }
+                
+                setTimeout(() => {
+                    closeGameModal();
+                }, 2000);
+            }
+        }, 2000);
+    }
+}
+
+// =============================================================================
+// CHECKERS GAME UTILITIES
+// =============================================================================
+
+function resetCheckersGame() {
+    checkersGameState = {
+        board: {},
+        currentPlayer: 'red',
+        selectedSquare: null,
+        possibleMoves: [],
+        gameHistory: [],
+        gameActive: false,
+        gameId: null,
+        mustCapture: false
+    };
+}
+
+function getCheckersGameStatus() {
+    if (!checkersGameState.gameActive) return 'inactive';
+    if (isCheckersGameOver()) return 'ended';
+    return 'active';
+}
+
+function exportCheckersGameState() {
+    return {
+        board: checkersGameState.board,
+        currentPlayer: checkersGameState.currentPlayer,
+        history: checkersGameState.gameHistory,
+        gameId: checkersGameState.gameId
+    };
+}
+
+function importCheckersGameState(gameData) {
+    checkersGameState.board = gameData.board || {};
+    checkersGameState.currentPlayer = gameData.currentPlayer || 'red';
+    checkersGameState.gameHistory = gameData.history || [];
+    checkersGameState.gameId = gameData.gameId || null;
+    checkersGameState.gameActive = true;
+    checkersGameState.selectedSquare = null;
+    checkersGameState.possibleMoves = [];
+    checkersGameState.mustCapture = false;
+    
+    // Re-render the board
+    renderCheckersGameBoard();
+    updateCheckersMoveHistory();
+}
+
+// =============================================================================
+// CHECKERS SOUND EFFECTS (OPTIONAL)
+// =============================================================================
+
+function playCheckersSound(soundType) {
+    // Simple sound effects using Web Audio API
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        switch (soundType) {
+            case 'move':
+                oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(300, audioContext.currentTime + 0.1);
+                break;
+            case 'capture':
+                oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.3);
+                break;
+            case 'king':
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.2);
+                break;
+            case 'win':
+                oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(880, audioContext.currentTime + 0.4);
+                break;
+        }
+        
+        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+        
+        oscillator.type = 'sine';
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.4);
+    } catch (error) {
+        console.log('Sound not supported:', error);
+    }
+}
+
+console.log('✅ Part 3B: Full Checkers Game Logic - Loaded');
+        // Word Game State Variables
+let wordGameState = {
+    currentWord: '',
+    targetWord: '',
+    score: 0,
+    timeLeft: 60,
+    gameActive: false,
+    gameId: null,
+    wordsFound: [],
+    wordList: [
+        'BLOCKCHAIN', 'ETHEREUM', 'BITCOIN', 'CRYPTO', 'GAMING', 'SMART', 'CONTRACT', 
+        'DEFI', 'NFT', 'TOKEN', 'WALLET', 'MINING', 'STAKING', 'YIELD', 'LIQUIDITY',
+        'CORE', 'CHAIN', 'HASH', 'NODE', 'PEER', 'BLOCK', 'LEDGER', 'DAPP', 'GAS',
+        'FORK', 'MINER', 'PROOF', 'STAKE', 'BURN', 'MINT', 'SWAP', 'POOL', 'FARM'
+    ],
+    timerInterval: null
+};
+
+// =============================================================================
+// WORD GAME FUNCTIONS
+// =============================================================================
+
+function startWordGameplay(game) {
+    currentGame = game;
+    wordGameState.score = game.score || 0;
+    wordGameState.timeLeft = game.timeLeft || 60;
+    wordGameState.gameActive = true;
+    wordGameState.gameId = game.id;
+    wordGameState.wordsFound = game.wordsFound || [];
+    
+    createGameModal();
+    const gameInterface = safeGetElement('gameInterface');
+    if (gameInterface) {
+        gameInterface.innerHTML = `
+            <div style="text-align: center; color: white;">
+                <h3>📝 Word Challenge</h3>
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
+                    <div><strong>Stake:</strong> ${game.stake} CORE</div>
+                    <div><strong>Score:</strong> <span id="wordGameScore">${wordGameState.score}</span></div>
+                    <div><strong>Time Left:</strong> <span id="wordGameTime">${wordGameState.timeLeft}s</span></div>
+                    <div><strong>Words Found:</strong> <span id="wordGameCount">${wordGameState.wordsFound.length}</span></div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 2rem; border-radius: 15px; margin: 1rem 0;">
+                    <div style="font-size: 1.2rem; margin-bottom: 1rem; color: #ffd700;">Unscramble this word:</div>
+                    <div id="wordGameTarget" style="font-size: 2.5rem; font-weight: bold; color: #4ecdc4; margin: 1rem 0; letter-spacing: 0.2em;">Loading...</div>
+                    <input type="text" id="wordGameInput" style="width: 100%; max-width: 300px; padding: 0.8rem; font-size: 1.2rem; border: 2px solid #4ecdc4; border-radius: 8px; text-align: center; background: rgba(255, 255, 255, 0.1); color: white;" placeholder="Enter your guess..." maxlength="20">
+                    <div style="margin: 1rem 0;">
+                        <button class="btn" onclick="submitWordGuess()" style="margin: 0.5rem;">Submit Guess</button>
+                        <button class="btn" onclick="skipWordChallenge()" style="margin: 0.5rem;">Skip Word (-5 pts)</button>
+                        <button class="btn" onclick="getWordHint()" style="margin: 0.5rem;">Hint (-2 pts)</button>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button class="btn btn-danger" onclick="forfeitWordGame()">Forfeit Game</button>
+                    <button class="btn" onclick="closeGameModal()">Close</button>
+                </div>
+                <div id="wordGameHistory" style="max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
+                    <h4>Words Found:</h4>
+                    <div id="wordGameFoundList"></div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Initialize word game
+    generateNewWord();
+    startWordGameTimer();
+    updateWordGameDisplay();
+    
+    // Focus on input
+    const wordInput = safeGetElement('wordGameInput');
+    if (wordInput) {
+        wordInput.focus();
+        wordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                submitWordGuess();
+            }
+        });
+    }
+    
+    const modal = safeGetElement('gameModal');
+    if (modal) {
+        safeRemoveClass(modal, 'hidden');
+    }
+}
+
+function generateNewWord() {
+    // Select random word from word list that hasn't been found yet
+    const availableWords = wordGameState.wordList.filter(word => 
+        !wordGameState.wordsFound.includes(word)
+    );
+    
+    if (availableWords.length === 0) {
+        // All words found - bonus round with repeated words
+        wordGameState.targetWord = wordGameState.wordList[Math.floor(Math.random() * wordGameState.wordList.length)];
+        showTransactionStatus('🎉 Bonus Round! All words completed!');
+    } else {
+        wordGameState.targetWord = availableWords[Math.floor(Math.random() * availableWords.length)];
+    }
+    
+    wordGameState.currentWord = scrambleWord(wordGameState.targetWord);
+    
+    const targetDisplay = safeGetElement('wordGameTarget');
+    if (targetDisplay) {
+        targetDisplay.textContent = wordGameState.currentWord;
+    }
+}
+
+function scrambleWord(word) {
+    const letters = word.split('');
+    // Fisher-Yates shuffle algorithm
+    for (let i = letters.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [letters[i], letters[j]] = [letters[j], letters[i]];
+    }
+    
+    // Make sure it's actually scrambled (not the same as original)
+    const scrambled = letters.join('');
+    if (scrambled === word && word.length > 3) {
+        return scrambleWord(word); // Try again
+    }
+    
+    return scrambled;
+}
+
+function submitWordGuess() {
+    const input = safeGetElement('wordGameInput');
+    if (!input || !wordGameState.gameActive) return;
+    
+    const guess = input.value.trim().toUpperCase();
+    
+    if (guess.length === 0) {
+        showTransactionStatus('Please enter a word!');
+        return;
+    }
+    
+    if (guess === wordGameState.targetWord) {
+        // Correct guess!
+        const points = calculateWordPoints(wordGameState.targetWord);
+        wordGameState.score += points;
+        wordGameState.wordsFound.push(wordGameState.targetWord);
+        
+        showTransactionStatus(`✅ Correct! "${wordGameState.targetWord}" +${points} points`);
+        
+        // Play success sound
+        playWordSound('correct');
+        
+        // Generate new word
+        generateNewWord();
+        
+        // Clear input
+        input.value = '';
+        
+        // Update display
+        updateWordGameDisplay();
+        
+        // Check if all words found
+        if (wordGameState.wordsFound.length >= wordGameState.wordList.length) {
+            showTransactionStatus('🎉 Perfect Game! All words found!');
+            wordGameState.score += 100; // Bonus for perfect game
+        }
+        
+    } else {
+        // Wrong guess
+        wordGameState.score = Math.max(0, wordGameState.score - 1);
+        showTransactionStatus(`❌ Wrong! Try again. (-1 point)`);
+        playWordSound('wrong');
+        input.value = '';
+        updateWordGameDisplay();
+    }
+}
+
+function calculateWordPoints(word) {
+    // Base points: word length * 10
+    let points = word.length * 10;
+    
+    // Bonus for longer words
+    if (word.length >= 8) points += 20;
+    if (word.length >= 10) points += 30;
+    
+    // Time bonus (more points for faster solving)
+    if (wordGameState.timeLeft > 45) points += 15;
+    else if (wordGameState.timeLeft > 30) points += 10;
+    else if (wordGameState.timeLeft > 15) points += 5;
+    
+    return points;
+}
+
+function skipWordChallenge() {
+    if (!wordGameState.gameActive) return;
+    
+    if (confirm('Skip this word? You will lose 5 points.')) {
+        wordGameState.score = Math.max(0, wordGameState.score - 5);
+        
+        showTransactionStatus(`Skipped "${wordGameState.targetWord}" (-5 points)`);
+        playWordSound('skip');
+        
+        generateNewWord();
+        
+        const input = safeGetElement('wordGameInput');
+        if (input) {
+            input.value = '';
+        }
+        
+        updateWordGameDisplay();
+    }
+}
+
+function getWordHint() {
+    if (!wordGameState.gameActive) return;
+    
+    if (wordGameState.score < 2) {
+        showTransactionStatus('Need at least 2 points for a hint!');
+        return;
+    }
+    
+    wordGameState.score -= 2;
+    
+    const hint = `Hint: Word starts with "${wordGameState.targetWord[0]}" and has ${wordGameState.targetWord.length} letters (-2 pts)`;
+    showTransactionStatus(hint);
+    
+    updateWordGameDisplay();
+}
+
+function startWordGameTimer() {
+    if (wordGameState.timerInterval) {
+        clearInterval(wordGameState.timerInterval);
+    }
+    
+    wordGameState.timerInterval = setInterval(() => {
+        if (!wordGameState.gameActive) {
+            clearInterval(wordGameState.timerInterval);
+            return;
+        }
+        
+        wordGameState.timeLeft--;
+        
+        const timeDisplay = safeGetElement('wordGameTime');
+        if (timeDisplay) {
+            timeDisplay.textContent = wordGameState.timeLeft + 's';
+            
+            // Color coding for urgency
+            if (wordGameState.timeLeft <= 10) {
+                timeDisplay.style.color = '#ff6b6b';
+            } else if (wordGameState.timeLeft <= 30) {
+                timeDisplay.style.color = '#ffd700';
+            } else {
+                timeDisplay.style.color = '#4ecdc4';
+            }
+        }
+        
+        if (wordGameState.timeLeft <= 0) {
+            clearInterval(wordGameState.timerInterval);
+            endWordGame();
+        }
+    }, 1000);
+}
+
+function updateWordGameDisplay() {
+    const scoreDisplay = safeGetElement('wordGameScore');
+    if (scoreDisplay) {
+        scoreDisplay.textContent = wordGameState.score;
+    }
+    
+    const countDisplay = safeGetElement('wordGameCount');
+    if (countDisplay) {
+        countDisplay.textContent = wordGameState.wordsFound.length;
+    }
+    
+    const foundList = safeGetElement('wordGameFoundList');
+    if (foundList) {
+        if (wordGameState.wordsFound.length === 0) {
+            foundList.innerHTML = '<div style="color: #aaa;">No words found yet</div>';
+        } else {
+            foundList.innerHTML = wordGameState.wordsFound.map((word, index) => 
+                `<div style="margin: 0.2rem 0; color: #4ecdc4;">${index + 1}. ${word}</div>`
+            ).join('');
+        }
+    }
+}
+
+function endWordGame() {
+    wordGameState.gameActive = false;
+    
+    if (wordGameState.timerInterval) {
+        clearInterval(wordGameState.timerInterval);
+    }
+    
+    const targetDisplay = safeGetElement('wordGameTarget');
+    if (targetDisplay) {
+        targetDisplay.textContent = 'GAME OVER!';
+        targetDisplay.style.color = '#ff6b6b';
+    }
+    
+    const input = safeGetElement('wordGameInput');
+    if (input) {
+        input.disabled = true;
+        input.style.background = 'rgba(100, 100, 100, 0.5)';
+    }
+    
+    // Calculate final performance
+    let message = `🎉 Word Game Over! Final Score: ${wordGameState.score}`;
+    let performance = '';
+    
+    if (wordGameState.score >= 500) {
+        performance = ' - LEGENDARY! 🌟';
+    } else if (wordGameState.score >= 300) {
+        performance = ' - EXCELLENT! 🎯';
+    } else if (wordGameState.score >= 200) {
+        performance = ' - GREAT JOB! 👏';
+    } else if (wordGameState.score >= 100) {
+        performance = ' - GOOD EFFORT! 👍';
+    } else if (wordGameState.score >= 50) {
+        performance = ' - KEEP PRACTICING! 📚';
+    } else {
+        performance = ' - TRY AGAIN! 💪';
+    }
+    
+    message += performance;
+    showTransactionStatus(message);
+    
+    // Play end game sound
+    playWordSound(wordGameState.score >= 200 ? 'win' : 'lose');
+    
+    // Update stats
+    playerStats.gamesPlayed++;
+    if (wordGameState.score >= 100) { // Win threshold
+        playerStats.gamesWon++;
+        playerStats.wordWins++;
+        playerStats.totalEarned += currentGame.stake * 2;
+    }
+    
+    // Update game status
+    if (currentGame) {
+        currentGame.status = 'completed';
+        updateActiveGames();
+    }
+    
+    setTimeout(() => {
+        closeGameModal();
+    }, 4000);
+}
+
+function forfeitWordGame() {
+    if (confirm('Are you sure you want to forfeit this word game?')) {
+        wordGameState.gameActive = false;
+        
+        if (wordGameState.timerInterval) {
+            clearInterval(wordGameState.timerInterval);
+        }
+        
+        showTransactionStatus('Word game forfeited!');
+        
+        playerStats.gamesPlayed++;
+        if (currentGame) {
+            currentGame.status = 'completed';
+            updateActiveGames();
+        }
+        
+        setTimeout(() => {
+            closeGameModal();
+        }, 2000);
+    }
+}
+
+// =============================================================================
+// WORD GAME UTILITIES
+// =============================================================================
+
+function resetWordGame() {
+    wordGameState = {
+        currentWord: '',
+        targetWord: '',
+        score: 0,
+        timeLeft: 60,
+        gameActive: false,
+        gameId: null,
+        wordsFound: [],
+        wordList: [
+            'BLOCKCHAIN', 'ETHEREUM', 'BITCOIN', 'CRYPTO', 'GAMING', 'SMART', 'CONTRACT', 
+            'DEFI', 'NFT', 'TOKEN', 'WALLET', 'MINING', 'STAKING', 'YIELD', 'LIQUIDITY',
+            'CORE', 'CHAIN', 'HASH', 'NODE', 'PEER', 'BLOCK', 'LEDGER', 'DAPP', 'GAS',
+            'FORK', 'MINER', 'PROOF', 'STAKE', 'BURN', 'MINT', 'SWAP', 'POOL', 'FARM'
+        ],
+        timerInterval: null
+    };
+}
+
+// Enhanced word game functions for HTML interface
+function submitWord() {
+    submitWordGuess();
+}
+
+function skipWord() {
+    skipWordChallenge();
+}
+
+function updateWordDisplay() {
+    const wordDisplay = safeGetElement('wordDisplay');
+    if (wordDisplay && wordGameState.gameActive) {
+        wordDisplay.textContent = wordGameState.currentWord;
+    }
+}
+
+function updateWordScore() {
+    const scoreDisplay = safeGetElement('wordScore');
+    if (scoreDisplay) {
+        scoreDisplay.textContent = `Score: ${wordGameState.score}`;
+    }
+}
+
+// =============================================================================
+// WORD GAME SOUND EFFECTS
+// =============================================================================
+
+function playWordSound(soundType) {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        switch (soundType) {
+            case 'correct':
+                // Happy ascending tone
+                oscillator.frequency.setValueAtTime(523, audioContext.currentTime); // C5
+                oscillator.frequency.exponentialRampToValueAtTime(659, audioContext.currentTime + 0.1); // E5
+                oscillator.frequency.exponentialRampToValueAtTime(784, audioContext.currentTime + 0.2); // G5
+                break;
+            case 'wrong':
+                // Descending disappointed tone
+                oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.3);
+                break;
+            case 'skip':
+                // Neutral blip
+                oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(300, audioContext.currentTime + 0.1);
+                break;
+            case 'win':
+                // Victory fanfare
+                oscillator.frequency.setValueAtTime(523, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(659, audioContext.currentTime + 0.1);
+                oscillator.frequency.exponentialRampToValueAtTime(784, audioContext.currentTime + 0.2);
+                oscillator.frequency.exponentialRampToValueAtTime(1047, audioContext.currentTime + 0.3);
+                break;
+            case 'lose':
+                // Sad trombone
+                oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(196, audioContext.currentTime + 0.2);
+                oscillator.frequency.exponentialRampToValueAtTime(174, audioContext.currentTime + 0.4);
+                break;
+        }
+        
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+        
+        oscillator.type = 'sine';
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.5);
+    } catch (error) {
+        console.log('Sound not supported:', error);
+    }
+}
+
+console.log('✅ Part 3C: Full Word Game Logic - Loaded');
+        // Initialize the application when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎮 Crypticus Gaming Platform - Starting Initialization...');
+    
+    try {
+        // Initialize all game boards
+        console.log('🔄 Initializing game boards...');
+        initializeChessBoard();
+        initializeCheckersBoard();
+        initializeWordGame();
+        
+        // Show initial section
+        showSection('games');
+        
+        // Auto-connect wallet if previously connected
+        if (localStorage.getItem('walletConnected') === 'true') {
+            console.log('🔄 Auto-connecting wallet...');
+            setTimeout(() => {
+                connectWallet();
+            }, 1000);
+        }
+        
+        // Initialize demo games for showcase
+        initializeDemoGames();
+        
+        // Set up keyboard shortcuts
+        setupKeyboardShortcuts();
+        
+        // Initialize responsive features
+        setupResponsiveFeatures();
+        
+        console.log('✅ Crypticus Gaming Platform - Fully Loaded & Ready!');
+        showTransactionStatus('🚀 Welcome to Crypticus! Connect wallet to start playing.');
+        
+    } catch (error) {
+        console.error('❌ Initialization error:', error);
+        showTransactionStatus('⚠️ Platform loaded with minor issues. Refresh if needed.');
+    }
+});
+
+// =============================================================================
+// DEMO GAMES INITIALIZATION
+// =============================================================================
+
+function initializeDemoGames() {
+    // Add some demo games to showcase the platform
+    setTimeout(() => {
+        if (activeGames.length === 0) {
+            const demoGames = [
+                {
+                    id: 1001,
+                    type: 'chess',
+                    creator: 'DemoPlayer1',
+                    stake: 0.5,
+                    status: 'waiting',
+                    board: getInitialChessPosition(),
+                    currentPlayer: 'white',
+                    moves: []
+                },
+                {
+                    id: 1002,
+                    type: 'checkers',
+                    creator: 'CryptoMaster',
+                    stake: 0.3,
+                    status: 'waiting',
+                    board: getInitialCheckersPosition(),
+                    currentPlayer: 'red',
+                    moves: []
+                },
+                {
+                    id: 1003,
+                    type: 'word',
+                    creator: 'WordWizard',
+                    stake: 0.2,
+                    status: 'waiting',
+                    score: 0,
+                    timeLeft: 60,
+                    wordsFound: []
+                }
+            ];
+            
+            // Only add demo games if user hasn't created any
+            if (!userAddress) {
+                activeGames.push(...demoGames);
+                updateActiveGames();
+            }
+        }
+    }, 2000);
+}
+
+// =============================================================================
+// KEYBOARD SHORTCUTS
+// =============================================================================
+
+function setupKeyboardShortcuts() {
+    document.addEventListener('keydown', function(e) {
+        // Only apply shortcuts when not typing in inputs
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            return;
+        }
+        
+        switch(e.key) {
+            case '1':
+                showSection('games');
+                break;
+            case '2':
+                showSection('leaderboard');
+                break;
+            case '3':
+                showSection('profile');
+                break;
+            case '4':
+                showSection('settings');
+                break;
+            case 'Escape':
+                closeGameModal();
+                break;
+            case 'c':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    if (!userAddress) {
+                        connectWallet();
+                    }
+                }
+                break;
+        }
+    });
+}
+
+// =============================================================================
+// RESPONSIVE FEATURES
+// =============================================================================
+
+function setupResponsiveFeatures() {
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        // Adjust game boards for mobile
+        adjustGameBoardsForMobile();
+        
+        // Update modal sizing
+        adjustModalForMobile();
+    });
+    
+    // Initial adjustment
+    adjustGameBoardsForMobile();
+}
+
+function adjustGameBoardsForMobile() {
+    const isMobile = window.innerWidth <= 768;
+    
+    // Adjust chess board
+    const chessBoard = safeGetElement('chessBoard');
+    if (chessBoard) {
+        const squareSize = isMobile ? '35px' : '40px';
+        chessBoard.style.gridTemplateColumns = `repeat(8, ${squareSize})`;
+        chessBoard.style.gridTemplateRows = `repeat(8, ${squareSize})`;
+        
+        const squares = chessBoard.querySelectorAll('.chess-square');
+        squares.forEach(square => {
+            square.style.width = squareSize;
+            square.style.height = squareSize;
+            square.style.fontSize = isMobile ? '20px' : '24px';
+        });
+    }
+    
+    // Adjust checkers board
+    const checkersBoard = safeGetElement('checkersBoard');
+    if (checkersBoard) {
+        const squareSize = isMobile ? '40px' : '45px';
+        checkersBoard.style.gridTemplateColumns = `repeat(8, ${squareSize})`;
+        checkersBoard.style.gridTemplateRows = `repeat(8, ${squareSize})`;
+        
+        const squares = checkersBoard.querySelectorAll('.checkers-square');
+        squares.forEach(square => {
+            square.style.width = squareSize;
+            square.style.height = squareSize;
+            square.style.fontSize = isMobile ? '24px' : '28px';
+        });
+    }
+}
+
+function adjustModalForMobile() {
+    const modal = safeGetElement('gameModal');
+    if (modal && !modal.classList.contains('hidden')) {
+        const isMobile = window.innerWidth <= 768;
+        const modalContent = modal.querySelector('div');
+        
+        if (modalContent) {
+            if (isMobile) {
+                modalContent.style.maxWidth = '95vw';
+                modalContent.style.maxHeight = '95vh';
+                modalContent.style.padding = '1rem';
+            } else {
+                modalContent.style.maxWidth = '90vw';
+                modalContent.style.maxHeight = '90vh';
+                modalContent.style.padding = '2rem';
+            }
+        }
+    }
+}
+
+// =============================================================================
+// WALLET EVENT LISTENERS (ENHANCED)
+// =============================================================================
+
+if (window.ethereum) {
+    // Account change handler
+    window.ethereum.on('accountsChanged', function (accounts) {
+        console.log('👤 Account changed:', accounts);
+        if (accounts.length === 0) {
+            disconnectWallet();
+            showTransactionStatus('👋 Wallet disconnected');
+        } else {
+            userAddress = accounts[0];
+            updateWalletUI();
+            updateBalance();
+            showTransactionStatus('🔄 Account switched');
+        }
+    });
+    
+    // Network change handler
+    window.ethereum.on('chainChanged', function (chainId) {
+        console.log('🌐 Network changed:', chainId);
+        showTransactionStatus('🔄 Network changed - reloading...');
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+    });
+    
+    // Connection handler
+    window.ethereum.on('connect', function (connectInfo) {
+        console.log('🔗 Wallet connected:', connectInfo);
+        showTransactionStatus('✅ Wallet connection established');
+    });
+    
+    // Disconnection handler
+    window.ethereum.on('disconnect', function (error) {
+        console.log('💔 Wallet disconnected:', error);
+        disconnectWallet();
+        showTransactionStatus('❌ Wallet connection lost');
+    });
+}
+
+// =============================================================================
+// GLOBAL ERROR HANDLING
+// =============================================================================
+
+// Global error handler
+window.addEventListener('error', function(e) {
+    console.error('🚨 Application error:', e.error);
+    showTransactionStatus('❌ An error occurred. The platform is still functional.');
+});
+
+// Unhandled promise rejection handler
+window.addEventListener('unhandledrejection', function(e) {
+    console.error('🚨 Unhandled promise rejection:', e.reason);
+    e.preventDefault(); // Prevent the default browser behavior
+    showTransactionStatus('⚠️ Minor issue detected. Platform remains operational.');
+});
+
+// =============================================================================
+// PERFORMANCE MONITORING
+// =============================================================================
+
+function logPerformanceMetrics() {
+    if (performance && performance.timing) {
+        const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+        console.log(`⚡ Platform loaded in ${loadTime}ms`);
+        
+        if (loadTime > 3000) {
+            console.warn('⚠️ Slow loading detected. Consider optimizations.');
+        }
+    }
+}
+
+// Log performance after load
+window.addEventListener('load', function() {
+    setTimeout(logPerformanceMetrics, 100);
+});
+
+// =============================================================================
+// PLATFORM HEALTH CHECK
+// =============================================================================
+
+function performHealthCheck() {
+    const checks = {
+        dom: !!document.getElementById('gamesSection'),
+        wallet: typeof window.ethereum !== 'undefined',
+        ethers: typeof ethers !== 'undefined',
+        games: activeGames !== undefined,
+        stats: playerStats !== undefined
+    };
+    
+    const allHealthy = Object.values(checks).every(check => check);
+    
+    console.log('🏥 Platform Health Check:', checks);
+    
+    if (allHealthy) {
+        console.log('✅ All systems operational');
+    } else {
+        console.warn('⚠️ Some systems may need attention');
+    }
+    
+    return allHealthy;
+}
+
+// =============================================================================
+// PLATFORM FEATURES SUMMARY
+// =============================================================================
+
+function displayPlatformFeatures() {
+    console.log(`
+🎮 CRYPTICUS GAMING PLATFORM - FEATURE SUMMARY
+===============================================
+
+✅ GAMES:
+   • Chess - Full piece movement, capture, win detection
+   • Checkers - Jump mechanics, king promotion, strategy
+   • Word Challenge - Timed vocabulary with crypto terms
+
+✅ BLOCKCHAIN:
+   • Core Network Integration
+   • MetaMask Wallet Connection
+   • Smart Contract Interaction (Demo)
+   • Transaction Status Tracking
+
+✅ FEATURES:
+   • Game Creation & Joining
+   • Real-time Gameplay
+   • Player Statistics
+   • Leaderboards
+   • Responsive Design
+   • Sound Effects
+
+✅ TECHNICAL:
+   • Error Handling
+   • Mobile Optimization
+   • Keyboard Shortcuts
+   • Performance Monitoring
+
+🚀 Ready for DoraHacks Submission!
+    `);
+}
+
+// =============================================================================
+// FINAL INITIALIZATION COMPLETION
+// =============================================================================
+
+// Run health check and display features after everything loads
+setTimeout(() => {
+    performHealthCheck();
+    displayPlatformFeatures();
+    
+    // Final success message
+    console.log('🎯 Crypticus Gaming Platform - READY FOR DORAHACKS! 🚀');
+    
+    // Update any remaining UI elements
+    updateActiveGames();
+    
+    // Mark platform as fully loaded
+    window.crypticusLoaded = true;
+    
+}, 3000);
+
+// =============================================================================
+// EMERGENCY RECOVERY FUNCTIONS
+// =============================================================================
+
+// Recovery function if something breaks
+window.recoverPlatform = function() {
+    console.log('🔧 Running platform recovery...');
+    
+    try {
+        // Reset game states
+        activeGames = [];
+        currentGame = null;
+        
+        // Reinitialize boards
+        initializeChessBoard();
+        initializeCheckersBoard();
+        initializeWordGame();
+        
+        // Update displays
+        updateActiveGames();
+        showSection('games');
+        
+        showTransactionStatus('🔧 Platform recovered successfully!');
+        console.log('✅ Platform recovery completed');
+        
+    } catch (error) {
+        console.error('❌ Recovery failed:', error);
+        showTransactionStatus('❌ Recovery failed. Please refresh the page.');
+    }
+};
+
+// Expose useful functions to global scope for debugging
+window.crypticus = {
+    version: '1.0.0-dorahacks',
+    recover: window.recoverPlatform,
+    stats: () => playerStats,
+    games: () => activeGames,
+    healthCheck: performHealthCheck
+};
+
+console.log('✅ Step 9: Final Integration & Initialization - Complete! 🎉');
+    </script>
+</body>
+</html>

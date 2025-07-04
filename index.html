@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypticus | Blockchain Gaming Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #4e54c8;
+            --primary-dark: #363a9e;
+            --secondary: #f39c12;
+            --dark: #1a1c2c;
+            --light: #f5f7fa;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --warning: #f1c40f;
+            --gray: #95a5a6;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1c2c, #2c3e50);
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1620336655052-b57986f5a26a?q=80&w=1920') no-repeat center center;
+            background-size: cover;
+            opacity: 0.1;
+            z-index: -1;
+        }
+        
+        /* Age Verification Modal */
+        .age-verification {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        
+        .verification-content {
+            background: var(--dark);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--primary);
+        }
+        
+        .verification-content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--secondary);
+        }
+        
+        .verification-content p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .verification-content .warning {
+            background: rgba(231, 76, 60, 0.2);
+            border-left: 4px solid var(--danger);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+            text-align: left;
+        }
+        
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            outline: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(78, 84, 200, 0.4);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: var(--light);
+            border: 2px solid var(--gray);
+        }
+        
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--light);
+        }
+        
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: none; /* Hidden until age verification */
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo h1 {
+            font-size: 2.2rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--secondary);
+        }
+        
+        .wallet-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .wallet-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+        
+        .wallet-info .balance {
+            color: var(--secondary);
+            font-weight: 700;
+        }
+        
+        #connectWallet {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        #connectWallet:hover {
+            background: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(78, 84, 200, 0.4);
+        }
+        
+        .game-section {
+            margin-bottom: 50px;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .live-badge {
+            background: var(--danger);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+        }
+        
+        .game-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border-color: var(--primary);
+        }
+        
+        .game-header {
+            padding: 25px;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .game-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .game-icon {
+            font-size: 1.8rem;
+            color: var(--secondary);
+        }
+        
+        .game-description {
+            color: var(--gray);
+            line-height: 1.6;
+        }
+        
+        .game-content {
+            padding: 25px;
+        }
+        
+        .stake-input {
+            margin-bottom: 25px;
+        }
+        
+        .stake-input label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .input-group {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .input-group input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 15px 20px;
+            color: var(--light);
+            font-size: 1.1rem;
+            outline: none;
+        }
+        
+        .input-group .token {
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            font-weight: 600;
+            color: var(--secondary);
+        }
+        
+        .min-stake {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        .btn-block {
+            width: 100%;
+            padding: 16px;
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+        
+        .transaction-status {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-left: 4px solid var(--warning);
+        }
+        
+        .status-icon {
+            font-size: 1.8rem;
+            color: var(--warning);
+        }
+        
+        .status-text {
+            flex: 1;
+        }
+        
+        .error-message {
+            background: rgba(231, 76, 60, 0.2);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-left: 4px solid var(--danger);
+        }
+        
+        .error-icon {
+            font-size: 1.8rem;
+            color: var(--danger);
+        }
+        
+        .error-text a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .error-text a:hover {
+            text-decoration: underline;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            color: var(--gray);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .wallet-section {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .verification-content {
+                padding: 30px 20px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    
+    <!-- Age Verification -->
+    <div class="age-verification" id="ageVerification">
+        <div class="verification-content">
+            <h1><i class="fas fa-exclamation-triangle"></i> Age Verification Required</h1>
+            <p>This platform contains blockchain-based games that involve financial stakes. You must be 18 years or older to access this content.</p>
+            
+            <div class="warning">
+                <p><i class="fas fa-exclamation-circle"></i> Gambling involves risk. Please play responsibly. Only gamble with funds you can afford to lose.</p>
+            </div>
+            
+            <p>By entering this site, you confirm that you are at least 18 years of age and agree to our Terms of Service.</p>
+            
+            <div class="button-group">
+                <button class="btn btn-primary" id="confirmAge">
+                    <i class="fas fa-check"></i> I am 18 or older
+                </button>
+                <button class="btn btn-outline" id="exitSite">
+                    <i class="fas fa-times"></i> Exit Site
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="container" id="mainContainer">
+        <header>
+            <div class="logo">
+                <i class="fas fa-dice-d20 logo-icon"></i>
+                <h1>Crypticus</h1>
+            </div>
+            
+            <div class="wallet-section">
+                <div class="wallet-info">
+                    <i class="fas fa-wallet"></i>
+                    Balance: <span class="balance">0.00</span> CORE
+                </div>
+                <button id="connectWallet">
+                    <i class="fas fa-plug"></i> Connect Wallet
+                </button>
+            </div>
+        </header>
+        
+        <div class="game-section">
+            <h2 class="section-title">
+                Blockchain Games
+                <span class="live-badge">LIVE</span>
+            </h2>
+            
+            <div class="games-grid">
+                <!-- Chess Masters -->
+                <div class="game-card">
+                    <div class="game-header">
+                        <h3 class="game-title">
+                            <i class="fas fa-chess game-icon"></i>
+                            Chess Masters
+                        </h3>
+                        <p class="game-description">Play chess with real CORE stakes! Smart contract ensures fair play.</p>
+                    </div>
+                    <div class="game-content">
+                        <div class="stake-input">
+                            <label>Stake Amount (CORE)</label>
+                            <div class="input-group">
+                                <input type="number" value="0.1" min="0.01" step="0.01">
+                                <div class="token">CORE</div>
+                            </div>
+                            <div class="min-stake">Minimum stake: 0.01 CORE</div>
+                        </div>
+                        
+                        <button class="btn btn-primary btn-block">
+                            <i class="fas fa-chess-board"></i> Start Chess Game
+                        </button>
+                        
+                        <div class="transaction-status">
+                            <i class="fas fa-sync-alt status-icon"></i>
+                            <div class="status-text">
+                                <strong>Transaction submitted</strong>
+                                <p>Waiting for confirmation</p>
+                            </div>
+                        </div>
+                        
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle error-icon"></i>
+                            <div class="error-text">
+                                <strong>Error creating game: transaction failed</strong>
+                                <p>See: <a href="https://links.ethers.org/v5-errors-CALL_EXCEPTION" target="_blank">https://links.ethers.org/v5-errors-CALL_EXCEPTION</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Checkers Pro -->
+                <div class="game-card">
+                    <div class="game-header">
+                        <h3 class="game-title">
+                            <i class="fas fa-th game-icon"></i>
+                            Checkers Pro
+                        </h3>
+                        <p class="game-description">Fast checkers with blockchain stakes! Quick games, instant rewards.</p>
+                    </div>
+                    <div class="game-content">
+                        <div class="stake-input">
+                            <label>Stake Amount (CORE)</label>
+                            <div class="input-group">
+                                <input type="number" value="0.1" min="0.01" step="0.01">
+                                <div class="token">CORE</div>
+                            </div>
+                            <div class="min-stake">Minimum stake: 0.01 CORE</div>
+                        </div>
+                        
+                        <button class="btn btn-primary btn-block">
+                            <i class="fas fa-gamepad"></i> Start Checkers Game
+                        </button>
+                        
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle error-icon"></i>
+                            <div class="error-text">
+                                <strong>Error creating game: transaction failed</strong>
+                                <p>See: <a href="https://links.ethers.org/v5-errors-CALL_EXCEPTION" target="_blank">https://links.ethers.org/v5-errors-CALL_EXCEPTION</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Word Battle -->
+                <div class="game-card">
+                    <div class="game-header">
+                        <h3 class="game-title">
+                            <i class="fas fa-font game-icon"></i>
+                            Word Battle
+                        </h3>
+                        <p class="game-description">Compete in word games with crypto stakes! Test your vocabulary.</p>
+                    </div>
+                    <div class="game-content">
+                        <div class="stake-input">
+                            <label>Stake Amount (CORE)</label>
+                            <div class="input-group">
+                                <input type="number" value="0.1" min="0.01" step="0.01">
+                                <div class="token">CORE</div>
+                            </div>
+                            <div class="min-stake">Minimum stake: 0.01 CORE</div>
+                        </div>
+                        
+                        <button class="btn btn-primary btn-block">
+                            <i class="fas fa-keyboard"></i> Start Word Game
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 Crypticus Blockchain Gaming Platform. All rights reserved.</p>
+            <p>Play responsibly. Gambling can be addictive. Must be 18+ to participate.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Age verification
+        document.addEventListener('DOMContentLoaded', function() {
+            const ageVerification = document.getElementById('ageVerification');
+            const mainContainer = document.getElementById('mainContainer');
+            const confirmAgeBtn = document.getElementById('confirmAge');
+            const exitSiteBtn = document.getElementById('exitSite');
+            
+            // Check if age is already verified
+            if(localStorage.getItem('ageVerified')) {
+                ageVerification.style.display = 'none';
+                mainContainer.style.display = 'block';
+            } else {
+                ageVerification.style.display = 'flex';
+            }
+            
+            // Confirm age
+            confirmAgeBtn.addEventListener('click', function() {
+                localStorage.setItem('ageVerified', 'true');
+                ageVerification.style.display = 'none';
+                mainContainer.style.display = 'block';
+            });
+            
+            // Exit site
+            exitSiteBtn.addEventListener('click', function() {
+                window.location.href = 'https://www.google.com';
+            });
+            
+            // Wallet connection
+            const connectWalletBtn = document.getElementById('connectWallet');
+            
+            connectWalletBtn.addEventListener('click', connectWallet);
+            
+            function connectWallet() {
+                connectWalletBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
+                
+                // Simulate wallet connection
+                setTimeout(() => {
+                    connectWalletBtn.innerHTML = '<i class="fas fa-check"></i> Connected';
+                    connectWalletBtn.disabled = true;
+                    
+                    // Update balance
+                    document.querySelector('.balance').textContent = '2.45';
+                    
+                    // Show success notification
+                    showTransactionStatus('Wallet connected successfully!');
+                }, 1500);
+            }
+            
+            function showTransactionStatus(message) {
+                // In a real app, this would display a notification
+                console.log('Transaction Status:', message);
+            }
+            
+            // Simulate blockchain events
+            window.ethereum = {
+                on: function(event, callback) {
+                    if (event === 'chainChanged') {
+                        // Simulate chain change
+                        setTimeout(() => {
+                            showTransactionStatus('🔄 Network changed, reloading...');
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 2000);
+                        }, 5000);
+                    }
+                }
+            };
+        });
+    </script>
+</body>
+</html>

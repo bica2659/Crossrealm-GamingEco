@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypticus - Blockchain Gaming Platform</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        :root {
+            --primary: #6a11cb;
+            --primary-dark: #4a00a3;
+            --secondary: #ff8c00;
+            --dark: #0d1c2c;
+            --light: #f5f7fa;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --warning: #f1c40f;
+            --gray: #95a5a6;
+            --accent: #00c6ff;
+            --core-blue: #2d7cf7;
+            --core-dark: #0d1c2c;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--core-dark), #1a2c3c);
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #0d1c2c, #1a2c3c, #0d1c2c);
+            opacity: 1;
+            z-index: -1;
+        }
+        
+        /* Age Verification Modal */
+        .age-verification {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        
+        .verification-content {
+            background: var(--dark);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 50px rgba(45, 124, 247, 0.5);
+            border: 2px solid var(--core-blue);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 20px rgba(45, 124, 247, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(45, 124, 247, 0.8); }
+            100% { box-shadow: 0 0 20px rgba(45, 124, 247, 0.5); }
+        }
+        
+        .verification-content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--secondary);
+            text-shadow: 0 0 10px rgba(255, 140, 0, 0.5);
+        }
+        
+        .verification-content p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .verification-content .warning {
+            background: rgba(231, 76, 60, 0.2);
+            border-left: 4px solid var(--danger);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+            text-align: left;
+        }
+        
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            outline: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--core-blue), #2d9df7);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-dark), #1851b4);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(45, 124, 247, 0.6);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: var(--light);
+            border: 2px solid var(--gray);
+        }
+        
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--light);
+        }
+        
+        /* Main Content */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: none; /* Hidden until age verification */
+        }
+        
+        /* Top Navigation */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .nav-logo h1 {
+            font-size: 2rem;
+            background: linear-gradient(to right, var(--core-blue), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+        
+        .logo-icon {
+            font-size: 2.2rem;
+            color: var(--secondary);
+        }
+        
+        .wallet-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .wallet-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 25px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(45, 124, 247, 0.3);
+        }
+        
+        .wallet-info .balance {
+            color: var(--secondary);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        #connectWallet {
+            background: linear-gradient(135deg, var(--core-blue), #2d9df7);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #connectWallet:hover {
+            background: linear-gradient(135deg, #1a5bc5, #1d7dc7);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(45, 124, 247, 0.6);
+        }
+        
+        /* Game Section */
+        .game-section {
+            margin-bottom: 50px;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .live-badge {
+            background: var(--danger);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 30px;
+        }
+        
+        .game-card {
+            background: rgba(26, 28, 44, 0.7);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(45, 124, 247, 0.3);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+        }
+        
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(45, 124, 247, 0.4);
+            border-color: var(--core-blue);
+        }
+        
+        .game-header {
+            padding: 25px;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(45, 124, 247, 0.2);
+        }
+        
+        .game-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .game-icon {
+            font-size: 1.8rem;
+            color: var(--secondary);
+        }
+        
+        .game-description {
+            color: var(--gray);
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+        
+        .game-content {
+            padding: 25px;
+        }
+        
+        .stake-input {
+            margin-bottom: 25px;
+        }
+        
+        .stake-input label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .input-group {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(45, 124, 247, 0.3);
+        }
+        
+        .input-group input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 15px 20px;
+            color: var(--light);
+            font-size: 1.1rem;
+            outline: none;
+        }
+        
+        .input-group .token {
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            font-weight: 600;
+            color: var(--secondary);
+        }
+        
+        .min-stake {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        .btn-block {
+            width: 100%;
+            padding: 16px;
+            font-size: 1.1rem;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .transaction-status {
+            background: rgba(241, 196, 15, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-left: 4px solid var(--warning);
+        }
+        
+        .status-icon {
+            font-size: 1.8rem;
+            color: var(--warning);
+        }
+        
+        .status-text {
+            flex: 1;
+        }
+        
+        .error-message {
+            background: rgba(231, 76, 60, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-left: 4px solid var(--danger);
+        }
+        
+        .error-icon {
+            font-size: 1.8rem;
+            color: var(--danger);
+        }
+        
+        .error-text a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        
+        .error-text a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Core Blockchain Info */
+        .core-info {
+            background: rgba(45, 124, 247, 0.1);
+            border-radius: 16px;
+            padding: 25px;
+            margin: 40px 0;
+            border: 1px solid var(--core-blue);
+            text-align: center;
+        }
+        
+        .core-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--core-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .core-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(45, 124, 247, 0.2);
+        }
+        
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--secondary);
+            margin: 10px 0;
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            color: var(--gray);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+        }
+        
+        /* Game Board */
+        .game-board {
+            display: none;
+            background: rgba(26, 28, 44, 0.9);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 30px;
+            border: 1px solid var(--core-blue);
+        }
+        
+        .board-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(45, 124, 247, 0.3);
+        }
+        
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 0;
+            width: 400px;
+            height: 400px;
+            margin: 0 auto;
+            border: 2px solid #333;
+        }
+        
+        .board-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0d9b5;
+        }
+        
+        .board-cell.dark {
+            background-color: #b58863;
+        }
+        
+        .board-piece {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .piece-red {
+            background: radial-gradient(circle at 30% 30%, #ff6666, #cc0000);
+            border: 1px solid #990000;
+        }
+        
+        .piece-black {
+            background: radial-gradient(circle at 30% 30%, #666, #000);
+            border: 1px solid #333;
+        }
+        
+        .piece-king::after {
+            content: "♛";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: gold;
+            font-size: 20px;
+            text-shadow: 0 0 3px black;
+        }
+        
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .top-nav {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .games-grid {
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            }
+            
+            .board-grid {
+                width: 320px;
+                height: 320px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .wallet-section {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .verification-content {
+                padding: 25px 20px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .board-grid {
+                width: 280px;
+                height: 280px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    
+    <!-- Age Verification -->
+    <div class="age-verification" id="ageVerification">
+        <div class="verification-content">
+            <h1><i class="fas fa-exclamation-triangle"></i> Age Verification Required</h1>
+            <p>This platform contains blockchain-based games that involve financial stakes. You must be 18 years or older to access this content.</p>
+            
+            <div class="warning">
+                <p><i class="fas fa-exclamation-circle"></i> Gambling involves risk. Please play responsibly. Only gamble with funds you can afford to lose.</p>
+            </div>
+            
+            <p>By entering this site, you confirm that you are at least 18 years of age and agree to our Terms of Service.</p>
+            
+            <div class="button-group">
+                <button class="btn btn-primary" id="confirmAge">
+                    <i class="fas fa-check"></i> I am 18 or older
+                </button>
+                <button class="btn btn-outline" id="exitSite">
+                    <i class="fas fa-times"></i> Exit Site
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="container" id="mainContainer">
+        <!-- Top Navigation -->
+        <div class="top-nav">
+            <div class="nav-logo">
+                <i class="fas fa-dice-d20 logo-icon"></i>
+                <h1>Crypticus</h1>
+            </div>
+            
+            <div class="wallet-section">
+                <div class="wallet-info">
+                    <i class="fas fa-wallet"></i>
+                    Balance: <span class="balance" id="coreBalance">0.00</span> CORE
+                </div>
+                <button id="connectWallet">
+                    <i class="fas fa-plug"></i> Connect Wallet
+                </button>
+            </div>
+        </div>
+        
+        <div class="core-info">
+            <h3><i class="fas fa-link"></i> Smart Contract Gaming</h3>
+            <p><strong>97% of every stake goes directly to the winner!</strong></p>
+            <p>Powered by Core Blockchain • Instant payouts • Provably fair</p>
+            <p>Contract Address: <span id="contractAddress">0x7af2cB8f93D0a75E0ba39E974B4e968EAe49028A</span> (Verified)</p>
+            
+            <div class="core-stats">
+                <div class="stat-card">
+                    <div>Network</div>
+                    <div class="value" id="networkName">Mainnet</div>
+                    <div>Core Chain ID: 1116</div>
+                </div>
+                <div class="stat-card">
+                    <div>Block Number</div>
+                    <div class="value" id="blockNumber">8,452,190</div>
+                    <div>Latest confirmed</div>
+                </div>
+                <div class="stat-card">
+                    <div>Gas Price</div>
+                    <div class="value" id="gasPrice">7.2 Gwei</div>
+                    <div>Current network fee</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-section">
+            <h2 class="section-title">
+                Blockchain Games
+                <span class="live-badge">LIVE</span>
+            </h2>
+            
+            <div class="games-grid">
+                <!-- Chess Masters -->
+                <div class="game-card">
+                    <div class="game-header">
+                        <h3 class="game-title">
+                            <i class="fas fa-chess game-icon"></i>
+                            Chess Masters
+                        </h3>
+                        <p class="game-description">Play chess with real CORE stakes! Smart contract ensures fair play.</p>
+                    </div>
+                    <div class="game-content">
+                        <div class="stake-input">
+                            <label>Stake Amount (CORE)</label>
+                            <div class="input-group">
+                                <input type="number" value="0.1" min="0.01" step="0.01" id="chessStake">
+                                <div class="token">CORE</div>
+                            </div>
+                            <div class="min-stake">Minimum stake: 0.01 CORE</div>
+                        </div>
+                        
+                        <button class="btn btn-primary btn-block" id="startChess">
+                            <i class="fas fa-chess-board"></i> Start Chess Game
+                        </button>
+                        
+                        <div class="transaction-status" id="chessStatus">
+                            <i class="fas fa-sync-alt status-icon"></i>
+                            <div class="status-text">
+                                <strong>Transaction submitted</strong>
+                                <p>Waiting for confirmation</p>
+                            </div>
+                        </div>
+                        
+                        <div class="error-message" id="chessError">
+                            <i class="fas fa-exclamation-circle error-icon"></i>
+                            <div class="error-text">
+                                <strong>Error creating game: transaction failed</strong>
+                                <p>See: <a href="https://docs.coreblockchain.cc/developers/errors" target="_blank">Core Blockchain error documentation</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Checkers Pro -->
+                <div class="game-card">
+                    <div class="game-header">
+                        <h3 class="game-title">
+                            <i class="fas fa-th game-icon"></i>
+                            Checkers Pro
+                        </h3>
+                        <p class="game-description">Fast checkers with blockchain stakes! Quick games, instant rewards.</p>
+                    </div>
+                    <div class="game-content">
+                        <div class="stake-input">
+                            <label>Stake Amount (CORE)</label>
+                            <div class="input-group">
+                                <input type="number" value="0.1" min="0.01" step="0.01" id="checkersStake">
+                                <div class="token">CORE</div>
+                            </div>
+                            <div class="min-stake">Minimum stake: 0.01 CORE</div>
+                        </div>
+                        
+                        <button class="btn btn-primary btn-block" id="startCheckers">
+                            <i class="fas fa-gamepad"></i> Start Checkers Game
+                        </button>
+                        
+                        <div class="transaction-status" id="checkersStatus">
+                            <i class="fas fa-sync-alt status-icon"></i>
+                            <div class="status-text">
+                                <strong>Transaction submitted</strong>
+                                <p>Waiting for confirmation</p>
+                            </div>
+                        </div>
+                        
+                        <div class="error-message" id="checkersError">
+                            <i class="fas fa-exclamation-circle error-icon"></i>
+                            <div class="error-text">
+                                <strong>Error creating game: transaction failed</strong>
+                                <p>See: <a href="https://docs.coreblockchain.cc/developers/errors" target="_blank">Core Blockchain error documentation</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Word Battle -->
+                <div class="game-card">
+                    <div class="game-header">
+                        <h3 class="game-title">
+                            <i class="fas fa-font game-icon"></i>
+                            Word Battle
+                        </h3>
+                        <p class="game-description">Compete in word games with crypto stakes! Test your vocabulary.</p>
+                    </div>
+                    <div class="game-content">
+                        <div class="stake-input">
+                            <label>Stake Amount (CORE)</label>
+                            <div class="input-group">
+                                <input type="number" value="0.1" min="0.01" step="0.01" id="wordStake">
+                                <div class="token">CORE</div>
+                            </div>
+                            <div class="min-stake">Minimum stake: 0.01 CORE</div>
+                        </div>
+                        
+                        <button class="btn btn-primary btn-block" id="startWord">
+                            <i class="fas fa-keyboard"></i> Start Word Game
+                        </button>
+                        
+                        <div class="transaction-status" id="wordStatus">
+                            <i class="fas fa-sync-alt status-icon"></i>
+                            <div class="status-text">
+                                <strong>Transaction submitted</strong>
+                                <p>Waiting for confirmation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 Crypticus Blockchain Gaming Platform. All rights reserved.</p>
+            <p>Play responsibly. Gambling can be addictive. Must be 18+ to participate.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Core blockchain contract details
+        const CONTRACT_ADDRESS = "0x7af2cB8f93D0a75E0ba39E974B4e968EAe49028A";
+        
+        // Minimal ABI for game functions
+        const CONTRACT_ABI = [
+            "function createGame(uint256 gameType) payable",
+            "function joinGame(uint256 gameId) payable",
+            "function getOpenGames() view returns (tuple(uint256 gameId, address creator, uint256 stake, uint256 gameType)[])",
+            "event GameCreated(uint256 indexed gameId, address indexed creator, uint256 stake, uint256 gameType)",
+            "event GameJoined(uint256 indexed gameId, address indexed joiner)"
+        ];
+        
+        // Global variables
+        let provider;
+        let signer;
+        let contract;
+        let currentAccount;
+        
+        // Age verification
+        document.addEventListener('DOMContentLoaded', function() {
+            const ageVerification = document.getElementById('ageVerification');
+            const mainContainer = document.getElementById('mainContainer');
+            const confirmAgeBtn = document.getElementById('confirmAge');
+            const exitSiteBtn = document.getElementById('exitSite');
+            
+            // Check if age is already verified
+            if(localStorage.getItem('ageVerified')) {
+                ageVerification.style.display = 'none';
+                mainContainer.style.display = 'block';
+            } else {
+                ageVerification.style.display = 'flex';
+            }
+            
+            // Confirm age
+            confirmAgeBtn.addEventListener('click', function() {
+                localStorage.setItem('ageVerified', 'true');
+                ageVerification.style.display = 'none';
+                mainContainer.style.display = 'block';
+            });
+            
+            // Exit site
+            exitSiteBtn.addEventListener('click', function() {
+                window.location.href = 'https://www.google.com';
+            });
+            
+            // Wallet connection
+            const connectWalletBtn = document.getElementById('connectWallet');
+            connectWalletBtn.addEventListener('click', connectWallet);
+            
+            // Game buttons
+            document.getElementById('startChess').addEventListener('click', function() {
+                startGame('chess');
+            });
+            
+            document.getElementById('startCheckers').addEventListener('click', function() {
+                startGame('checkers');
+            });
+            
+            document.getElementById('startWord').addEventListener('click', function() {
+                startGame('word');
+            });
+            
+            // Initialize hidden elements
+            document.getElementById('chessStatus').style.display = 'none';
+            document.getElementById('chessError').style.display = 'none';
+            document.getElementById('checkersStatus').style.display = 'none';
+            document.getElementById('checkersError').style.display = 'none';
+            document.getElementById('wordStatus').style.display = 'none';
+        });
+        
+        // Connect to Core blockchain
+        async function connectWallet() {
+            const connectWalletBtn = document.getElementById('connectWallet');
+            
+            try {
+                // Check if Web3 is available
+                if (window.ethereum) {
+                    connectWalletBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
+                    
+                    // Request account access
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    currentAccount = accounts[0];
+                    
+                    // Create provider and signer
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    signer = provider.getSigner();
+                    
+                    // Create contract instance
+                    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                    
+                    // Update UI
+                    connectWalletBtn.innerHTML = '<i class="fas fa-check"></i> Connected';
+                    connectWalletBtn.disabled = true;
+                    
+                    // Get balance
+                    const balance = await provider.getBalance(currentAccount);
+                    const coreBalance = ethers.utils.formatEther(balance);
+                    document.getElementById('coreBalance').textContent = parseFloat(coreBalance).toFixed(4);
+                    
+                    // Get network
+                    const network = await provider.getNetwork();
+                    document.getElementById('networkName').textContent = network.name === 'unknown' ? 'Core Mainnet' : network.name;
+                    
+                    // Get gas price
+                    const gasPrice = await provider.getGasPrice();
+                    document.getElementById('gasPrice').textContent = `${ethers.utils.formatUnits(gasPrice, 'gwei').substring(0,4)} Gwei`;
+                    
+                    // Show success notification
+                    showNotification('Wallet connected successfully!', 'success');
+                    
+                    // Listen for account changes
+                    window.ethereum.on('accountsChanged', (accounts) => {
+                        if (accounts.length === 0) {
+                            // Wallet disconnected
+                            connectWalletBtn.innerHTML = '<i class="fas fa-plug"></i> Connect Wallet';
+                            connectWalletBtn.disabled = false;
+                            document.getElementById('coreBalance').textContent = '0.00';
+                        } else {
+                            // Account changed
+                            currentAccount = accounts[0];
+                            updateBalance();
+                        }
+                    });
+                    
+                    // Listen for chain changes
+                    window.ethereum.on('chainChanged', (chainId) => {
+                        window.location.reload();
+                    });
+                } else {
+                    showNotification('Please install a Core-compatible wallet like Core Wallet or MetaMask!', 'error');
+                }
+            } catch (error) {
+                console.error(error);
+                connectWalletBtn.innerHTML = '<i class="fas fa-plug"></i> Connect Wallet';
+                showNotification(`Wallet connection failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // Start a game
+        async function startGame(game) {
+            if (!signer) {
+                showNotification('Please connect your wallet first!', 'error');
+                return;
+            }
+            
+            const gameBtn = document.querySelector(`#start${game.charAt(0).toUpperCase() + game.slice(1)}`);
+            gameBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Starting...';
+            gameBtn.disabled = true;
+            
+            // Show transaction status
+            document.getElementById(`${game}Status`).style.display = 'flex';
+            if (document.getElementById(`${game}Error`)) {
+                document.getElementById(`${game}Error`).style.display = 'none';
+            }
+            
+            try {
+                // Get stake amount
+                let stakeAmount = 0.1;
+                if (game === 'chess') stakeAmount = parseFloat(document.getElementById('chessStake').value) || 0.1;
+                if (game === 'checkers') stakeAmount = parseFloat(document.getElementById('checkersStake').value) || 0.1;
+                if (game === 'word') stakeAmount = parseFloat(document.getElementById('wordStake').value) || 0.1;
+                
+                // Convert to wei
+                const stakeWei = ethers.utils.parseEther(stakeAmount.toString());
+                
+                // Determine game type ID
+                const typeId = game === 'chess' ? 0 : game === 'checkers' ? 1 : 2;
+                
+                // Call contract function
+                const tx = await contract.createGame(typeId, { value: stakeWei });
+                
+                // Show transaction hash
+                showNotification(`Creating ${game} game... Transaction: ${tx.hash}`, 'info');
+                
+                // Wait for transaction to be mined
+                await tx.wait();
+                
+                // Show success
+                showNotification(`${game} game started with ${stakeAmount} CORE stake!`, 'success');
+                
+                // Update balance
+                updateBalance();
+                
+            } catch (error) {
+                console.error(error);
+                document.getElementById(`${game}Status`).style.display = 'none';
+                if (document.getElementById(`${game}Error`)) {
+                    document.getElementById(`${game}Error`).style.display = 'flex';
+                }
+                
+                let errorMsg = 'Unknown error';
+                if (error.data && error.data.message) {
+                    errorMsg = error.data.message;
+                } else if (error.message) {
+                    errorMsg = error.message;
+                }
+                
+                showNotification(`Failed to create ${game} game: ${errorMsg}`, 'error');
+            }
+            
+            // Reset button
+            resetGameButton(game);
+        }
+        
+        function resetGameButton(game) {
+            const gameBtn = document.querySelector(`#start${game.charAt(0).toUpperCase() + game.slice(1)}`);
+            if (game === 'chess') {
+                gameBtn.innerHTML = '<i class="fas fa-chess-board"></i> Start Chess Game';
+            } else if (game === 'checkers') {
+                gameBtn.innerHTML = '<i class="fas fa-gamepad"></i> Start Checkers Game';
+            } else {
+                gameBtn.innerHTML = '<i class="fas fa-keyboard"></i> Start Word Game';
+            }
+            gameBtn.disabled = false;
+        }
+        
+        // Update balance
+        async function updateBalance() {
+            if (provider && currentAccount) {
+                const balance = await provider.getBalance(currentAccount);
+                const coreBalance = ethers.utils.formatEther(balance);
+                document.getElementById('coreBalance').textContent = parseFloat(coreBalance).toFixed(4);
+            }
+        }
+        
+        // Show notification
+        function showNotification(message, type) {
+            // In a real app, this would display a notification
+            console.log(`${type.toUpperCase()}: ${message}`);
+            
+            // Visual notification simulation
+            const notification = document.createElement('div');
+            notification.style.position = 'fixed';
+            notification.style.top = '20px';
+            notification.style.right = '20px';
+            notification.style.padding = '15px 25px';
+            notification.style.borderRadius = '8px';
+            notification.style.color = 'white';
+            notification.style.zIndex = '3000';
+            notification.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+            notification.style.display = 'flex';
+            notification.style.alignItems = 'center';
+            notification.style.gap = '15px';
+            
+            if (type === 'success') {
+                notification.style.background = 'linear-gradient(135deg, var(--success), #27ae60)';
+                notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            } else if (type === 'error') {
+                notification.style.background = 'linear-gradient(135deg, var(--danger), #c0392b)';
+                notification.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+            } else {
+                notification.style.background = 'linear-gradient(135deg, var(--core-blue), #2980b9)';
+                notification.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
+            }
+            
+            document.body.appendChild(notification);
+            
+            // Remove notification after 5 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100px)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 5000);
+        }
+    </script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</body>
+</html>

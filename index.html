@@ -1,18 +1,604 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypticus - Live Blockchain Gaming Platform</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js"></script>
     <style>
-        /* ... (existing CSS remains unchanged) ... */
+        :root {
+            --primary: #4ecdc4;
+            --secondary: #44a08d;
+            --dark: #0f1a2a;
+            --darker: #0a121f;
+            --light: #1a2a3a;
+            --accent: #ff6b6b;
+            --text: #e0f7ff;
+            --success: #00ff88;
+            --warning: #ffcc00;
+            --danger: #ff5252;
+        }
         
-        /* New styles for game chat */
-        .game-chat {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--darker);
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 10% 20%, rgba(68, 160, 141, 0.15) 0%, rgba(15, 26, 42, 0) 20%), 
+                        radial-gradient(circle at 90% 80%, rgba(78, 205, 196, 0.15) 0%, rgba(15, 26, 42, 0) 20%);
+            z-index: -2;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5%;
+            background: rgba(10, 18, 31, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(78, 205, 196, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-icon {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+        
+        .logo h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 20px;
+            margin-left: 30px;
+        }
+        
+        .nav-item {
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(78, 205, 196, 0.2);
+        }
+        
+        .live-badge {
+            background: linear-gradient(45deg, #ff5252, #ff6b6b);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-left: 20px;
+        }
+        
+        .wallet-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .wallet-info {
+            text-align: right;
+        }
+        
+        .connection-status {
+            font-size: 0.85rem;
+            color: var(--danger);
+        }
+        
+        .connected-status {
+            color: var(--success) !important;
+        }
+        
+        .balance {
+            font-weight: bold;
+            font-size: 1.1rem;
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .connect-btn, .disconnect-btn {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 8px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .connect-btn:hover, .disconnect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+        }
+        
+        .disconnect-btn {
+            background: linear-gradient(45deg, #ff5252, #ff6b6b);
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .main-container {
+            display: flex;
+            padding: 20px 5%;
+            gap: 20px;
+        }
+        
+        .sidebar {
+            width: 300px;
+            background: rgba(15, 26, 42, 0.6);
+            border-radius: 15px;
+            padding: 20px;
+            height: fit-content;
+            border: 1px solid rgba(78, 205, 196, 0.1);
+        }
+        
+        .news-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .news-feed h3 {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(78, 205, 196, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .news-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .news-item:hover {
+            background: rgba(78, 205, 196, 0.1);
+            transform: translateY(-3px);
+        }
+        
+        .news-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .news-time {
+            font-size: 0.8rem;
+            color: rgba(224, 247, 255, 0.7);
+        }
+        
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .section {
+            background: rgba(15, 26, 42, 0.6);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(78, 205, 196, 0.1);
+        }
+        
+        .section-header {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
             margin-top: 20px;
+        }
+        
+        .game-card {
+            background: linear-gradient(145deg, rgba(26, 42, 58, 0.8), rgba(15, 26, 42, 0.8));
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(78, 205, 196, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            border-color: rgba(78, 205, 196, 0.5);
+        }
+        
+        .game-image {
+            height: 150px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        
+        .game-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(10, 18, 31, 0.8), transparent);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+        }
+        
+        .game-info {
+            padding: 15px;
+        }
+        
+        .game-title {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .game-desc {
+            font-size: 0.9rem;
+            color: rgba(224, 247, 255, 0.7);
+            margin-bottom: 15px;
+            min-height: 60px;
+        }
+        
+        .game-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: rgba(224, 247, 255, 0.7);
+        }
+        
+        .players {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .stake {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--primary);
+        }
+        
+        .game-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .play-btn {
+            flex: 1;
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .play-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+        }
+        
+        .lobby-btn {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .lobby-section {
+            margin-top: 30px;
+        }
+        
+        .lobby-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .lobby-title {
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .active-games-container {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        #noActiveGames {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 150px;
+            color: rgba(224, 247, 255, 0.5);
+            text-align: center;
+        }
+        
+        .game-lobby-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .game-lobby-item:hover {
+            background: rgba(78, 205, 196, 0.1);
+        }
+        
+        .join-game-btn {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .join-game-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(78, 205, 196, 0.2);
+        }
+        
+        .transaction-status {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(10, 18, 31, 0.9);
+            padding: 12px 20px;
+            border-radius: 50px;
+            border: 1px solid rgba(78, 205, 196, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .transaction-status.visible {
+            opacity: 1;
+        }
+        
+        .tx-hash {
+            font-size: 0.8rem;
+            color: var(--primary);
+            word-break: break-all;
+            max-width: 300px;
+            text-align: center;
+        }
+        
+        .game-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+            display: none;
+        }
+        
+        .game-overlay.visible {
+            display: block;
+        }
+        
+        .game-window {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            background: rgba(15, 26, 42, 0.95);
+            border-radius: 15px;
+            border: 1px solid rgba(78, 205, 196, 0.3);
+            z-index: 1000;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            display: none;
+        }
+        
+        .game-window.visible {
+            display: block;
+        }
+        
+        .game-window-header {
+            padding: 15px 20px;
+            background: rgba(10, 18, 31, 0.8);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(78, 205, 196, 0.2);
+        }
+        
+        .game-window-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .game-window-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .window-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+        }
+        
+        .minimize-btn {
+            background: rgba(255, 204, 0, 0.2);
+            color: var(--warning);
+        }
+        
+        .minimize-btn:hover {
+            background: rgba(255, 204, 0, 0.3);
+        }
+        
+        .close-btn {
+            background: rgba(255, 82, 82, 0.2);
+            color: var(--danger);
+        }
+        
+        .close-btn:hover {
+            background: rgba(255, 82, 82, 0.3);
+        }
+        
+        .game-window-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .game-status {
+            text-align: center;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        
+        .chess-board {
+            width: 400px;
+            height: 400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            border: 2px solid #333;
+        }
+        
+        .chess-square {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+        
+        .light-square {
+            background-color: #f0d9b5;
+        }
+        
+        .dark-square {
+            background-color: #b58863;
+        }
+        
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .game-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .game-btn:hover {
+            background: rgba(78, 205, 196, 0.2);
+        }
+        
+        .game-chat {
+            margin-top: 15px;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 10px;
             padding: 15px;
@@ -28,13 +614,27 @@
             padding: 10px;
             background: rgba(0, 0, 0, 0.2);
             border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
         
         .chat-message {
-            margin-bottom: 8px;
-            padding: 5px;
-            border-radius: 5px;
+            padding: 8px;
+            border-radius: 8px;
             background: rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            word-break: break-word;
+        }
+        
+        .chat-message.you {
+            background: rgba(78, 205, 196, 0.2);
+            align-self: flex-end;
+        }
+        
+        .chat-message.opponent {
+            background: rgba(255, 107, 107, 0.2);
+            align-self: flex-start;
         }
         
         .chat-input-container {
@@ -47,8 +647,13 @@
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 8px;
-            padding: 8px;
+            padding: 8px 12px;
             color: white;
+        }
+        
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary);
         }
         
         .chat-send-btn {
@@ -58,6 +663,11 @@
             color: white;
             cursor: pointer;
             padding: 0 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-send-btn:hover {
+            transform: translateY(-2px);
         }
         
         /* Animation for new chat messages */
@@ -70,14 +680,117 @@
             animation: messageAppear 0.3s ease;
         }
         
-        /* Styling for blockchain connection status */
-        .connected-status {
-            color: #00ff88 !important;
+        /* Game lobby highlight */
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(78, 205, 196, 0.5); }
+            70% { box-shadow: 0 0 0 10px rgba(78, 205, 196, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(78, 205, 196, 0); }
         }
         
-        /* Game lobby highlight */
         .new-game {
             animation: pulse 1.5s 3;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 1024px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+            }
+            
+            .chess-board {
+                width: 350px;
+                height: 350px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+            
+            .nav-menu {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+                margin-left: 0;
+                flex-wrap: wrap;
+            }
+            
+            .live-badge {
+                margin-left: 0;
+            }
+            
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .game-window {
+                width: 95vw;
+                height: 90vh;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+            
+            .chess-board {
+                width: 90%;
+                height: 60vw;
+                max-height: 350px;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .nav-menu {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: rgba(10, 18, 31, 0.95);
+                padding: 15px;
+                border-top: 1px solid rgba(78, 205, 196, 0.2);
+            }
+            
+            .nav-menu.active {
+                display: flex;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .wallet-section {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .wallet-info {
+                text-align: center;
+            }
+            
+            .game-controls {
+                flex-direction: column;
+            }
+            
+            .chess-board {
+                height: 80vw;
+            }
         }
     </style>
 </head>
@@ -91,117 +804,38 @@
         </div>
         <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
         <div class="nav-menu" id="navMenu">
-            <div class="nav-item active" onclick="showSection('games')">🎮 Games</div>
-            <div class="nav-item" onclick="showSection('leaderboard')">🏆 Leaderboard</div>
-            <div class="nav-item" onclick="showSection('profile')">👤 Profile</div>
-            <div class="nav-item" onclick="showSection('chat')">💬 Chat</div>
-            <div class="nav-item" onclick="showSection('news')">📰 News</div>
-            <div class="nav-item" onclick="showSection('settings')">⚙️ Settings</div>
+            <div class="nav-item active" onclick="showSection('games')"><i class="fas fa-gamepad"></i> Games</div>
+            <div class="nav-item" onclick="showSection('leaderboard')"><i class="fas fa-trophy"></i> Leaderboard</div>
+            <div class="nav-item" onclick="showSection('profile')"><i class="fas fa-user"></i> Profile</div>
+            <div class="nav-item" onclick="showSection('chat')"><i class="fas fa-comments"></i> Chat</div>
+            <div class="nav-item" onclick="showSection('news')"><i class="fas fa-newspaper"></i> News</div>
+            <div class="nav-item" onclick="showSection('settings')"><i class="fas fa-cog"></i> Settings</div>
         </div>
-        <div class="live-badge">🔴 LIVE ON CORE</div>
+        <div class="live-badge"><i class="fas fa-circle"></i> LIVE ON CORE</div>
         <div class="wallet-section">
             <div class="wallet-info">
-                <div class="connection-status" id="connectionStatus">🔴 Not Connected</div>
+                <div class="connection-status" id="connectionStatus"><i class="fas fa-plug"></i> Not Connected</div>
                 <div class="balance" id="balanceDisplay">0.00 CORE</div>
             </div>
-            <button class="connect-btn" id="connectBtn"><i class="fas fa-plug"></i>Connect Wallet</button>
-            <button class="disconnect-btn hidden" id="disconnectBtn">Disconnect</button>
+            <button class="connect-btn" id="connectBtn"><i class="fas fa-wallet"></i> Connect Wallet</button>
+            <button class="disconnect-btn hidden" id="disconnectBtn"><i class="fas fa-power-off"></i> Disconnect</button>
         </div>
     </div>
 
     <!-- Transaction Status Popup -->
     <div class="transaction-status" id="transactionStatus">
-        <div id="txStatusMessage">Processing transaction...</div>
+        <div id="txStatusMessage"><i class="fas fa-sync-alt spinner"></i> Connecting to blockchain...</div>
         <div class="tx-hash" id="txHash"></div>
     </div>
 
     <div class="main-container">
         <div class="sidebar">
             <div class="news-feed">
-                <h3>📰 Live Game Feed</h3>
+                <h3><i class="fas fa-broadcast-tower"></i> Live Game Feed</h3>
                 <div id="gameFeed">
-                    <!-- Will be populated dynamically -->
-                </div>
-            </div>
-        </div>
-        <!-- Age Verification Modal -->
-        <div class="age-verification" id="ageVerificationModal">
-            <!-- ... (existing content) ... -->
-        </div>
-
-        <!-- Game Windows -->
-        <div class="game-overlay hidden" id="gameOverlay"></div>
-
-        <!-- Chess Game Window -->
-        <div class="game-window hidden" id="chessGameWindow">
-            <div class="game-window-header">
-                <div class="game-window-title">♟️ Chess Masters</div>
-                <div class="game-window-controls">
-                    <button class="window-btn minimize-btn" onclick="minimizeGame('chess')">−</button>
-                    <button class="window-btn close-btn" onclick="closeGame('chess')">×</button>
-                </div>
-            </div>
-            <div class="game-window-content">
-                <div class="game-status" id="chessStatus">Waiting for opponent...</div>
-                <div class="chess-board" id="chessBoard"></div>
-                <div class="game-controls">
-                    <button class="game-btn" onclick="resignChess()">Resign</button>
-                    <button class="game-btn" onclick="drawChess()">Offer Draw</button>
-                </div>
-                <!-- NEW: In-game chat -->
-                <div class="game-chat">
-                    <div class="chat-messages" id="chessChatMessages"></div>
-                    <div class="chat-input-container">
-                        <input type="text" class="chat-input" id="chessChatInput" placeholder="Type a message...">
-                        <button class="chat-send-btn" onclick="sendGameChat('chess')">Send</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Checkers Game Window -->
-        <div class="game-window hidden" id="checkersGameWindow">
-            <div class="game-window-header">
-                <div class="game-window-title">⚫ Checkers Pro</div>
-                <div class="game-window-controls">
-                    <button class="window-btn minimize-btn" onclick="minimizeGame('checkers')">−</button>
-                    <button class="window-btn close-btn" onclick="closeGame('checkers')">×</button>
-                </div>
-            </div>
-            <div class="game-window-content">
-                <div class="game-status" id="checkersStatus">Waiting for opponent...</div>
-                <div class="checkers-board" id="checkersBoard"></div>
-                <div class="game-controls">
-                    <button class="game-btn" onclick="resignCheckers()">Resign</button>
-                </div>
-                <!-- NEW: In-game chat -->
-                <div class="game-chat">
-                    <div class="chat-messages" id="checkersChatMessages"></div>
-                    <div class="chat-input-container">
-                        <input type="text" class="chat-input" id="checkersChatInput" placeholder="Type a message...">
-                        <button class="chat-send-btn" onclick="sendGameChat('checkers')">Send</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Word Game Window -->
-        <div class="game-window hidden" id="wordGameWindow">
-            <div class="game-window-header">
-                <div class="game-window-title">📝 Word Battle</div>
-                <div class="game-window-controls">
-                    <button class="window-btn minimize-btn" onclick="minimizeGame('word')">−</button>
-                    <button class="window-btn close-btn" onclick="closeGame('word')">×</button>
-                </div>
-            </div>
-            <div class="game-window-content">
-                <!-- ... (existing content) ... -->
-                <!-- NEW: In-game chat -->
-                <div class="game-chat">
-                    <div class="chat-messages" id="wordChatMessages"></div>
-                    <div class="chat-input-container">
-                        <input type="text" class="chat-input" id="wordChatInput" placeholder="Type a message...">
-                        <button class="chat-send-btn" onclick="sendGameChat('word')">Send</button>
+                    <div class="news-item">
+                        <div class="news-title">🎮 Welcome to Crypticus!</div>
+                        <div class="news-time">Connect your wallet to start playing</div>
                     </div>
                 </div>
             </div>
@@ -209,10 +843,141 @@
 
         <div class="content-area">
             <!-- Games Section -->
-            <div id="gamesSection">
-                <!-- ... (existing content) ... -->
+            <div id="gamesSection" class="section">
+                <div class="section-header"><i class="fas fa-gamepad"></i> Featured Games</div>
+                <div class="games-grid">
+                    <div class="game-card" onclick="openGameDetails('chess')">
+                        <div class="game-image" style="background: linear-gradient(135deg, #1a1a2e, #16213e);">
+                            <div class="game-overlay">♟️</div>
+                        </div>
+                        <div class="game-info">
+                            <div class="game-title"><i class="fas fa-chess"></i> Chess Masters</div>
+                            <div class="game-desc">Classic strategy game with blockchain-powered tournaments and rewards. Test your skills against players worldwide.</div>
+                            <div class="game-meta">
+                                <div class="players"><i class="fas fa-users"></i> 2 players</div>
+                                <div class="stake"><i class="fas fa-coins"></i> 0.1 - 5 CORE</div>
+                            </div>
+                            <div class="game-controls">
+                                <button class="play-btn" onclick="createGame('chess', 0.1); event.stopPropagation()"><i class="fas fa-plus"></i> Create</button>
+                                <button class="play-btn lobby-btn" onclick="showLobby('chess'); event.stopPropagation()"><i class="fas fa-door-open"></i> Lobby</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="game-card" onclick="openGameDetails('checkers')">
+                        <div class="game-image" style="background: linear-gradient(135deg, #2c3e50, #4a6491);">
+                            <div class="game-overlay">⚫</div>
+                        </div>
+                        <div class="game-info">
+                            <div class="game-title"><i class="fas fa-circle"></i> Checkers Pro</div>
+                            <div class="game-desc">Timeless board game with modern blockchain integration. Simple rules, deep strategy, high stakes!</div>
+                            <div class="game-meta">
+                                <div class="players"><i class="fas fa-users"></i> 2 players</div>
+                                <div class="stake"><i class="fas fa-coins"></i> 0.05 - 2 CORE</div>
+                            </div>
+                            <div class="game-controls">
+                                <button class="play-btn" onclick="createGame('checkers', 0.05); event.stopPropagation()"><i class="fas fa-plus"></i> Create</button>
+                                <button class="play-btn lobby-btn" onclick="showLobby('checkers'); event.stopPropagation()"><i class="fas fa-door-open"></i> Lobby</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="game-card" onclick="openGameDetails('word')">
+                        <div class="game-image" style="background: linear-gradient(135deg, #0f9b0f, #3e8e41);">
+                            <div class="game-overlay">📝</div>
+                        </div>
+                        <div class="game-info">
+                            <div class="game-title"><i class="fas fa-font"></i> Word Battle</div>
+                            <div class="game-desc">Create words from random letters. Fast-paced competitive word game with blockchain rewards for vocabulary masters.</div>
+                            <div class="game-meta">
+                                <div class="players"><i class="fas fa-users"></i> 2-4 players</div>
+                                <div class="stake"><i class="fas fa-coins"></i> 0.01 - 1 CORE</div>
+                            </div>
+                            <div class="game-controls">
+                                <button class="play-btn" onclick="createGame('word', 0.01); event.stopPropagation()"><i class="fas fa-plus"></i> Create</button>
+                                <button class="play-btn lobby-btn" onclick="showLobby('word'); event.stopPropagation()"><i class="fas fa-door-open"></i> Lobby</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="lobby-section">
+                    <div class="lobby-header">
+                        <div class="lobby-title"><i class="fas fa-door-open"></i> Active Games Lobby</div>
+                        <button class="game-btn" onclick="loadActiveGames()"><i class="fas fa-sync-alt"></i> Refresh</button>
+                    </div>
+                    <div class="active-games-container">
+                        <div id="noActiveGames" class="hidden">
+                            <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                            <div>No active games at the moment</div>
+                            <div style="font-size: 0.9rem; margin-top: 5px;">Create a game to get started!</div>
+                        </div>
+                        <div id="activeGamesList"></div>
+                    </div>
+                </div>
             </div>
-            <!-- ... (other sections remain unchanged) ... -->
+        </div>
+    </div>
+
+    <!-- Game Overlay -->
+    <div class="game-overlay" id="gameOverlay"></div>
+
+    <!-- Chess Game Window -->
+    <div class="game-window" id="chessGameWindow">
+        <div class="game-window-header">
+            <div class="game-window-title"><i class="fas fa-chess"></i> Chess Masters</div>
+            <div class="game-window-controls">
+                <button class="window-btn minimize-btn" onclick="minimizeGame('chess')">−</button>
+                <button class="window-btn close-btn" onclick="closeGame('chess')">×</button>
+            </div>
+        </div>
+        <div class="game-window-content">
+            <div class="game-status" id="chessStatus">Connecting to blockchain game...</div>
+            <div class="chess-board" id="chessBoard">
+                <!-- Chess board will be generated dynamically -->
+            </div>
+            <div class="game-controls">
+                <button class="game-btn" onclick="resignChess()"><i class="fas fa-flag"></i> Resign</button>
+                <button class="game-btn" onclick="drawChess()"><i class="fas fa-handshake"></i> Offer Draw</button>
+            </div>
+            <div class="game-chat">
+                <div class="chat-messages" id="chessChatMessages">
+                    <div class="chat-message system">Game chat initialized. Say hello to your opponent!</div>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" class="chat-input" id="chessChatInput" placeholder="Type a message..." onkeypress="if(event.key === 'Enter') sendGameChat('chess')">
+                    <button class="chat-send-btn" onclick="sendGameChat('chess')"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkers Game Window -->
+    <div class="game-window" id="checkersGameWindow">
+        <div class="game-window-header">
+            <div class="game-window-title"><i class="fas fa-circle"></i> Checkers Pro</div>
+            <div class="game-window-controls">
+                <button class="window-btn minimize-btn" onclick="minimizeGame('checkers')">−</button>
+                <button class="window-btn close-btn" onclick="closeGame('checkers')">×</button>
+            </div>
+        </div>
+        <div class="game-window-content">
+            <div class="game-status" id="checkersStatus">Connecting to blockchain game...</div>
+            <div class="chess-board" id="checkersBoard">
+                <!-- Checkers board will be generated dynamically -->
+            </div>
+            <div class="game-controls">
+                <button class="game-btn" onclick="resignCheckers()"><i class="fas fa-flag"></i> Resign</button>
+            </div>
+            <div class="game-chat">
+                <div class="chat-messages" id="checkersChatMessages">
+                    <div class="chat-message system">Game chat initialized. Say hello to your opponent!</div>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" class="chat-input" id="checkersChatInput" placeholder="Type a message..." onkeypress="if(event.key === 'Enter') sendGameChat('checkers')">
+                    <button class="chat-send-btn" onclick="sendGameChat('checkers')"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -225,16 +990,16 @@
         ];
 
         // Global variables
-        let demoMode = false; // Now using real blockchain
+        let demoMode = false;
         let userAddress = '';
         let userBalance = 0;
         let gameContract = null;
         let provider = null;
         let signer = null;
         let currentSection = 'games';
-        let windowZIndex = 1000;
         let openWindows = [];
         let activeGames = [];
+        let gameChats = {};
         let playerStats = {
             gamesPlayed: 0,
             gamesWon: 0,
@@ -242,11 +1007,6 @@
             chess: { wins: 0, losses: 0 },
             checkers: { wins: 0, losses: 0 },
             words: { wins: 0, losses: 0 }
-        };
-        let gameChats = {
-            chess: [],
-            checkers: [],
-            word: []
         };
 
         // ======================
@@ -261,7 +1021,7 @@
                 gameContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
                 return true;
             } else {
-                alert('Please install MetaMask or a Web3-compatible browser!');
+                showTransactionStatus('⚠️ Please install MetaMask or a Web3 browser!');
                 return false;
             }
         }
@@ -270,6 +1030,8 @@
         async function connectWallet() {
             if (await initContract()) {
                 try {
+                    showTransactionStatus('<i class="fas fa-plug"></i> Connecting to Core blockchain...');
+                    
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     userAddress = accounts[0];
                     
@@ -278,20 +1040,55 @@
                     userBalance = ethers.utils.formatEther(balance);
                     
                     // Update UI
-                    document.getElementById('connectionStatus').innerHTML = '🟢 Connected to Core';
+                    document.getElementById('connectionStatus').innerHTML = '<i class="fas fa-link"></i> Connected to Core';
                     document.getElementById('connectionStatus').classList.add('connected-status');
-                    document.getElementById('balanceDisplay').textContent = parseFloat(userBalance).toFixed(4) + ' CORE';
+                    document.getElementById('balanceDisplay').textContent = formatBalance(userBalance) + ' CORE';
                     document.getElementById('connectBtn').classList.add('hidden');
                     document.getElementById('disconnectBtn').classList.remove('hidden');
+                    
+                    // Add blockchain event listeners
+                    window.ethereum.on('accountsChanged', (accounts) => {
+                        if (accounts.length > 0) {
+                            userAddress = accounts[0];
+                            updateBalance();
+                            showTransactionStatus('<i class="fas fa-sync-alt"></i> Account changed');
+                        } else {
+                            disconnectWallet();
+                        }
+                    });
+                    
+                    window.ethereum.on('chainChanged', (chainId) => {
+                        const coreChainIds = [25, 338]; // Core Mainnet & Testnet
+                        if (!coreChainIds.includes(parseInt(chainId, 16))) {
+                            showTransactionStatus('⚠️ Wrong network! Please switch to Core');
+                        } else {
+                            showTransactionStatus('<i class="fas fa-network-wired"></i> Network connected');
+                        }
+                    });
                     
                     // Load active games
                     loadActiveGames();
                     
-                    showTransactionStatus('✅ Wallet connected!');
+                    showTransactionStatus('✅ Wallet connected successfully!');
                 } catch (error) {
                     console.error("Error connecting wallet:", error);
-                    showTransactionStatus('🔴 Error connecting wallet');
+                    showTransactionStatus('🔴 Error connecting wallet: ' + error.message);
                 }
+            }
+        }
+        
+        // Format balance for display
+        function formatBalance(balance) {
+            const bal = parseFloat(balance);
+            return bal < 0.001 ? '<0.001' : bal.toFixed(3);
+        }
+        
+        // Update wallet balance
+        async function updateBalance() {
+            if (provider && userAddress) {
+                const balance = await provider.getBalance(userAddress);
+                userBalance = ethers.utils.formatEther(balance);
+                document.getElementById('balanceDisplay').textContent = formatBalance(userBalance) + ' CORE';
             }
         }
 
@@ -299,6 +1096,8 @@
         async function loadActiveGames() {
             if (gameContract) {
                 try {
+                    showTransactionStatus('<i class="fas fa-sync-alt spinner"></i> Loading active games...');
+                    
                     const games = await gameContract.getActiveGames();
                     activeGames = games.map(game => ({
                         id: game.id.toString(),
@@ -307,28 +1106,46 @@
                         stake: ethers.utils.formatEther(game.stake),
                         status: game.status
                     }));
+                    
                     updateActiveGames();
+                    showTransactionStatus('✅ Active games loaded');
                 } catch (error) {
                     console.error("Error loading games:", error);
+                    showTransactionStatus('🔴 Error loading games: ' + error.message);
                 }
             }
         }
 
         // Create a new game
         async function createGame(gameType, stakeAmount) {
+            if (!userAddress) {
+                showTransactionStatus('🔴 Please connect your wallet first!');
+                return null;
+            }
+            
             if (gameContract) {
                 try {
+                    // Show loading state on button
+                    const btn = event.target;
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+                    btn.disabled = true;
+                    
                     const stakeWei = ethers.utils.parseEther(stakeAmount.toString());
                     const tx = await gameContract.createGame(gameType, stakeWei);
                     
-                    showTransactionStatus('Creating game on blockchain...', tx.hash);
+                    showTransactionStatus('<i class="fas fa-hard-hat"></i> Creating game on blockchain...', tx.hash);
                     
                     // Wait for transaction confirmation
                     const receipt = await tx.wait();
                     if (receipt.status === 1) {
+                        // Get contract game ID from event
+                        const event = receipt.events.find(e => e.event === "GameCreated");
+                        const contractGameId = event.args.gameId.toString();
+                        
                         // Add to active games
                         const newGame = {
-                            id: Date.now().toString(),
+                            id: contractGameId,
                             type: gameType,
                             creator: 'You',
                             stake: stakeAmount,
@@ -339,7 +1156,7 @@
                         
                         // Highlight new game in lobby
                         setTimeout(() => {
-                            const newGameElement = document.querySelector(`[data-game-id="${newGame.id}"]`);
+                            const newGameElement = document.querySelector(`[data-game-id="${contractGameId}"]`);
                             if (newGameElement) {
                                 newGameElement.classList.add('new-game');
                                 setTimeout(() => newGameElement.classList.remove('new-game'), 3000);
@@ -347,12 +1164,21 @@
                         }, 500);
                         
                         showTransactionStatus('✅ Game created!', tx.hash);
-                        openGameWindow(gameType);
-                        return newGame.id;
+                        openGameWindow(gameType, contractGameId);
+                        
+                        // Restore button state
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        
+                        return contractGameId;
                     }
                 } catch (error) {
                     console.error("Error creating game:", error);
-                    showTransactionStatus('🔴 Game creation failed');
+                    showTransactionStatus('🔴 Game creation failed: ' + error.message);
+                    
+                    // Restore button state
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
                 }
             }
             return null;
@@ -360,12 +1186,23 @@
 
         // Join an existing game
         async function joinGame(gameId, stakeAmount) {
+            if (!userAddress) {
+                showTransactionStatus('🔴 Please connect your wallet first!');
+                return false;
+            }
+            
             if (gameContract) {
                 try {
+                    // Show loading state on button
+                    const btn = document.querySelector(`.join-game-btn[data-game-id="${gameId}"]`);
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Joining...';
+                    btn.disabled = true;
+                    
                     const stakeWei = ethers.utils.parseEther(stakeAmount.toString());
                     const tx = await gameContract.joinGame(gameId, { value: stakeWei });
                     
-                    showTransactionStatus('Joining game on blockchain...', tx.hash);
+                    showTransactionStatus('<i class="fas fa-sign-in-alt"></i> Joining game on blockchain...', tx.hash);
                     
                     // Wait for transaction confirmation
                     const receipt = await tx.wait();
@@ -373,29 +1210,39 @@
                         // Update game status
                         const gameIndex = activeGames.findIndex(g => g.id === gameId);
                         if (gameIndex !== -1) {
-                            activeGames.splice(gameIndex, 1);
+                            activeGames[gameIndex].status = 'started';
+                            activeGames[gameIndex].opponent = userAddress;
                             updateActiveGames();
                         }
                         
                         // Determine game type and open window
                         const game = activeGames.find(g => g.id === gameId);
                         if (game) {
-                            openGameWindow(game.type);
+                            openGameWindow(game.type, gameId);
                         }
                         
                         showTransactionStatus('✅ Game joined!', tx.hash);
+                        
+                        // Restore button state
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        
                         return true;
                     }
                 } catch (error) {
                     console.error("Error joining game:", error);
-                    showTransactionStatus('🔴 Failed to join game');
+                    showTransactionStatus('🔴 Failed to join game: ' + error.message);
+                    
+                    // Restore button state
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
                 }
             }
             return false;
         }
 
         // ======================
-        // GAME LOBBY IMPROVEMENTS
+        // GAME LOBBY & UI
         // ======================
         
         // Update active games display
@@ -419,8 +1266,9 @@
                 gameDiv.className = 'game-lobby-item';
                 gameDiv.dataset.gameId = game.id;
                 
-                const gameIcon = game.type === 'chess' ? '♟️' : 
-                                game.type === 'checkers' ? '⚫' : '📝';
+                const gameIcon = game.type === 'chess' ? '<i class="fas fa-chess"></i>' : 
+                                game.type === 'checkers' ? '<i class="fas fa-circle"></i>' : 
+                                '<i class="fas fa-font"></i>';
                 const gameName = game.type === 'chess' ? 'Chess Masters' : 
                                game.type === 'checkers' ? 'Checkers Pro' : 'Word Battle';
                 
@@ -429,7 +1277,9 @@
                         <strong>${gameIcon} ${gameName}</strong>
                         <div style="font-size: 0.9rem; color: #aaa;">${game.creator} • Stake: ${game.stake} CORE</div>
                     </div>
-                    <button class="join-game-btn" onclick="joinGame('${game.id}', ${game.stake})">Join Game</button>
+                    <button class="join-game-btn" data-game-id="${game.id}" onclick="joinGame('${game.id}', ${game.stake})">
+                        <i class="fas fa-sign-in-alt"></i> Join
+                    </button>
                 `;
                 
                 gamesList.appendChild(gameDiv);
@@ -444,18 +1294,27 @@
             const gameFeed = document.getElementById('gameFeed');
             if (!gameFeed) return;
             
+            const totalPool = activeGames.reduce((sum, game) => sum + parseFloat(game.stake), 0);
+            const lastGame = playerStats.gamesWon > 0 ? 'You' : 'CryptoKing';
+            const lastGameType = playerStats.chess.wins > 0 ? 'Chess' : 
+                               playerStats.checkers.wins > 0 ? 'Checkers' : 'Word Battle';
+            
             gameFeed.innerHTML = `
                 <div class="news-item">
                     <div class="news-title">🎮 Active Games: ${activeGames.length}</div>
-                    <div class="news-time">Players online now</div>
+                    <div class="news-time">Players online now: ${activeGames.length * 2}</div>
                 </div>
                 <div class="news-item">
-                    <div class="news-title">💰 Total Pool: ${activeGames.reduce((sum, game) => sum + parseFloat(game.stake), 0).toFixed(2)} CORE</div>
+                    <div class="news-title">💰 Total Pool: ${totalPool.toFixed(2)} CORE</div>
                     <div class="news-time">Live betting volume</div>
                 </div>
                 <div class="news-item">
-                    <div class="news-title">🏆 Last Winner: ${playerStats.gamesWon > 0 ? 'You' : 'CryptoKing'}</div>
-                    <div class="news-time">Won ${playerStats.totalEarned.toFixed(2)} CORE in ${playerStats.chess.wins > 0 ? 'Chess' : playerStats.checkers.wins > 0 ? 'Checkers' : 'Word Battle'}</div>
+                    <div class="news-title">🏆 Last Winner: ${lastGame}</div>
+                    <div class="news-time">Won ${playerStats.totalEarned.toFixed(2)} CORE in ${lastGameType}</div>
+                </div>
+                <div class="news-item">
+                    <div class="news-title">📊 Your Stats: ${playerStats.gamesWon}W/${playerStats.gamesPlayed - playerStats.gamesWon}L</div>
+                    <div class="news-time">Earned: ${playerStats.totalEarned.toFixed(2)} CORE</div>
                 </div>
             `;
         }
@@ -464,14 +1323,22 @@
         // IN-GAME CHAT SYSTEM
         // ======================
         
+        // Sanitize chat messages
+        function sanitizeMessage(msg) {
+            return DOMPurify.sanitize(msg);
+        }
+        
         function sendGameChat(gameType) {
             const input = document.getElementById(`${gameType}ChatInput`);
-            const message = input.value.trim();
+            let message = input.value.trim();
             if (!message) return;
+            
+            // Sanitize the message
+            message = sanitizeMessage(message);
             
             const chatMessages = document.getElementById(`${gameType}ChatMessages`);
             const messageDiv = document.createElement('div');
-            messageDiv.className = 'chat-message new-message';
+            messageDiv.className = 'chat-message new-message you';
             messageDiv.textContent = `You: ${message}`;
             chatMessages.appendChild(messageDiv);
             
@@ -479,7 +1346,10 @@
             input.value = '';
             
             // Scroll to bottom
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            scrollChatToBottom(gameType);
+            
+            // Initialize chat storage for this game if needed
+            if (!gameChats[gameType]) gameChats[gameType] = [];
             
             // Save message
             gameChats[gameType].push({
@@ -494,42 +1364,203 @@
                     "Nice move!",
                     "I'm winning this!",
                     "Good game!",
-                    "Hmm... interesting.",
-                    "I need to concentrate."
+                    "Hmm... interesting strategy.",
+                    "I need to concentrate.",
+                    "Are you a professional?",
+                    "This is getting intense!",
+                    "I didn't see that coming!",
+                    "Let's see how this plays out.",
+                    "You're pretty good!"
                 ];
                 const response = responses[Math.floor(Math.random() * responses.length)];
-                addGameChatMessage(gameType, `Opponent: ${response}`);
+                addGameChatMessage(gameType, `Opponent: ${response}`, 'opponent');
             }, 2000);
         }
         
-        function addGameChatMessage(gameType, message) {
+        function addGameChatMessage(gameType, message, senderType = 'system') {
             const chatMessages = document.getElementById(`${gameType}ChatMessages`);
             const messageDiv = document.createElement('div');
-            messageDiv.className = 'chat-message new-message';
+            messageDiv.className = `chat-message new-message ${senderType}`;
             messageDiv.textContent = message;
             chatMessages.appendChild(messageDiv);
             
             // Scroll to bottom
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            scrollChatToBottom(gameType);
+        }
+        
+        function scrollChatToBottom(gameType) {
+            const chatMessages = document.getElementById(`${gameType}ChatMessages`);
+            chatMessages.scrollTo({
+                top: chatMessages.scrollHeight,
+                behavior: 'smooth'
+            });
         }
         
         // ======================
         // GAME WINDOW MANAGEMENT
         // ======================
         
-        function openGameWindow(gameType) {
-            // ... (existing implementation) ...
-            // Additional: Initialize chat
-            const chatMessages = document.getElementById(`${gameType}ChatMessages`);
-            chatMessages.innerHTML = '';
-            gameChats[gameType].forEach(msg => {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'chat-message';
-                messageDiv.textContent = `${msg.sender}: ${msg.message}`;
-                chatMessages.appendChild(messageDiv);
-            });
+        function openGameWindow(gameType, gameId) {
+            const gameWindow = document.getElementById(`${gameType}GameWindow`);
+            const gameOverlay = document.getElementById('gameOverlay');
+            
+            if (gameWindow) {
+                // Initialize game board
+                initGameBoard(gameType);
+                
+                // Initialize chat
+                const chatMessages = document.getElementById(`${gameType}ChatMessages`);
+                chatMessages.innerHTML = '';
+                
+                if (gameChats[gameType] && gameChats[gameType].length > 0) {
+                    gameChats[gameType].forEach(msg => {
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = `chat-message ${msg.sender === 'You' ? 'you' : 'opponent'}`;
+                        messageDiv.textContent = `${msg.sender}: ${msg.message}`;
+                        chatMessages.appendChild(messageDiv);
+                    });
+                } else {
+                    const systemMsg = document.createElement('div');
+                    systemMsg.className = 'chat-message system';
+                    systemMsg.textContent = 'Game chat initialized. Say hello to your opponent!';
+                    chatMessages.appendChild(systemMsg);
+                }
+                
+                // Set status
+                const statusElement = document.getElementById(`${gameType}Status`);
+                if (statusElement) {
+                    statusElement.textContent = gameId ? `Game #${gameId} - Waiting for opponent...` : 'Starting game...';
+                }
+                
+                // Show window
+                gameWindow.classList.add('visible');
+                gameOverlay.classList.add('visible');
+            }
         }
-
+        
+        function initGameBoard(gameType) {
+            if (gameType === 'chess') {
+                const board = document.getElementById('chessBoard');
+                board.innerHTML = '';
+                
+                // Create chess board
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        const square = document.createElement('div');
+                        square.className = `chess-square ${(row + col) % 2 === 0 ? 'light-square' : 'dark-square'}`;
+                        
+                        // Add pieces (simplified for demo)
+                        if (row === 0 || row === 7) {
+                            const pieces = ['♜', '♞', '♝', '♛', '♚', '♝', '♞', '♜'];
+                            square.textContent = pieces[col];
+                        } else if (row === 1 || row === 6) {
+                            square.textContent = '♟';
+                        }
+                        
+                        board.appendChild(square);
+                    }
+                }
+            } else if (gameType === 'checkers') {
+                const board = document.getElementById('checkersBoard');
+                board.innerHTML = '';
+                
+                // Create checkers board
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        const square = document.createElement('div');
+                        square.className = `chess-square ${(row + col) % 2 === 0 ? 'light-square' : 'dark-square'}`;
+                        
+                        // Add pieces (simplified for demo)
+                        if ((row + col) % 2 !== 0) {
+                            if (row < 3) {
+                                square.innerHTML = '<div class="checker-piece red"></div>';
+                            } else if (row > 4) {
+                                square.innerHTML = '<div class="checker-piece black"></div>';
+                            }
+                        }
+                        
+                        board.appendChild(square);
+                    }
+                }
+            }
+        }
+        
+        function closeGame(gameType) {
+            const gameWindow = document.getElementById(`${gameType}GameWindow`);
+            const gameOverlay = document.getElementById('gameOverlay');
+            
+            if (gameWindow) {
+                gameWindow.classList.remove('visible');
+            }
+            
+            if (!document.querySelector('.game-window.visible')) {
+                gameOverlay.classList.remove('visible');
+            }
+        }
+        
+        function minimizeGame(gameType) {
+            // For simplicity, just close the game in this demo
+            closeGame(gameType);
+        }
+        
+        // ======================
+        // UI UTILITIES
+        // ======================
+        
+        function showTransactionStatus(message, txHash = '') {
+            const status = document.getElementById('transactionStatus');
+            const messageEl = document.getElementById('txStatusMessage');
+            const hashEl = document.getElementById('txHash');
+            
+            messageEl.innerHTML = message;
+            hashEl.textContent = txHash ? `TX: ${txHash}` : '';
+            
+            status.classList.add('visible');
+            
+            // Auto-hide after 5 seconds unless it's an error
+            if (!message.includes('🔴') && !message.includes('⚠️')) {
+                setTimeout(() => {
+                    status.classList.remove('visible');
+                }, 5000);
+            }
+        }
+        
+        function toggleMobileMenu() {
+            const navMenu = document.getElementById('navMenu');
+            navMenu.classList.toggle('active');
+        }
+        
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show selected section
+            document.getElementById(`${sectionId}Section`).style.display = 'block';
+            
+            // Update active nav item
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // Close mobile menu if open
+            if (window.innerWidth <= 768) {
+                toggleMobileMenu();
+            }
+        }
+        
+        function showLobby(gameType) {
+            document.getElementById('gamesSection').style.display = 'block';
+            document.getElementById('activeGamesList').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function openGameDetails(gameType) {
+            // In a real app, this would show game details
+            showLobby(gameType);
+        }
+        
         // ======================
         // INITIALIZATION
         // ======================
@@ -540,7 +1571,7 @@
             document.getElementById('disconnectBtn').addEventListener('click', () => {
                 userAddress = '';
                 userBalance = 0;
-                document.getElementById('connectionStatus').innerHTML = '🔴 Not Connected';
+                document.getElementById('connectionStatus').innerHTML = '<i class="fas fa-unlink"></i> Not Connected';
                 document.getElementById('connectionStatus').classList.remove('connected-status');
                 document.getElementById('balanceDisplay').textContent = '0.00 CORE';
                 document.getElementById('connectBtn').classList.remove('hidden');
@@ -551,21 +1582,50 @@
             // Initialize contract
             initContract();
             
-            // Initialize chat input handlers
-            ['chess', 'checkers', 'word'].forEach(gameType => {
-                const input = document.getElementById(`${gameType}ChatInput`);
-                input.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        sendGameChat(gameType);
-                    }
-                });
-            });
+            // Initialize game boards
+            initGameBoard('chess');
+            initGameBoard('checkers');
             
-            // Other initialization code...
+            // Show games section by default
+            showSection('games');
+            
+            // Simulate some player stats
+            playerStats = {
+                gamesPlayed: 12,
+                gamesWon: 8,
+                totalEarned: 3.75,
+                chess: { wins: 4, losses: 2 },
+                checkers: { wins: 2, losses: 1 },
+                words: { wins: 2, losses: 1 }
+            };
+            
+            // Update UI with initial data
+            updateGameFeed();
         });
 
-        // ... (rest of the existing JavaScript code) ...
-
+        // ======================
+        // GAME FUNCTIONS (PLACEHOLDER)
+        // ======================
+        
+        function resignChess() {
+            showTransactionStatus('🏳️ Resigning chess game...');
+            setTimeout(() => {
+                showTransactionStatus('🔴 You resigned the game');
+                closeGame('chess');
+            }, 2000);
+        }
+        
+        function drawChess() {
+            showTransactionStatus('🤝 Offering draw to opponent...');
+        }
+        
+        function resignCheckers() {
+            showTransactionStatus('🏳️ Resigning checkers game...');
+            setTimeout(() => {
+                showTransactionStatus('🔴 You resigned the game');
+                closeGame('checkers');
+            }, 2000);
+        }
     </script>
 </body>
 </html>

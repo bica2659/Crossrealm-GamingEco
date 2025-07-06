@@ -14693,6 +14693,54 @@ if (document.readyState === 'loading') {
 }
 
 console.log('🔧 Critical fixes applied successfully!');
-</script>
+        // Add this to fix the cut-off function
+if (completedItems === totalItems) {
+    console.log('🚀 READY FOR LAUNCH!');
+    console.log('✅ ALL SYSTEMS GO!');
+}
+        window.addEventListener('error', function(event) {
+    console.error('Error:', event.error);
+    showNotification('Something went wrong. Please refresh.', 'error');
+});
+        // Step 2: Add input sanitization function
+function sanitizeInput(input) {
+    if (typeof input !== 'string') return input;
+    
+    return input.replace(/[<>&"']/g, function(match) {
+        return {
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&#39;'
+        }[match];
+    }).trim().substring(0, 1000);
+}
+
+// Step 3: Update existing input handlers to use sanitization
+const originalSendMessage = window.sendMessage;
+if (originalSendMessage) {
+    window.sendMessage = function() {
+        const input = document.getElementById('chatInput');
+        if (input) {
+            input.value = sanitizeInput(input.value);
+        }
+        return originalSendMessage.apply(this, arguments);
+    };
+}
+
+const originalSubmitWord = window.submitWord;
+if (originalSubmitWord) {
+    window.submitWord = function() {
+        const input = document.getElementById('wordInput');
+        if (input) {
+            input.value = sanitizeInput(input.value);
+        }
+        return originalSubmitWord.apply(this, arguments);
+    };
+}
+
+console.log('🛡️ Input sanitization applied successfully!');
+    </script>
 </body>
 </html>

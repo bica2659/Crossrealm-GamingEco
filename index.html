@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypticus - Live Blockchain Gaming Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <style>
+        /* ... (existing CSS remains unchanged) ... */
+        
+        /* New styles for game chat */
+        .game-chat {
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 200px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        
+        .chat-message {
+            margin-bottom: 8px;
+            padding: 5px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .chat-input-container {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 8px;
+            color: white;
+        }
+        
+        .chat-send-btn {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            padding: 0 15px;
+        }
+        
+        /* Animation for new chat messages */
+        @keyframes messageAppear {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .new-message {
+            animation: messageAppear 0.3s ease;
+        }
+        
+        /* Styling for blockchain connection status */
+        .connected-status {
+            color: #00ff88 !important;
+        }
+        
+        /* Game lobby highlight */
+        .new-game {
+            animation: pulse 1.5s 3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background"></div>
+    <div class="header">
+        <div class="logo">
+            <i class="fas fa-dice-d20 logo-icon"></i>
+            <h1>CRYPTICUS</h1>
+        </div>
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+        <div class="nav-menu" id="navMenu">
+            <div class="nav-item active" onclick="showSection('games')">🎮 Games</div>
+            <div class="nav-item" onclick="showSection('leaderboard')">🏆 Leaderboard</div>
+            <div class="nav-item" onclick="showSection('profile')">👤 Profile</div>
+            <div class="nav-item" onclick="showSection('chat')">💬 Chat</div>
+            <div class="nav-item" onclick="showSection('news')">📰 News</div>
+            <div class="nav-item" onclick="showSection('settings')">⚙️ Settings</div>
+        </div>
+        <div class="live-badge">🔴 LIVE ON CORE</div>
+        <div class="wallet-section">
+            <div class="wallet-info">
+                <div class="connection-status" id="connectionStatus">🔴 Not Connected</div>
+                <div class="balance" id="balanceDisplay">0.00 CORE</div>
+            </div>
+            <button class="connect-btn" id="connectBtn"><i class="fas fa-plug"></i>Connect Wallet</button>
+            <button class="disconnect-btn hidden" id="disconnectBtn">Disconnect</button>
+        </div>
+    </div>
+
+    <!-- Transaction Status Popup -->
+    <div class="transaction-status" id="transactionStatus">
+        <div id="txStatusMessage">Processing transaction...</div>
+        <div class="tx-hash" id="txHash"></div>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="news-feed">
+                <h3>📰 Live Game Feed</h3>
+                <div id="gameFeed">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+        </div>
+        <!-- Age Verification Modal -->
+        <div class="age-verification" id="ageVerificationModal">
+            <!-- ... (existing content) ... -->
+        </div>
+
+        <!-- Game Windows -->
+        <div class="game-overlay hidden" id="gameOverlay"></div>
+
+        <!-- Chess Game Window -->
+        <div class="game-window hidden" id="chessGameWindow">
+            <div class="game-window-header">
+                <div class="game-window-title">♟️ Chess Masters</div>
+                <div class="game-window-controls">
+                    <button class="window-btn minimize-btn" onclick="minimizeGame('chess')">−</button>
+                    <button class="window-btn close-btn" onclick="closeGame('chess')">×</button>
+                </div>
+            </div>
+            <div class="game-window-content">
+                <div class="game-status" id="chessStatus">Waiting for opponent...</div>
+                <div class="chess-board" id="chessBoard"></div>
+                <div class="game-controls">
+                    <button class="game-btn" onclick="resignChess()">Resign</button>
+                    <button class="game-btn" onclick="drawChess()">Offer Draw</button>
+                </div>
+                <!-- NEW: In-game chat -->
+                <div class="game-chat">
+                    <div class="chat-messages" id="chessChatMessages"></div>
+                    <div class="chat-input-container">
+                        <input type="text" class="chat-input" id="chessChatInput" placeholder="Type a message...">
+                        <button class="chat-send-btn" onclick="sendGameChat('chess')">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Checkers Game Window -->
+        <div class="game-window hidden" id="checkersGameWindow">
+            <div class="game-window-header">
+                <div class="game-window-title">⚫ Checkers Pro</div>
+                <div class="game-window-controls">
+                    <button class="window-btn minimize-btn" onclick="minimizeGame('checkers')">−</button>
+                    <button class="window-btn close-btn" onclick="closeGame('checkers')">×</button>
+                </div>
+            </div>
+            <div class="game-window-content">
+                <div class="game-status" id="checkersStatus">Waiting for opponent...</div>
+                <div class="checkers-board" id="checkersBoard"></div>
+                <div class="game-controls">
+                    <button class="game-btn" onclick="resignCheckers()">Resign</button>
+                </div>
+                <!-- NEW: In-game chat -->
+                <div class="game-chat">
+                    <div class="chat-messages" id="checkersChatMessages"></div>
+                    <div class="chat-input-container">
+                        <input type="text" class="chat-input" id="checkersChatInput" placeholder="Type a message...">
+                        <button class="chat-send-btn" onclick="sendGameChat('checkers')">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Word Game Window -->
+        <div class="game-window hidden" id="wordGameWindow">
+            <div class="game-window-header">
+                <div class="game-window-title">📝 Word Battle</div>
+                <div class="game-window-controls">
+                    <button class="window-btn minimize-btn" onclick="minimizeGame('word')">−</button>
+                    <button class="window-btn close-btn" onclick="closeGame('word')">×</button>
+                </div>
+            </div>
+            <div class="game-window-content">
+                <!-- ... (existing content) ... -->
+                <!-- NEW: In-game chat -->
+                <div class="game-chat">
+                    <div class="chat-messages" id="wordChatMessages"></div>
+                    <div class="chat-input-container">
+                        <input type="text" class="chat-input" id="wordChatInput" placeholder="Type a message...">
+                        <button class="chat-send-btn" onclick="sendGameChat('word')">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <!-- Games Section -->
+            <div id="gamesSection">
+                <!-- ... (existing content) ... -->
+            </div>
+            <!-- ... (other sections remain unchanged) ... -->
+        </div>
+    </div>
+
+    <script>
+        // Smart Contract Configuration
+        const CONTRACT_ADDRESS = "0x7af2cB8f93D0a75E0ba39E974B4e968EAe49028A";
+        const CONTRACT_ABI = [
+            // ABI would go here (truncated for brevity)
+            // In a real implementation, you would include the full ABI
+        ];
+
+        // Global variables
+        let demoMode = false; // Now using real blockchain
+        let userAddress = '';
+        let userBalance = 0;
+        let gameContract = null;
+        let provider = null;
+        let signer = null;
+        let currentSection = 'games';
+        let windowZIndex = 1000;
+        let openWindows = [];
+        let activeGames = [];
+        let playerStats = {
+            gamesPlayed: 0,
+            gamesWon: 0,
+            totalEarned: 0,
+            chess: { wins: 0, losses: 0 },
+            checkers: { wins: 0, losses: 0 },
+            words: { wins: 0, losses: 0 }
+        };
+        let gameChats = {
+            chess: [],
+            checkers: [],
+            word: []
+        };
+
+        // ======================
+        // BLOCKCHAIN INTEGRATION
+        // ======================
+        
+        // Initialize contract
+        async function initContract() {
+            if (typeof window.ethereum !== 'undefined') {
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                gameContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                return true;
+            } else {
+                alert('Please install MetaMask or a Web3-compatible browser!');
+                return false;
+            }
+        }
+
+        // Connect to blockchain wallet
+        async function connectWallet() {
+            if (await initContract()) {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    userAddress = accounts[0];
+                    
+                    // Get balance
+                    const balance = await provider.getBalance(userAddress);
+                    userBalance = ethers.utils.formatEther(balance);
+                    
+                    // Update UI
+                    document.getElementById('connectionStatus').innerHTML = '🟢 Connected to Core';
+                    document.getElementById('connectionStatus').classList.add('connected-status');
+                    document.getElementById('balanceDisplay').textContent = parseFloat(userBalance).toFixed(4) + ' CORE';
+                    document.getElementById('connectBtn').classList.add('hidden');
+                    document.getElementById('disconnectBtn').classList.remove('hidden');
+                    
+                    // Load active games
+                    loadActiveGames();
+                    
+                    showTransactionStatus('✅ Wallet connected!');
+                } catch (error) {
+                    console.error("Error connecting wallet:", error);
+                    showTransactionStatus('🔴 Error connecting wallet');
+                }
+            }
+        }
+
+        // Load active games from blockchain
+        async function loadActiveGames() {
+            if (gameContract) {
+                try {
+                    const games = await gameContract.getActiveGames();
+                    activeGames = games.map(game => ({
+                        id: game.id.toString(),
+                        type: game.gameType,
+                        creator: game.creator,
+                        stake: ethers.utils.formatEther(game.stake),
+                        status: game.status
+                    }));
+                    updateActiveGames();
+                } catch (error) {
+                    console.error("Error loading games:", error);
+                }
+            }
+        }
+
+        // Create a new game
+        async function createGame(gameType, stakeAmount) {
+            if (gameContract) {
+                try {
+                    const stakeWei = ethers.utils.parseEther(stakeAmount.toString());
+                    const tx = await gameContract.createGame(gameType, stakeWei);
+                    
+                    showTransactionStatus('Creating game on blockchain...', tx.hash);
+                    
+                    // Wait for transaction confirmation
+                    const receipt = await tx.wait();
+                    if (receipt.status === 1) {
+                        // Add to active games
+                        const newGame = {
+                            id: Date.now().toString(),
+                            type: gameType,
+                            creator: 'You',
+                            stake: stakeAmount,
+                            status: 'waiting'
+                        };
+                        activeGames.push(newGame);
+                        updateActiveGames();
+                        
+                        // Highlight new game in lobby
+                        setTimeout(() => {
+                            const newGameElement = document.querySelector(`[data-game-id="${newGame.id}"]`);
+                            if (newGameElement) {
+                                newGameElement.classList.add('new-game');
+                                setTimeout(() => newGameElement.classList.remove('new-game'), 3000);
+                            }
+                        }, 500);
+                        
+                        showTransactionStatus('✅ Game created!', tx.hash);
+                        openGameWindow(gameType);
+                        return newGame.id;
+                    }
+                } catch (error) {
+                    console.error("Error creating game:", error);
+                    showTransactionStatus('🔴 Game creation failed');
+                }
+            }
+            return null;
+        }
+
+        // Join an existing game
+        async function joinGame(gameId, stakeAmount) {
+            if (gameContract) {
+                try {
+                    const stakeWei = ethers.utils.parseEther(stakeAmount.toString());
+                    const tx = await gameContract.joinGame(gameId, { value: stakeWei });
+                    
+                    showTransactionStatus('Joining game on blockchain...', tx.hash);
+                    
+                    // Wait for transaction confirmation
+                    const receipt = await tx.wait();
+                    if (receipt.status === 1) {
+                        // Update game status
+                        const gameIndex = activeGames.findIndex(g => g.id === gameId);
+                        if (gameIndex !== -1) {
+                            activeGames.splice(gameIndex, 1);
+                            updateActiveGames();
+                        }
+                        
+                        // Determine game type and open window
+                        const game = activeGames.find(g => g.id === gameId);
+                        if (game) {
+                            openGameWindow(game.type);
+                        }
+                        
+                        showTransactionStatus('✅ Game joined!', tx.hash);
+                        return true;
+                    }
+                } catch (error) {
+                    console.error("Error joining game:", error);
+                    showTransactionStatus('🔴 Failed to join game');
+                }
+            }
+            return false;
+        }
+
+        // ======================
+        // GAME LOBBY IMPROVEMENTS
+        // ======================
+        
+        // Update active games display
+        function updateActiveGames() {
+            const gamesList = document.getElementById('activeGamesList');
+            const noGamesDiv = document.getElementById('noActiveGames');
+            
+            if (!gamesList) return;
+            
+            if (activeGames.length === 0) {
+                gamesList.innerHTML = '';
+                noGamesDiv.classList.remove('hidden');
+                return;
+            }
+            
+            noGamesDiv.classList.add('hidden');
+            gamesList.innerHTML = '';
+            
+            activeGames.forEach(game => {
+                const gameDiv = document.createElement('div');
+                gameDiv.className = 'game-lobby-item';
+                gameDiv.dataset.gameId = game.id;
+                
+                const gameIcon = game.type === 'chess' ? '♟️' : 
+                                game.type === 'checkers' ? '⚫' : '📝';
+                const gameName = game.type === 'chess' ? 'Chess Masters' : 
+                               game.type === 'checkers' ? 'Checkers Pro' : 'Word Battle';
+                
+                gameDiv.innerHTML = `
+                    <div>
+                        <strong>${gameIcon} ${gameName}</strong>
+                        <div style="font-size: 0.9rem; color: #aaa;">${game.creator} • Stake: ${game.stake} CORE</div>
+                    </div>
+                    <button class="join-game-btn" onclick="joinGame('${game.id}', ${game.stake})">Join Game</button>
+                `;
+                
+                gamesList.appendChild(gameDiv);
+            });
+            
+            // Update game feed
+            updateGameFeed();
+        }
+        
+        // Update live game feed
+        function updateGameFeed() {
+            const gameFeed = document.getElementById('gameFeed');
+            if (!gameFeed) return;
+            
+            gameFeed.innerHTML = `
+                <div class="news-item">
+                    <div class="news-title">🎮 Active Games: ${activeGames.length}</div>
+                    <div class="news-time">Players online now</div>
+                </div>
+                <div class="news-item">
+                    <div class="news-title">💰 Total Pool: ${activeGames.reduce((sum, game) => sum + parseFloat(game.stake), 0).toFixed(2)} CORE</div>
+                    <div class="news-time">Live betting volume</div>
+                </div>
+                <div class="news-item">
+                    <div class="news-title">🏆 Last Winner: ${playerStats.gamesWon > 0 ? 'You' : 'CryptoKing'}</div>
+                    <div class="news-time">Won ${playerStats.totalEarned.toFixed(2)} CORE in ${playerStats.chess.wins > 0 ? 'Chess' : playerStats.checkers.wins > 0 ? 'Checkers' : 'Word Battle'}</div>
+                </div>
+            `;
+        }
+
+        // ======================
+        // IN-GAME CHAT SYSTEM
+        // ======================
+        
+        function sendGameChat(gameType) {
+            const input = document.getElementById(`${gameType}ChatInput`);
+            const message = input.value.trim();
+            if (!message) return;
+            
+            const chatMessages = document.getElementById(`${gameType}ChatMessages`);
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message new-message';
+            messageDiv.textContent = `You: ${message}`;
+            chatMessages.appendChild(messageDiv);
+            
+            // Clear input
+            input.value = '';
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Save message
+            gameChats[gameType].push({
+                sender: 'You',
+                message: message,
+                timestamp: new Date().getTime()
+            });
+            
+            // Simulate opponent response after delay
+            setTimeout(() => {
+                const responses = [
+                    "Nice move!",
+                    "I'm winning this!",
+                    "Good game!",
+                    "Hmm... interesting.",
+                    "I need to concentrate."
+                ];
+                const response = responses[Math.floor(Math.random() * responses.length)];
+                addGameChatMessage(gameType, `Opponent: ${response}`);
+            }, 2000);
+        }
+        
+        function addGameChatMessage(gameType, message) {
+            const chatMessages = document.getElementById(`${gameType}ChatMessages`);
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message new-message';
+            messageDiv.textContent = message;
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // ======================
+        // GAME WINDOW MANAGEMENT
+        // ======================
+        
+        function openGameWindow(gameType) {
+            // ... (existing implementation) ...
+            // Additional: Initialize chat
+            const chatMessages = document.getElementById(`${gameType}ChatMessages`);
+            chatMessages.innerHTML = '';
+            gameChats[gameType].forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'chat-message';
+                messageDiv.textContent = `${msg.sender}: ${msg.message}`;
+                chatMessages.appendChild(messageDiv);
+            });
+        }
+
+        // ======================
+        // INITIALIZATION
+        // ======================
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize wallet connection button
+            document.getElementById('connectBtn').addEventListener('click', connectWallet);
+            document.getElementById('disconnectBtn').addEventListener('click', () => {
+                userAddress = '';
+                userBalance = 0;
+                document.getElementById('connectionStatus').innerHTML = '🔴 Not Connected';
+                document.getElementById('connectionStatus').classList.remove('connected-status');
+                document.getElementById('balanceDisplay').textContent = '0.00 CORE';
+                document.getElementById('connectBtn').classList.remove('hidden');
+                document.getElementById('disconnectBtn').classList.add('hidden');
+                showTransactionStatus('👋 Wallet disconnected');
+            });
+            
+            // Initialize contract
+            initContract();
+            
+            // Initialize chat input handlers
+            ['chess', 'checkers', 'word'].forEach(gameType => {
+                const input = document.getElementById(`${gameType}ChatInput`);
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        sendGameChat(gameType);
+                    }
+                });
+            });
+            
+            // Other initialization code...
+        });
+
+        // ... (rest of the existing JavaScript code) ...
+
+    </script>
+</body>
+</html>

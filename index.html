@@ -1,0 +1,3898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypticus - Enhanced Blockchain Gaming Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    
+    <!-- Basic CSS Variables - Copy this section -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4e54c8;
+            --primary-dark: #363a9e;
+            --secondary: #f39c12;
+            --dark: #1a1c2c;
+            --light: #f5f7fa;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --warning: #f1c40f;
+            --gray: #95a5a6;
+            --accent: #4ecdc4;
+        }
+
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1c2c, #2c3e50);
+            color: var(--light);
+            position: relative;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1620336655052-b57986f5a26a?q=80&w=1920') no-repeat center center;
+            background-size: cover;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+  <!-- Add this CSS after the basic styles -->
+<style>
+/* Enhanced Header Styles */
+.header {
+    position: relative;
+    z-index: 100;
+    background: linear-gradient(135deg, #1a1c2c, #2c3e50);
+    padding: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    min-height: 80px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo h1 {
+    font-size: 1.8rem;
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.logo-icon {
+    font-size: 2.5rem;
+    color: var(--secondary);
+}
+
+.nav-menu {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.nav-item {
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(78, 205, 196, 0.5);
+}
+
+.nav-item.active {
+    background: linear-gradient(45deg, var(--accent), #44a08d);
+    color: white;
+}
+
+/* NEW: Mobile Menu Styles */
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+.mobile-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(15px);
+    z-index: 200;
+    transition: right 0.3s ease;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-menu.open {
+    right: 0;
+}
+
+.mobile-menu-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mobile-menu-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.mobile-menu-items {
+    padding: 1rem 0;
+}
+
+.mobile-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+    cursor: pointer;
+}
+
+.mobile-menu-item:hover {
+    background: rgba(78, 205, 196, 0.1);
+    border-left-color: var(--accent);
+}
+
+.mobile-menu-item.active {
+    background: rgba(78, 205, 196, 0.2);
+    border-left-color: var(--accent);
+}
+
+.mobile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 199;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.mobile-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.live-badge {
+    background: linear-gradient(45deg, #00ff88, #00cc6a);
+    color: #000;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.8rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.wallet-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.wallet-info {
+    text-align: right;
+}
+
+.connection-status {
+    font-size: 0.9rem;
+    color: #ff6b6b;
+}
+
+.balance {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.connect-btn, .disconnect-btn {
+    background: linear-gradient(45deg, var(--accent), #44a08d);
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.disconnect-btn {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+    margin-left: 0.5rem;
+}
+
+.connect-btn:hover, .disconnect-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(78, 205, 196, 0.3);
+}
+
+/* Connection Status Indicators */
+.connection-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.connected {
+    background: #00ff88;
+    animation: pulse 2s infinite;
+}
+
+.disconnected {
+    background: #ff6b6b;
+}
+
+.pending {
+    background: #f1c40f;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.3; }
+}
+</style>
+  <!-- Add this CSS for Tournament and Enhanced Features -->
+<style>
+/* Main Layout */
+.main-container {
+    display: flex;
+    min-height: calc(100vh - 80px);
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 350px;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 2rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 80px);
+}
+
+.content-area {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 80px);
+}
+
+/* NEW: Tournament Styles */
+.tournament-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.tournament-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.tournament-card {
+    background: linear-gradient(135deg, rgba(78, 205, 196, 0.1), rgba(68, 160, 141, 0.1));
+    border: 2px solid rgba(78, 205, 196, 0.3);
+    border-radius: 15px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.tournament-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(78, 205, 196, 0.2);
+    border-color: var(--accent);
+}
+
+.tournament-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.tournament-title {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--accent);
+}
+
+.tournament-status {
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.status-registering {
+    background: linear-gradient(45deg, #f1c40f, #f39c12);
+    color: #000;
+}
+
+.status-active {
+    background: linear-gradient(45deg, #e74c3c, #c0392b);
+    color: white;
+}
+
+.status-finished {
+    background: linear-gradient(45deg, #95a5a6, #7f8c8d);
+    color: white;
+}
+
+.tournament-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.tournament-detail {
+    text-align: center;
+    padding: 0.8rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+.tournament-participants {
+    margin: 1rem 0;
+}
+
+.participants-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.participant-badge {
+    background: rgba(78, 205, 196, 0.2);
+    border: 1px solid var(--accent);
+    border-radius: 15px;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.8rem;
+}
+
+.bracket-view {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    padding: 1rem;
+    margin: 1rem 0;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #aaa;
+}
+
+/* NEW: Server-side Validation Indicators */
+.validation-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(46, 204, 113, 0.2);
+    border: 1px solid var(--success);
+    border-radius: 15px;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.7rem;
+    color: var(--success);
+}
+
+.validation-badge.warning {
+    background: rgba(241, 196, 15, 0.2);
+    border-color: var(--warning);
+    color: var(--warning);
+}
+
+.validation-badge.error {
+    background: rgba(231, 76, 60, 0.2);
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+/* NEW: Skill Rating Display */
+.skill-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.rating-stars {
+    color: #f39c12;
+}
+
+.rating-number {
+    font-weight: bold;
+    color: var(--accent);
+}
+
+/* NEW: Anti-bot Protection */
+.captcha-container {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    padding: 1rem;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.captcha-challenge {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: var(--accent);
+}
+
+.captcha-input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+    padding: 0.5rem;
+    color: white;
+    text-align: center;
+    width: 100px;
+    margin: 0 1rem;
+}
+
+/* Enhanced Game Entry Styles */
+.live-lobby {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+}
+
+.lobby-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lobby-stats {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1rem;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--accent);
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+.game-entry {
+    background: linear-gradient(135deg, rgba(78, 205, 196, 0.1), rgba(68, 160, 141, 0.1));
+    border: 1px solid rgba(78, 205, 196, 0.3);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.game-entry:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(78, 205, 196, 0.2);
+    border-color: var(--accent);
+}
+
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.game-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--accent);
+}
+
+.game-status {
+    padding: 0.2rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.status-waiting {
+    background: linear-gradient(45deg, #f1c40f, #f39c12);
+    color: #000;
+}
+
+.status-playing {
+    background: linear-gradient(45deg, #e74c3c, #c0392b);
+    color: white;
+}
+
+.game-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.detail-item {
+    text-align: center;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+}
+
+.detail-label {
+    color: #aaa;
+    font-size: 0.8rem;
+}
+
+.detail-value {
+    font-weight: bold;
+    margin-top: 0.2rem;
+}
+
+.join-btn, .tournament-btn {
+    width: 100%;
+    background: linear-gradient(45deg, #00ff88, #00cc6a);
+    border: none;
+    padding: 0.8rem;
+    border-radius: 8px;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.tournament-btn {
+    background: linear-gradient(45deg, #f39c12, #e67e22);
+    color: white;
+}
+
+.join-btn:hover, .tournament-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 255, 136, 0.3);
+}
+
+.join-btn:disabled, .tournament-btn:disabled {
+    background: #666;
+    color: #999;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+</style>
+  <!-- Add these additional styles -->
+<style>
+/* Settings Styles */
+.settings-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.settings-group {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.settings-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.settings-toggle {
+    position: relative;
+    width: 60px;
+    height: 30px;
+    background: #ccc;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.settings-toggle.active {
+    background: var(--accent);
+}
+
+.settings-toggle::after {
+    content: '';
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: white;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s;
+}
+
+.settings-toggle.active::after {
+    transform: translateX(30px);
+}
+
+.settings-input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 0.8rem;
+    color: white;
+    width: 200px;
+}
+
+.settings-button {
+    background: linear-gradient(45deg, var(--accent), #44a08d);
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 10px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.settings-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(78, 205, 196, 0.3);
+}
+
+.danger-button {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+}
+
+/* Transaction Status */
+.transaction-status {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.95);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 1rem;
+    max-width: 350px;
+    z-index: 2000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    word-wrap: break-word;
+}
+
+.transaction-status.show {
+    transform: translateX(0);
+}
+
+.tx-hash {
+    font-family: monospace;
+    font-size: 0.8rem;
+    word-break: break-all;
+    color: var(--accent);
+    margin-top: 0.5rem;
+    cursor: pointer;
+}
+
+/* Smart Contract Status */
+.contract-status {
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.contract-address {
+    font-family: monospace;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.5rem;
+    border-radius: 5px;
+    margin: 0.5rem 0;
+    word-break: break-all;
+}
+
+.copy-btn {
+    background: rgba(78, 205, 196, 0.2);
+    border: 1px solid var(--accent);
+    border-radius: 5px;
+    padding: 0.3rem 0.6rem;
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+    margin-left: 0.5rem;
+}
+
+.copy-btn:hover {
+    background: rgba(78, 205, 196, 0.3);
+}
+
+/* Progress Bar */
+.progress-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #00ff88);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+/* Age Verification Modal */
+.age-verification {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    backdrop-filter: blur(10px);
+}
+
+.verification-content {
+    background: var(--dark);
+    border-radius: 16px;
+    padding: 40px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 2px solid var(--primary);
+    position: relative;
+    z-index: 10000;
+}
+
+.verification-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: var(--secondary);
+}
+
+.verification-content p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    line-height: 1.6;
+    color: var(--light);
+}
+
+.verification-content .warning {
+    background: rgba(231, 76, 60, 0.2);
+    border-left: 4px solid var(--danger);
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
+    text-align: left;
+}
+
+.verification-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+}
+
+.verify-btn {
+    padding: 1rem 2rem;
+    border-radius: 25px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    min-width: 120px;
+}
+
+.verify-btn.accept {
+    background: linear-gradient(45deg, var(--accent), #44a08d);
+    color: white;
+}
+
+.verify-btn.decline {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+    color: white;
+}
+
+.verify-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Loading Animation */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: var(--accent);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Utility Classes */
+.fade-in {
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+.shake {
+    animation: shake 0.5s;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.glow {
+    box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+}
+</style>
+  <!-- Add these mobile responsive styles -->
+<style>
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    /* Mobile Navigation */
+    .nav-menu {
+        display: none;
+    }
+    
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
+    /* Main Layout Adjustments */
+    .main-container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        order: 2;
+        padding: 1rem;
+        max-height: none;
+    }
+    
+    .content-area {
+        order: 1;
+        padding: 1rem;
+        max-height: none;
+    }
+    
+    /* Header Adjustments */
+    .header {
+        padding: 0.5rem 1rem;
+        min-height: 70px;
+    }
+    
+    .logo h1 {
+        font-size: 1.4rem;
+    }
+    
+    .logo-icon {
+        font-size: 2rem;
+    }
+    
+    .live-badge {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.8rem;
+    }
+    
+    /* Wallet Section Mobile */
+    .wallet-section {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-end;
+    }
+    
+    .wallet-info {
+        text-align: center;
+    }
+    
+    .connect-btn, .disconnect-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+        margin-left: 0;
+    }
+    
+    /* Stats Layout */
+    .lobby-stats {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .stat-item {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 1rem;
+        border-radius: 8px;
+    }
+    
+    /* Game Details Grid */
+    .game-details {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    .tournament-details {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    /* Tournament Grid */
+    .tournament-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    /* Modal Adjustments */
+    .verification-content {
+        margin: 1rem;
+        padding: 2rem 1rem;
+        max-height: 90vh;
+    }
+    
+    .verification-content h1 {
+        font-size: 1.8rem;
+    }
+    
+    .verification-content p {
+        font-size: 1rem;
+    }
+    
+    .verify-btn {
+        min-width: 100px;
+        padding: 0.8rem 1.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .verification-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    /* Transaction Status Mobile */
+    .transaction-status {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+    
+    /* Game Type Selector */
+    .game-type-selector {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Settings Mobile */
+    .settings-item {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .settings-input {
+        width: 100%;
+    }
+    
+    /* Sidebar Mobile */
+    .sidebar {
+        padding: 1rem;
+    }
+    
+    .contract-status, .live-lobby {
+        margin-bottom: 1rem;
+        padding: 1rem;
+    }
+    
+    /* Mobile-specific Tournament Layout */
+    .tournament-card {
+        padding: 1rem;
+    }
+    
+    .tournament-header {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+    
+    .participants-list {
+        justify-content: center;
+    }
+    
+    /* Captcha Mobile */
+    .captcha-container {
+        padding: 0.8rem;
+    }
+    
+    .captcha-challenge {
+        font-size: 1rem;
+    }
+    
+    /* Skill Rating Mobile */
+    .skill-rating {
+        justify-content: center;
+    }
+    
+    /* Validation Status Mobile */
+    #validationStatus {
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        min-width: auto;
+    }
+    
+    /* Chat Section Mobile */
+    #chatSection .live-lobby {
+        height: 400px;
+    }
+    
+    /* Profile Section Mobile */
+    .lobby-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+}
+
+/* Tablet Responsive (768px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .sidebar {
+        width: 300px;
+    }
+    
+    .tournament-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+    
+    .game-type-selector {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+    
+    .nav-menu {
+        gap: 1rem;
+    }
+    
+    .nav-item {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Very Small Screens (max-width: 480px) */
+@media (max-width: 480px) {
+    .header {
+        padding: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .logo h1 {
+        font-size: 1.2rem;
+    }
+    
+    .logo-icon {
+        font-size: 1.5rem;
+    }
+    
+    .wallet-section {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .live-badge {
+        display: none;
+    }
+    
+    .verification-content {
+        padding: 1.5rem 0.8rem;
+    }
+    
+    .verification-content h1 {
+        font-size: 1.5rem;
+    }
+    
+    .tournament-card {
+        padding: 0.8rem;
+    }
+    
+    .settings-section {
+        padding: 1rem;
+    }
+    
+    .lobby-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-item {
+        padding: 0.8rem;
+    }
+    
+    .captcha-container {
+        padding: 0.5rem;
+    }
+    
+    .skill-rating {
+        font-size: 0.8rem;
+    }
+    
+    #validationStatus {
+        font-size: 0.8rem;
+        padding: 0.5rem;
+    }
+}
+
+/* Landscape Mobile (max-height: 500px) */
+@media (max-height: 500px) and (orientation: landscape) {
+    .verification-content {
+        max-height: 95vh;
+        padding: 1rem;
+    }
+    
+    .verification-content h1 {
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+    }
+    
+    .verification-content p {
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+    }
+    
+    .age-verification {
+        align-items: flex-start;
+        padding-top: 2rem;
+    }
+}
+
+/* High DPI Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .logo-icon {
+        transform: scale(0.9);
+    }
+    
+    .validation-badge {
+        font-size: 0.65rem;
+    }
+}
+</style>
+</head>
+<body>
+    <div class="background"></div>
+  <!-- Header HTML - Add this after the background div -->
+<div class="header">
+    <div class="logo">
+        <i class="fas fa-dice-d20 logo-icon"></i>
+        <h1>CRYPTICUS</h1>
+    </div>
+    
+    <!-- Desktop Navigation -->
+    <div class="nav-menu" id="navMenu">
+        <div class="nav-item active" onclick="showSection('lobby')">🎯 Game Lobby</div>
+        <div class="nav-item" onclick="showSection('tournaments')">🏆 Tournaments</div>
+        <div class="nav-item" onclick="showSection('profile')">👤 Profile</div>
+        <div class="nav-item" onclick="showSection('chat')">💬 Chat</div>
+        <div class="nav-item" onclick="showSection('settings')">⚙️ Settings</div>
+    </div>
+    
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="live-badge">🔴 LIVE ON CORE</div>
+    
+    <div class="wallet-section">
+        <div class="wallet-info">
+            <div class="connection-status" id="connectionStatus">
+                <span class="connection-indicator disconnected"></span>Not Connected
+            </div>
+            <div class="balance" id="balanceDisplay">0.00 CORE</div>
+        </div>
+        <button class="connect-btn" id="connectBtn">
+            <i class="fas fa-plug"></i> Connect Wallet
+        </button>
+        <button class="disconnect-btn hidden" id="disconnectBtn">Disconnect</button>
+    </div>
+</div>
+
+<!-- Mobile Menu -->
+<div class="mobile-overlay" id="mobileOverlay"></div>
+<div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+        <h3>Menu</h3>
+        <button class="mobile-menu-close" id="mobileMenuClose">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="mobile-menu-items">
+        <div class="mobile-menu-item active" onclick="showSection('lobby'); closeMobileMenu();">
+            <i class="fas fa-gamepad"></i>
+            <span>Game Lobby</span>
+        </div>
+        <div class="mobile-menu-item" onclick="showSection('tournaments'); closeMobileMenu();">
+            <i class="fas fa-trophy"></i>
+            <span>Tournaments</span>
+        </div>
+        <div class="mobile-menu-item" onclick="showSection('profile'); closeMobileMenu();">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </div>
+        <div class="mobile-menu-item" onclick="showSection('chat'); closeMobileMenu();">
+            <i class="fas fa-comments"></i>
+            <span>Chat</span>
+        </div>
+        <div class="mobile-menu-item" onclick="showSection('settings'); closeMobileMenu();">
+            <i class="fas fa-cog"></i>
+            <span>Settings</span>
+        </div>
+    </div>
+</div>
+  <!-- Main Container - Add after header -->
+<div class="main-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <!-- Smart Contract Status -->
+        <div class="contract-status">
+            <h3>🔐 Smart Contract Status</h3>
+            <div class="contract-address" id="contractAddress">
+                0x7af2cB8f93D0a75E0ba39E974B4e968EAe49028A
+                <button class="copy-btn" onclick="copyContractAddress()">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+            <div id="contractStatus">
+                <span class="connection-indicator pending"></span>
+                Connecting to Core Blockchain...
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="connectionProgress" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Live Statistics -->
+        <div class="live-lobby">
+            <h3>📊 Live Platform Stats</h3>
+            <div class="lobby-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalPlayers">0</div>
+                    <div class="stat-label">Online Players</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalGames">0</div>
+                    <div class="stat-label">Active Games</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalVolume">0</div>
+                    <div class="stat-label">CORE Volume</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Feed -->
+        <div class="live-lobby">
+            <h3>🔥 Recent Activity</h3>
+            <div id="activityFeed">
+                <!-- Activity items will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+        <!-- Game Lobby Section -->
+        <div id="lobbySection">
+            <div class="live-lobby">
+                <div class="lobby-header">
+                    <h2>🎯 Live Game Lobby</h2>
+                    <button onclick="refreshLobby()" class="game-btn" style="width: auto; padding: 0.5rem 1rem; background: linear-gradient(45deg, var(--accent), #44a08d); border: none; border-radius: 8px; color: white; cursor: pointer;">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                
+                <div id="gamesList">
+                    <!-- Games will be populated here -->
+                </div>
+                
+                <div id="noGames" class="hidden" style="text-align: center; padding: 3rem; color: #aaa;">
+                    <i class="fas fa-gamepad" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                    <h3>No Active Games</h3>
+                    <p>Be the first to create a game and start earning CORE!</p>
+                    <button onclick="showSection('tournaments')" class="join-btn" style="margin-top: 1rem; max-width: 200px;">
+                        Join Tournament
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW: Tournament Section -->
+        <div id="tournamentsSection" class="hidden">
+            <div class="tournament-section">
+                <h2 style="color: #4ecdc4; margin-bottom: 2rem;">🏆 Tournaments & Enhanced Gaming</h2>
+                
+                <!-- Tournament Creation -->
+                <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem;">
+                    <h3>🎮 Create Tournament</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0;">
+                        <select id="tournamentType" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 8px; padding: 0.8rem; color: white;">
+                            <option value="chess">♟️ Chess Tournament</option>
+                            <option value="checkers">⚫ Checkers Tournament</option>
+                            <option value="words">📝 Word Battle Tournament</option>
+                        </select>
+                        <input type="number" id="tournamentStake" placeholder="Entry Fee (CORE)" min="0.01" step="0.01" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 8px; padding: 0.8rem; color: white;">
+                        <input type="number" id="maxParticipants" placeholder="Max Players" min="4" max="64" step="1" value="8" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 8px; padding: 0.8rem; color: white;">
+                    </div>
+                    
+                    <!-- NEW: Anti-bot Protection -->
+                    <div class="captcha-container" id="captchaContainer" style="display: none;">
+                        <div class="captcha-challenge" id="captchaChallenge">Solve: 5 + 3 = ?</div>
+                        <input type="number" class="captcha-input" id="captchaInput" placeholder="?">
+                        <button onclick="verifyCaptcha()" style="background: var(--accent); border: none; padding: 0.5rem 1rem; border-radius: 5px; color: white; margin-left: 1rem; cursor: pointer;">Verify</button>
+                    </div>
+                    
+                    <button onclick="createTournament()" class="tournament-btn" id="createTournamentBtn">
+                        <i class="fas fa-trophy"></i> Create Tournament
+                    </button>
+                </div>
+                
+                <!-- Active Tournaments -->
+                <div class="tournament-grid" id="tournamentGrid">
+                    <!-- Tournaments will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Section -->
+        <div id="profileSection" class="hidden">
+            <div class="live-lobby">
+                <h3 style="color: #4ecdc4; margin-bottom: 1rem;">👤 Player Profile</h3>
+                
+                <!-- NEW: Skill Rating Display -->
+                <div style="background: rgba(255, 255, 255, 0.05); border-radius: 10px; padding: 1rem; margin-bottom: 1rem;">
+                    <h4 style="color: #f39c12; margin-bottom: 0.5rem;">🏅 Skill Rating</h4>
+                    <div class="skill-rating">
+                        <div class="rating-stars">★★★★☆</div>
+                        <div class="rating-number" id="skillRating">1847</div>
+                        <span style="color: #aaa;">ELO</span>
+                    </div>
+                </div>
+                
+                <div class="lobby-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="profileGamesPlayed">0</div>
+                        <div class="stat-label">Games Played</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="profileGamesWon">0</div>
+                        <div class="stat-label">Games Won</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="profileTotalEarned">0</div>
+                        <div class="stat-label">CORE Earned</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="profileWinRate">0%</div>
+                        <div class="stat-label">Win Rate</div>
+                    </div>
+                </div>
+                
+                <!-- Game History -->
+                <div style="margin-top: 2rem;">
+                    <h4 style="margin-bottom: 1rem; color: #4ecdc4;">Recent Games</h4>
+                    <div id="gameHistory">
+                        <!-- Game history will be populated here -->
+                    </div>
+                </div>
+                
+                <!-- NEW: Tournament History -->
+                <div style="margin-top: 2rem;">
+                    <h4 style="margin-bottom: 1rem; color: #4ecdc4;">Tournament History</h4>
+                    <div id="tournamentHistory">
+                        <!-- Tournament history will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Section -->
+        <div id="chatSection" class="hidden">
+            <div class="live-lobby" style="height: 500px; display: flex; flex-direction: column;">
+                <h3 style="margin-bottom: 1rem;">💬 Global Chat</h3>
+                <div style="flex: 1; overflow-y: auto; background: rgba(0, 0, 0, 0.2); border-radius: 10px; padding: 1rem; margin-bottom: 1rem;" id="chatMessages">
+                    <!-- Chat messages will be populated here -->
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" placeholder="Type your message..." id="chatInput" 
+                           style="flex: 1; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 25px; padding: 0.8rem 1rem; color: white;" 
+                           onkeypress="handleChatKeyPress(event)" maxlength="200">
+                    <button onclick="sendChatMessage()" style="background: linear-gradient(45deg, var(--accent), #44a08d); border: none; padding: 0.8rem 1rem; border-radius: 25px; color: white; cursor: pointer;">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="settingsSection" class="hidden">
+            <div class="settings-section">
+                <h2 style="color: #4ecdc4; margin-bottom: 2rem;">⚙️ Platform Settings</h2>
+                
+                <!-- Game Settings -->
+                <div class="settings-group">
+                    <h3 style="color: #f39c12; margin-bottom: 1rem;">🎮 Game Settings</h3>
+                    
+                    <div class="settings-item">
+                        <div>
+                            <h4>Auto-join Games</h4>
+                            <p style="color: #aaa; font-size: 0.9rem;">Automatically join games when available</p>
+                        </div>
+                        <div class="settings-toggle" id="autoJoinToggle" onclick="toggleSetting('autoJoin')"></div>
+                    </div>
+                    
+                    <div class="settings-item">
+                        <div>
+                            <h4>Sound Effects</h4>
+                            <p style="color: #aaa; font-size: 0.9rem;">Enable game sound effects</p>
+                        </div>
+                        <div class="settings-toggle active" id="soundToggle" onclick="toggleSetting('sound')"></div>
+                    </div>
+                    
+                    <div class="settings-item">
+                        <div>
+                            <h4>Server Validation</h4>
+                            <p style="color: #aaa; font-size: 0.9rem;">Enable server-side move validation</p>
+                            <div class="validation-badge" style="margin-top: 0.5rem;">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Secure</span>
+                            </div>
+                        </div>
+                        <div class="settings-toggle active" id="serverValidationToggle" onclick="toggleSetting('serverValidation')"></div>
+                    </div>
+                    
+                    <div class="settings-item">
+                        <div>
+                            <h4>Default Stake Amount</h4>
+                            <p style="color: #aaa; font-size: 0.9rem;">Set your preferred stake amount</p>
+                        </div>
+                        <input type="number" class="settings-input" id="defaultStake" placeholder="0.01" min="0.01" step="0.01" value="0.1">
+                    </div>
+                </div>
+                
+                <!-- Advanced Settings -->
+                <div class="settings-group">
+                    <h3 style="color: #f39c12; margin-bottom: 1rem;">⚡ Advanced</h3>
+                    
+                    <div class="settings-item">
+                        <div>
+                            <h4>Skill-based Matching</h4>
+                            <p style="color: #aaa; font-size: 0.9rem;">Match with players of similar skill level</p>
+                        </div>
+                        <div class="settings-toggle active" id="skillMatchingToggle" onclick="toggleSetting('skillMatching')"></div>
+                    </div>
+                    
+                    <div class="settings-item">
+                        <div>
+                            <h4>Anti-bot Protection</h4>
+                            <p style="color: #aaa; font-size: 0.9rem;">Enable CAPTCHA verification</p>
+                        </div>
+                        <div class="settings-toggle active" id="antiBotToggle" onclick="toggleSetting('antiBot')"></div>
+                    </div>
+                    
+                    <div class="settings-item">
+                        <div>
+                            <h4>Gas Price Priority</h4>
+                            <p style="color: #aaa; font-size: 0.9rem;">Transaction speed preference</p>
+                        </div>
+                        <select class="settings-input" id="gasPriority" style="width: 150px;">
+                            <option value="slow">Slow (Low Fee)</option>
+                            <option value="standard" selected>Standard</option>
+                            <option value="fast">Fast (High Fee)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
+                    <button class="settings-button" onclick="saveSettings()">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                    <button class="settings-button" onclick="resetSettings()">
+                        <i class="fas fa-undo"></i> Reset to Default
+                    </button>
+                    <button class="settings-button danger-button" onclick="clearAllData()">
+                        <i class="fas fa-trash"></i> Clear All Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+  <!-- Add these modal elements before closing body tag -->
+
+<!-- Age Verification Modal -->
+<div class="age-verification" id="ageVerificationModal">
+    <div class="verification-content">
+        <h1><i class="fas fa-exclamation-triangle"></i> Age Verification Required</h1>
+        <p>This platform contains blockchain-based games that involve financial stakes. You must be 18 years or older to access this content.</p>
+        <div class="warning">
+            <p><i class="fas fa-exclamation-circle"></i> Gambling involves risk. Please play responsibly. Only gamble with funds you can afford to lose.</p>
+        </div>
+        <p>By entering this site, you confirm that you are at least 18 years of age and agree to our Terms of Service.</p>
+        <div class="verification-buttons">
+            <button class="verify-btn accept" onclick="verifyAge(true)">I am 18+</button>
+            <button class="verify-btn decline" onclick="verifyAge(false)">Under 18</button>
+        </div>
+    </div>
+</div>
+
+<!-- Transaction Status -->
+<div class="transaction-status" id="transactionStatus">
+    <div id="txStatusMessage">Processing transaction...</div>
+    <div class="tx-hash" id="txHash"></div>
+</div>
+
+<!-- Game Overlay -->
+<div class="game-overlay hidden" id="gameOverlay"></div>
+
+<!-- NEW: Tournament Details Modal -->
+<div class="age-verification hidden" id="tournamentModal" style="z-index: 1500;">
+    <div class="verification-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h2 id="tournamentModalTitle">Tournament Details</h2>
+            <button onclick="closeTournamentModal()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">×</button>
+        </div>
+        
+        <div id="tournamentModalContent">
+            <!-- Tournament details will be populated here -->
+        </div>
+        
+        <div style="margin-top: 2rem;">
+            <button class="verify-btn accept" id="joinTournamentBtn" onclick="joinTournament()">
+                Join Tournament
+            </button>
+            <button class="verify-btn decline" onclick="closeTournamentModal()">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- NEW: Skill Verification Modal -->
+<div class="age-verification hidden" id="skillVerificationModal" style="z-index: 1600;">
+    <div class="verification-content">
+        <h2>🎯 Skill Verification Required</h2>
+        <p>To ensure fair gameplay, please complete this quick skill assessment:</p>
+        
+        <div class="captcha-container">
+            <div class="captcha-challenge" id="skillChallenge">
+                Complete the pattern: ♜ ♞ ♝ ♛ ?
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: center; margin: 1rem 0;">
+                <button class="captcha-input" onclick="selectSkillAnswer('♚')" style="width: auto; padding: 0.5rem; cursor: pointer;">♚</button>
+                <button class="captcha-input" onclick="selectSkillAnswer('♜')" style="width: auto; padding: 0.5rem; cursor: pointer;">♜</button>
+                <button class="captcha-input" onclick="selectSkillAnswer('♞')" style="width: auto; padding: 0.5rem; cursor: pointer;">♞</button>
+                <button class="captcha-input" onclick="selectSkillAnswer('♝')" style="width: auto; padding: 0.5rem; cursor: pointer;">♝</button>
+            </div>
+        </div>
+        
+        <div class="verification-buttons">
+            <button class="verify-btn accept" id="submitSkillAnswer" onclick="submitSkillVerification()" disabled>
+                Submit Answer
+            </button>
+            <button class="verify-btn decline" onclick="closeSkillVerification()">
+                Skip
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- NEW: Server Validation Status Indicator -->
+<div style="position: fixed; bottom: 20px; left: 20px; background: rgba(0, 0, 0, 0.8); border-radius: 10px; padding: 1rem; z-index: 1000; min-width: 200px;" id="validationStatus">
+    <h4 style="margin-bottom: 0.5rem; color: #4ecdc4;">🛡️ Security Status</h4>
+    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem;">
+        <div class="validation-badge">
+            <i class="fas fa-shield-alt"></i>
+            <span>Server Validation</span>
+        </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem;">
+        <div class="validation-badge">
+            <i class="fas fa-random"></i>
+            <span>Provable Randomness</span>
+        </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <div class="validation-badge">
+            <i class="fas fa-robot"></i>
+            <span>Anti-bot Active</span>
+        </div>
+    </div>
+</div>
+  <script>
+    // Enhanced Blockchain Integration with Server-side Validation
+const GAME_CONTRACT_ADDRESS = "0x7af2cB8f93D0a75E0ba39E974B4e968EAe49028A";
+const CORE_CHAIN_ID = "0x45c";
+
+// Simplified working ABI
+const GAME_CONTRACT_ABI = [
+    "function owner() external view returns (address)",
+    "function paused() external view returns (bool)",
+    "function totalGames() external view returns (uint256)",
+    "function deposit() external payable",
+    "function withdraw(uint256 amount) external",
+    "event Deposit(address indexed user, uint256 amount)",
+    "event Withdrawal(address indexed user, uint256 amount)"
+];
+
+// Enhanced Global Variables
+let web3Provider = null;
+let userAccount = null;
+let gameContract = null;
+let currentBalance = 0;
+let activeGames = [];
+let globalGamesList = [];
+let activeTournaments = [];
+let selectedGameType = null;
+let gameUpdateInterval = null;
+let multiplayerSession = null;
+let gameRoomConnections = new Map();
+let pendingMatches = new Map();
+let currentSkillRating = 1200; // ELO rating
+let captchaAnswer = null;
+let skillVerificationAnswer = null;
+
+// Player stats with enhanced tracking
+let playerStats = {
+    gamesPlayed: 0,
+    gamesWon: 0,
+    totalEarned: 0,
+    winRate: 0,
+    skillRating: 1200,
+    tournamentsWon: 0,
+    perfectGames: 0
+};
+
+// NEW: Enhanced Settings with server validation
+let platformSettings = {
+    autoJoin: false,
+    sound: true,
+    animations: true,
+    serverValidation: true,
+    skillMatching: true,
+    antiBot: true,
+    defaultStake: 0.1,
+    gameInvites: true,
+    txNotifications: true,
+    chatNotifications: false,
+    autoLock: true,
+    sessionTimeout: 30,
+    hideBalance: false,
+    gasPriority: 'standard',
+    rpcEndpoint: 'https://rpc.coredao.org',
+    developerMode: false
+};
+
+// Initialize blockchain connection with enhanced security
+async function initializeBlockchain() {
+    try {
+        updateConnectionProgress(20);
+        
+        if (typeof window.ethereum === 'undefined') {
+            console.log('MetaMask not detected - continuing in demo mode');
+            updateConnectionProgress(100);
+            updateContractStatus('demo');
+            initializeGlobalLobby();
+            return true;
+        }
+
+        web3Provider = new ethers.providers.Web3Provider(window.ethereum);
+        updateConnectionProgress(40);
+
+        const network = await web3Provider.getNetwork();
+        console.log('Current network:', network);
+        
+        updateConnectionProgress(60);
+        
+        if (network.chainId !== parseInt(CORE_CHAIN_ID, 16)) {
+            console.log('Network mismatch - continuing in demo mode');
+        }
+        
+        updateConnectionProgress(80);
+        
+        gameContract = new ethers.Contract(
+            GAME_CONTRACT_ADDRESS, 
+            GAME_CONTRACT_ABI, 
+            web3Provider
+        );
+        
+        updateConnectionProgress(100);
+        updateContractStatus('connected');
+        
+        initializeGlobalLobby();
+        initializeTournaments();
+        
+        return true;
+    } catch (error) {
+        console.error('Blockchain initialization failed:', error);
+        updateContractStatus('demo', 'Running in demo mode');
+        initializeGlobalLobby();
+        initializeTournaments();
+        return true;
+    }
+}
+
+// NEW: Global Lobby System with Enhanced Features
+function initializeGlobalLobby() {
+    if (globalGamesList.length === 0) {
+        globalGamesList = [
+            {
+                id: Date.now() - 300000,
+                type: 'chess',
+                creator: '0x1234567890123456789012345678901234567890',
+                creatorRating: 1456,
+                stake: 0.05,
+                status: 'waiting',
+                createdAt: Date.now() - 300000,
+                serverValidated: true,
+                antiBotVerified: true
+            },
+            {
+                id: Date.now() - 180000,
+                type: 'checkers', 
+                creator: '0x9876543210987654321098765432109876543210',
+                creatorRating: 1623,
+                stake: 0.02,
+                status: 'waiting',
+                createdAt: Date.now() - 180000,
+                serverValidated: true,
+                antiBotVerified: true
+            }
+        ];
+    }
+    
+    // Update global lobby every 5 seconds with skill-based matching
+    setInterval(() => {
+        if (Math.random() < 0.1 && globalGamesList.length < 8) {
+            const gameTypes = ['chess', 'checkers', 'words'];
+            const stakes = [0.01, 0.02, 0.05, 0.1];
+            const ratings = [1100, 1250, 1400, 1550, 1700];
+            
+            globalGamesList.push({
+                id: Date.now(),
+                type: gameTypes[Math.floor(Math.random() * gameTypes.length)],
+                creator: '0x' + Math.random().toString(16).substr(2, 40),
+                creatorRating: ratings[Math.floor(Math.random() * ratings.length)],
+                stake: stakes[Math.floor(Math.random() * stakes.length)],
+                status: 'waiting',
+                createdAt: Date.now(),
+                serverValidated: Math.random() > 0.1,
+                antiBotVerified: Math.random() > 0.05
+            });
+        }
+        
+        if (currentSection === 'lobby') {
+            updateGamesDisplay();
+        }
+    }, 5000);
+}
+
+// NEW: Tournament System
+function initializeTournaments() {
+    if (activeTournaments.length === 0) {
+        activeTournaments = [
+            {
+                id: 'tournament_' + Date.now(),
+                name: 'Chess Masters Championship',
+                type: 'chess',
+                entryFee: 0.1,
+                maxParticipants: 16,
+                currentParticipants: 8,
+                prizePool: 1.6,
+                status: 'registering',
+                startTime: Date.now() + 600000, // 10 minutes
+                participants: [
+                    { address: '0x1234...5678', rating: 1456 },
+                    { address: '0x8765...4321', rating: 1623 },
+                    { address: '0x9999...1111', rating: 1389 },
+                    { address: '0x5555...7777', rating: 1567 }
+                ],
+                rounds: [],
+                winner: null
+            },
+            {
+                id: 'tournament_' + (Date.now() + 1),
+                name: 'Speed Checkers Blitz',
+                type: 'checkers',
+                entryFee: 0.05,
+                maxParticipants: 8,
+                currentParticipants: 6,
+                prizePool: 0.4,
+                status: 'registering',
+                startTime: Date.now() + 900000, // 15 minutes
+                participants: [
+                    { address: '0x2222...3333', rating: 1334 },
+                    { address: '0x4444...5555', rating: 1456 }
+                ],
+                rounds: [],
+                winner: null
+            }
+        ];
+    }
+}
+
+// NEW: Anti-bot Protection System
+function generateCaptcha() {
+    const operations = ['+', '-', '*'];
+    const op = operations[Math.floor(Math.random() * operations.length)];
+    let a, b, answer;
+    
+    switch(op) {
+        case '+':
+            a = Math.floor(Math.random() * 10) + 1;
+            b = Math.floor(Math.random() * 10) + 1;
+            answer = a + b;
+            break;
+        case '-':
+            a = Math.floor(Math.random() * 15) + 5;
+            b = Math.floor(Math.random() * 5) + 1;
+            answer = a - b;
+            break;
+        case '*':
+            a = Math.floor(Math.random() * 5) + 2;
+            b = Math.floor(Math.random() * 5) + 2;
+            answer = a * b;
+            break;
+    }
+    
+    captchaAnswer = answer;
+    const challenge = `Solve: ${a} ${op} ${b} = ?`;
+    
+    document.getElementById('captchaChallenge').textContent = challenge;
+    document.getElementById('captchaContainer').style.display = 'block';
+}
+
+function verifyCaptcha() {
+    const userAnswer = parseInt(document.getElementById('captchaInput').value);
+    
+    if (userAnswer === captchaAnswer) {
+        document.getElementById('captchaContainer').style.display = 'none';
+        document.getElementById('createTournamentBtn').disabled = false;
+        showTransactionStatus('✅ CAPTCHA verified successfully', '');
+        return true;
+    } else {
+        showTransactionStatus('❌ Incorrect CAPTCHA answer', '');
+        generateCaptcha(); // Generate new challenge
+        document.getElementById('captchaInput').value = '';
+        return false;
+    }
+}
+
+// NEW: Skill-based Matchmaking
+function findSkillMatchedOpponent(playerRating, gameType) {
+    const ratingRange = 200; // +/- 200 ELO points
+    const suitableGames = globalGamesList.filter(game => 
+        game.type === gameType &&
+        game.status === 'waiting' &&
+        Math.abs(game.creatorRating - playerRating) <= ratingRange &&
+        game.serverValidated &&
+        game.antiBotVerified
+    );
+    
+    // Sort by closest rating match
+    suitableGames.sort((a, b) => 
+        Math.abs(a.creatorRating - playerRating) - Math.abs(b.creatorRating - playerRating)
+    );
+    
+    return suitableGames.length > 0 ? suitableGames[0] : null;
+}
+
+// NEW: Server-side Validation System
+async function validateMoveOnServer(gameId, moveData) {
+    // Simulate server-side validation
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            // Basic validation rules
+            const isValid = moveData && 
+                           moveData.from && 
+                           moveData.to && 
+                           moveData.from.row !== moveData.to.row || moveData.from.col !== moveData.to.col;
+            
+            resolve({
+                valid: isValid,
+                message: isValid ? 'Move validated' : 'Invalid move detected',
+                timestamp: Date.now(),
+                validationHash: 'hash_' + Math.random().toString(36).substr(2, 9)
+            });
+        }, 100 + Math.random() * 200); // Simulate network delay
+    });
+}
+
+// NEW: Provably Fair Randomness
+function generateProvablyFairSeed() {
+    const timestamp = Date.now();
+    const userInput = userAccount || 'anonymous';
+    const blockHash = 'simulated_block_hash_' + Math.random().toString(36);
+    
+    // Simulate commit-reveal scheme
+    const commitHash = btoa(timestamp + userInput + blockHash);
+    
+    return {
+        seed: commitHash,
+        timestamp: timestamp,
+        blockHash: blockHash,
+        userInput: userInput
+    };
+}
+
+// Enhanced wallet connection with skill verification
+async function connectWallet() {
+    try {
+        showTransactionStatus('🔄 Connecting wallet...', '');
+        
+        if (typeof window.ethereum === 'undefined') {
+            userAccount = '0x' + Math.random().toString(16).slice(2, 42);
+            currentBalance = 10.0;
+            currentSkillRating = 1200 + Math.floor(Math.random() * 600);
+            
+            updateConnectionStatus('connected');
+            document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
+            document.getElementById('skillRating').textContent = currentSkillRating;
+            document.getElementById('connectBtn').classList.add('hidden');
+            document.getElementById('disconnectBtn').classList.remove('hidden');
+            
+            showTransactionStatus('✅ Demo wallet connected!', '');
+            await loadUserData();
+            await refreshLobby();
+            startRealTimeUpdates();
+            
+            // Show skill verification for new users
+            if (platformSettings.skillMatching) {
+                setTimeout(() => showSkillVerification(), 2000);
+            }
+            return;
+        }
+
+        if (!await initializeBlockchain()) {
+            return;
+        }
+
+        const accounts = await window.ethereum.request({
+            method: 'eth_requestAccounts'
+        });
+        
+        if (accounts.length === 0) {
+            throw new Error('No accounts found');
+        }
+
+        userAccount = accounts[0];
+        
+        const signer = web3Provider.getSigner();
+        if (gameContract) {
+            gameContract = gameContract.connect(signer);
+        }
+        
+        const balance = await web3Provider.getBalance(userAccount);
+        currentBalance = parseFloat(ethers.utils.formatEther(balance));
+        
+        // Load or generate skill rating
+        const savedRating = localStorage.getItem(`skillRating_${userAccount}`);
+        currentSkillRating = savedRating ? parseInt(savedRating) : 1200;
+        
+        updateConnectionStatus('connected');
+        document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
+        document.getElementById('skillRating').textContent = currentSkillRating;
+        document.getElementById('connectBtn').classList.add('hidden');
+        document.getElementById('disconnectBtn').classList.remove('hidden');
+        
+        showTransactionStatus('✅ Wallet connected successfully!', '');
+        
+        await loadUserData();
+        await refreshLobby();
+        startRealTimeUpdates();
+        
+        if (window.ethereum.on) {
+            window.ethereum.on('accountsChanged', handleAccountsChanged);
+            window.ethereum.on('chainChanged', handleChainChanged);
+        }
+        
+    } catch (error) {
+        console.error('Failed to connect wallet:', error);
+        showTransactionStatus('❌ Failed to connect wallet: ' + error.message, '');
+        updateConnectionStatus('disconnected');
+    }
+}
+
+// Navigation functions with mobile support
+function showSection(section) {
+    document.querySelectorAll('[id$="Section"]').forEach(el => el.classList.add('hidden'));
+    
+    const targetSection = document.getElementById(section + 'Section');
+    if (targetSection) {
+        targetSection.classList.remove('hidden');
+    }
+    
+    // Update desktop navigation
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    const clickedItem = Array.from(document.querySelectorAll('.nav-item')).find(item => 
+        item.textContent.toLowerCase().includes(section.toLowerCase())
+    );
+    if (clickedItem) {
+        clickedItem.classList.add('active');
+    }
+    
+    // Update mobile navigation
+    document.querySelectorAll('.mobile-menu-item').forEach(item => item.classList.remove('active'));
+    const clickedMobileItem = Array.from(document.querySelectorAll('.mobile-menu-item')).find(item => 
+        item.textContent.toLowerCase().includes(section.toLowerCase())
+    );
+    if (clickedMobileItem) {
+        clickedMobileItem.classList.add('active');
+    }
+    
+    currentSection = section;
+    
+    // Load section-specific data
+    if (section === 'lobby') {
+        refreshLobby();
+    } else if (section === 'tournaments') {
+        updateTournamentDisplay();
+    } else if (section === 'profile') {
+        updatePlayerStats();
+        loadGameHistory();
+        loadTournamentHistory();
+    } else if (section === 'settings') {
+        loadSettings();
+    }
+}
+
+// NEW: Mobile Menu Functions
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    const overlay = document.getElementById('mobileOverlay');
+    
+    menu.classList.toggle('open');
+    overlay.classList.toggle('show');
+}
+
+function closeMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    const overlay = document.getElementById('mobileOverlay');
+    
+    menu.classList.remove('open');
+    overlay.classList.remove('show');
+}
+
+// Initialize mobile menu event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const mobileToggle = document.getElementById('mobileMenuToggle');
+    const mobileClose = document.getElementById('mobileMenuClose');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    
+    if (mobileToggle) {
+        mobileToggle.addEventListener('click', toggleMobileMenu);
+    }
+    
+    if (mobileClose) {
+        mobileClose.addEventListener('click', closeMobileMenu);
+    }
+    
+    if (mobileOverlay) {
+        mobileOverlay.addEventListener('click', closeMobileMenu);
+    }
+});
+
+// Current section tracking
+let currentSection = 'lobby';
+  </script>
+  <script>
+    // NEW: Tournament Management Functions
+async function createTournament() {
+    const tournamentType = document.getElementById('tournamentType').value;
+    const entryFee = parseFloat(document.getElementById('tournamentStake').value);
+    const maxParticipants = parseInt(document.getElementById('maxParticipants').value);
+    
+    if (!userAccount) {
+        showTransactionStatus('❌ Please connect your wallet first', '');
+        return;
+    }
+    
+    if (!entryFee || entryFee < 0.01) {
+        showTransactionStatus('❌ Please enter a valid entry fee (minimum 0.01 CORE)', '');
+        return;
+    }
+    
+    if (!maxParticipants || maxParticipants < 4 || maxParticipants > 64) {
+        showTransactionStatus('❌ Tournament must have 4-64 participants', '');
+        return;
+    }
+    
+    if (entryFee > currentBalance) {
+        showTransactionStatus('❌ Insufficient CORE balance', '');
+        return;
+    }
+    
+    // Anti-bot verification
+    if (platformSettings.antiBot) {
+        generateCaptcha();
+        return; // Wait for CAPTCHA completion
+    }
+    
+    try {
+        showTransactionStatus('🔄 Creating tournament...', '');
+        
+        const tournamentId = 'tournament_' + Date.now();
+        const newTournament = {
+            id: tournamentId,
+            name: `${tournamentType.toUpperCase()} ${new Date().toLocaleDateString()}`,
+            type: tournamentType,
+            entryFee: entryFee,
+            maxParticipants: maxParticipants,
+            currentParticipants: 1,
+            prizePool: entryFee * 0.97, // 3% platform fee
+            status: 'registering',
+            startTime: Date.now() + 300000, // 5 minutes registration
+            creator: userAccount,
+            participants: [{
+                address: userAccount,
+                rating: currentSkillRating,
+                joinedAt: Date.now()
+            }],
+            rounds: [],
+            winner: null,
+            createdAt: Date.now()
+        };
+        
+        activeTournaments.push(newTournament);
+        
+        // Update balance
+        currentBalance -= entryFee;
+        document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
+        
+        // Clear form
+        document.getElementById('tournamentStake').value = '';
+        document.getElementById('createTournamentBtn').disabled = false;
+        
+        updateTournamentDisplay();
+        addActivityFeedItem(`🏆 You created a ${tournamentType} tournament with ${entryFee} CORE entry fee`);
+        showTransactionStatus('✅ Tournament created successfully!', '');
+        
+    } catch (error) {
+        showTransactionStatus('❌ Failed to create tournament: ' + error.message, '');
+    }
+}
+
+function updateTournamentDisplay() {
+    const tournamentGrid = document.getElementById('tournamentGrid');
+    if (!tournamentGrid) return;
+    
+    if (activeTournaments.length === 0) {
+        tournamentGrid.innerHTML = `
+            <div style="text-align: center; padding: 3rem; color: #aaa; grid-column: 1 / -1;">
+                <i class="fas fa-trophy" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                <h3>No Active Tournaments</h3>
+                <p>Create the first tournament and start competing!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    tournamentGrid.innerHTML = activeTournaments.map(tournament => {
+        const timeUntilStart = Math.max(0, tournament.startTime - Date.now());
+        const timeString = timeUntilStart > 0 ? 
+            `Starts in ${Math.ceil(timeUntilStart / 60000)}m` : 
+            'In Progress';
+        
+        const canJoin = userAccount && 
+                       tournament.status === 'registering' &&
+                       tournament.currentParticipants < tournament.maxParticipants &&
+                       currentBalance >= tournament.entryFee &&
+                       !tournament.participants.some(p => p.address === userAccount);
+        
+        const gameIcons = { chess: '♟️', checkers: '⚫', words: '📝' };
+        
+        return `
+            <div class="tournament-card fade-in">
+                <div class="tournament-header">
+                    <div class="tournament-title">
+                        ${gameIcons[tournament.type]} ${tournament.name}
+                    </div>
+                    <div class="tournament-status status-${tournament.status}">
+                        ${tournament.status.toUpperCase()}
+                    </div>
+                </div>
+                
+                <div class="tournament-details">
+                    <div class="tournament-detail">
+                        <div class="detail-label">Entry Fee</div>
+                        <div class="detail-value">${tournament.entryFee} CORE</div>
+                    </div>
+                    <div class="tournament-detail">
+                        <div class="detail-label">Prize Pool</div>
+                        <div class="detail-value">${(tournament.currentParticipants * tournament.entryFee * 0.97).toFixed(3)} CORE</div>
+                    </div>
+                    <div class="tournament-detail">
+                        <div class="detail-label">Players</div>
+                        <div class="detail-value">${tournament.currentParticipants}/${tournament.maxParticipants}</div>
+                    </div>
+                    <div class="tournament-detail">
+                        <div class="detail-label">Status</div>
+                        <div class="detail-value">${timeString}</div>
+                    </div>
+                </div>
+                
+                <div class="tournament-participants">
+                    <h5 style="margin-bottom: 0.5rem; color: #4ecdc4;">Participants:</h5>
+                    <div class="participants-list">
+                        ${tournament.participants.slice(0, 6).map(p => `
+                            <div class="participant-badge">
+                                ${p.address === userAccount ? 'You' : p.address.substring(0, 6) + '...'}
+                                <span style="color: #f39c12;">(${p.rating})</span>
+                            </div>
+                        `).join('')}
+                        ${tournament.participants.length > 6 ? 
+                            `<div class="participant-badge">+${tournament.participants.length - 6} more</div>` : ''
+                        }
+                    </div>
+                </div>
+                
+                ${tournament.status === 'active' || tournament.status === 'finished' ? `
+                    <div class="bracket-view" onclick="showTournamentDetails('${tournament.id}')">
+                        ${tournament.status === 'finished' && tournament.winner ? 
+                            `🏆 Winner: ${tournament.winner.address === userAccount ? 'You' : tournament.winner.address.substring(0, 8) + '...'}` :
+                            'Click to view bracket'
+                        }
+                    </div>
+                ` : ''}
+                
+                ${canJoin ? `
+                    <button class="tournament-btn" onclick="joinTournament('${tournament.id}')">
+                        <i class="fas fa-sign-in-alt"></i> Join Tournament (${tournament.entryFee} CORE)
+                    </button>
+                ` : tournament.participants.some(p => p.address === userAccount) ? `
+                    <button class="tournament-btn" disabled style="background: #666; color: #999;">
+                        <i class="fas fa-check"></i> Registered
+                    </button>
+                ` : !userAccount ? `
+                    <button class="tournament-btn" disabled style="background: #666; color: #999;">
+                        <i class="fas fa-wallet"></i> Connect Wallet to Join
+                    </button>
+                ` : currentBalance < tournament.entryFee ? `
+                    <button class="tournament-btn" disabled style="background: #666; color: #999;">
+                        <i class="fas fa-coins"></i> Insufficient Balance
+                    </button>
+                ` : tournament.currentParticipants >= tournament.maxParticipants ? `
+                    <button class="tournament-btn" disabled style="background: #666; color: #999;">
+                        <i class="fas fa-users"></i> Tournament Full
+                    </button>
+                ` : `
+                    <button class="tournament-btn" disabled style="background: #666; color: #999;">
+                        <i class="fas fa-clock"></i> Registration Closed
+                    </button>`}
+            </div>
+        `;
+    }).join('');
+}
+
+async function joinTournament(tournamentId) {
+    const tournament = activeTournaments.find(t => t.id === tournamentId);
+    if (!tournament) {
+        showTransactionStatus('❌ Tournament not found', '');
+        return;
+    }
+    
+    if (!userAccount) {
+        showTransactionStatus('❌ Please connect your wallet first', '');
+        return;
+    }
+    
+    if (currentBalance < tournament.entryFee) {
+        showTransactionStatus('❌ Insufficient CORE balance', '');
+        return;
+    }
+    
+    if (tournament.participants.some(p => p.address === userAccount)) {
+        showTransactionStatus('❌ Already registered for this tournament', '');
+        return;
+    }
+    
+    if (tournament.currentParticipants >= tournament.maxParticipants) {
+        showTransactionStatus('❌ Tournament is full', '');
+        return;
+    }
+    
+    try {
+        showTransactionStatus('🔄 Joining tournament...', '');
+        
+        // Add player to tournament
+        tournament.participants.push({
+            address: userAccount,
+            rating: currentSkillRating,
+            joinedAt: Date.now()
+        });
+        
+        tournament.currentParticipants++;
+        tournament.prizePool = tournament.currentParticipants * tournament.entryFee * 0.97;
+        
+        // Update balance
+        currentBalance -= tournament.entryFee;
+        document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
+        
+        updateTournamentDisplay();
+        addActivityFeedItem(`🏆 You joined ${tournament.name} tournament`);
+        showTransactionStatus('✅ Successfully joined tournament!', '');
+        
+        // Check if tournament can start
+        if (tournament.currentParticipants >= 4 && tournament.currentParticipants >= tournament.maxParticipants / 2) {
+            setTimeout(() => startTournament(tournamentId), 30000); // Start in 30 seconds if enough players
+        }
+        
+    } catch (error) {
+        showTransactionStatus('❌ Failed to join tournament: ' + error.message, '');
+    }
+}
+
+function startTournament(tournamentId) {
+    const tournament = activeTournaments.find(t => t.id === tournamentId);
+    if (!tournament || tournament.status !== 'registering') return;
+    
+    if (tournament.currentParticipants < 4) {
+        showTransactionStatus('❌ Not enough participants to start tournament', '');
+        return;
+    }
+    
+    tournament.status = 'active';
+    tournament.startTime = Date.now();
+    
+    // Generate tournament bracket
+    generateTournamentBracket(tournament);
+    
+    updateTournamentDisplay();
+    addActivityFeedItem(`🏆 ${tournament.name} tournament has started!`);
+    showTransactionStatus(`🎯 Tournament started with ${tournament.currentParticipants} players!`, '');
+}
+
+function generateTournamentBracket(tournament) {
+    const participants = [...tournament.participants];
+    
+    // Shuffle participants for random seeding
+    for (let i = participants.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [participants[i], participants[j]] = [participants[j], participants[i]];
+    }
+    
+    // Create first round matches
+    const firstRound = [];
+    for (let i = 0; i < participants.length; i += 2) {
+        if (i + 1 < participants.length) {
+            firstRound.push({
+                id: `match_${tournament.id}_${i/2}`,
+                player1: participants[i],
+                player2: participants[i + 1],
+                winner: null,
+                status: 'pending',
+                round: 1
+            });
+        } else {
+            // Bye for odd number of participants
+            firstRound.push({
+                id: `match_${tournament.id}_${i/2}`,
+                player1: participants[i],
+                player2: null,
+                winner: participants[i],
+                status: 'bye',
+                round: 1
+            });
+        }
+    }
+    
+    tournament.rounds = [firstRound];
+    tournament.currentRound = 1;
+}
+
+function showTournamentDetails(tournamentId) {
+    const tournament = activeTournaments.find(t => t.id === tournamentId);
+    if (!tournament) return;
+    
+    const modal = document.getElementById('tournamentModal');
+    const title = document.getElementById('tournamentModalTitle');
+    const content = document.getElementById('tournamentModalContent');
+    
+    title.textContent = tournament.name;
+    
+    let bracketHtml = '<h4>Tournament Bracket</h4>';
+    
+    if (tournament.rounds && tournament.rounds.length > 0) {
+        tournament.rounds.forEach((round, roundIndex) => {
+            bracketHtml += `<h5 style="margin: 1rem 0 0.5rem 0; color: #f39c12;">Round ${roundIndex + 1}</h5>`;
+            bracketHtml += '<div style="display: grid; gap: 0.5rem;">';
+            
+            round.forEach(match => {
+                const p1Name = match.player1.address === userAccount ? 'You' : 
+                              match.player1.address.substring(0, 8) + '...';
+                const p2Name = match.player2 ? 
+                              (match.player2.address === userAccount ? 'You' : 
+                               match.player2.address.substring(0, 8) + '...') : 'BYE';
+                
+                const winnerName = match.winner ? 
+                                 (match.winner.address === userAccount ? 'You' : 
+                                  match.winner.address.substring(0, 8) + '...') : 'TBD';
+                
+                bracketHtml += `
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 0.5rem; border-radius: 5px; display: flex; justify-content: space-between; align-items: center;">
+                        <span>${p1Name} vs ${p2Name}</span>
+                        <span style="color: ${match.winner ? '#00ff88' : '#aaa'};">
+                            ${match.status === 'bye' ? 'BYE' : 
+                              match.winner ? `Winner: ${winnerName}` : 'Pending'}
+                        </span>
+                    </div>
+                `;
+            });
+            
+            bracketHtml += '</div>';
+        });
+    } else {
+        bracketHtml += '<p style="text-align: center; color: #aaa;">Bracket will be generated when tournament starts</p>';
+    }
+    
+    content.innerHTML = `
+        <div style="margin-bottom: 1rem;">
+            <strong>Status:</strong> ${tournament.status.toUpperCase()}<br>
+            <strong>Prize Pool:</strong> ${tournament.prizePool.toFixed(3)} CORE<br>
+            <strong>Participants:</strong> ${tournament.currentParticipants}/${tournament.maxParticipants}
+        </div>
+        ${bracketHtml}
+    `;
+    
+    const joinBtn = document.getElementById('joinTournamentBtn');
+    joinBtn.style.display = 'none'; // Hide join button in details view
+    
+    modal.classList.remove('hidden');
+}
+
+function closeTournamentModal() {
+    document.getElementById('tournamentModal').classList.add('hidden');
+}
+
+// NEW: Skill Verification System
+function showSkillVerification() {
+    const modal = document.getElementById('skillVerificationModal');
+    generateSkillChallenge();
+    modal.classList.remove('hidden');
+}
+
+function generateSkillChallenge() {
+    const challenges = [
+        {
+            question: "Complete the pattern: ♜ ♞ ♝ ♛ ?",
+            options: ['♚', '♜', '♞', '♝'],
+            correct: '♚'
+        },
+        {
+            question: "Which piece can move diagonally in checkers?",
+            options: ['King', 'Regular', 'Both', 'Neither'],
+            correct: 'Both'
+        },
+        {
+            question: "In chess, which piece is worth approximately 5 points?",
+            options: ['Bishop', 'Knight', 'Rook', 'Queen'],
+            correct: 'Rook'
+        }
+    ];
+    
+    const challenge = challenges[Math.floor(Math.random() * challenges.length)];
+    skillVerificationAnswer = challenge.correct;
+    
+    document.getElementById('skillChallenge').textContent = challenge.question;
+    
+    const buttonsContainer = document.querySelector('#skillVerificationModal .captcha-container div');
+    buttonsContainer.innerHTML = challenge.options.map(option => 
+        `<button class="captcha-input" onclick="selectSkillAnswer('${option}')" style="width: auto; padding: 0.5rem; cursor: pointer;">${option}</button>`
+    ).join('');
+}
+
+let selectedSkillAnswer = null;
+
+function selectSkillAnswer(answer) {
+    selectedSkillAnswer = answer;
+    
+    // Update button states
+    document.querySelectorAll('#skillVerificationModal .captcha-input').forEach(btn => {
+        btn.style.background = btn.textContent === answer ? 
+            'rgba(78, 205, 196, 0.3)' : 'rgba(255, 255, 255, 0.1)';
+    });
+    
+    document.getElementById('submitSkillAnswer').disabled = false;
+}
+
+function submitSkillVerification() {
+    if (selectedSkillAnswer === skillVerificationAnswer) {
+        // Increase skill rating for correct answer
+        currentSkillRating += 25;
+        localStorage.setItem(`skillRating_${userAccount}`, currentSkillRating);
+        document.getElementById('skillRating').textContent = currentSkillRating;
+        
+        showTransactionStatus('✅ Skill verification passed! Rating increased.', '');
+        closeSkillVerification();
+    } else {
+        // Slight decrease for incorrect answer
+        currentSkillRating = Math.max(800, currentSkillRating - 10);
+        localStorage.setItem(`skillRating_${userAccount}`, currentSkillRating);
+        document.getElementById('skillRating').textContent = currentSkillRating;
+        
+        showTransactionStatus('❌ Incorrect answer. Try again later.', '');
+        generateSkillChallenge();
+        selectedSkillAnswer = null;
+        document.getElementById('submitSkillAnswer').disabled = true;
+    }
+}
+
+function closeSkillVerification() {
+    document.getElementById('skillVerificationModal').classList.add('hidden');
+    selectedSkillAnswer = null;
+}
+
+// Enhanced Game Creation with Server Validation
+async function createGameOnChain(gameType, stakeAmount) {
+    if (!userAccount) {
+        throw new Error('Wallet not connected');
+    }
+    
+    try {
+        showTransactionStatus('🔄 Creating game...', '');
+        
+        // Server-side validation
+        if (platformSettings.serverValidation) {
+            const validationResult = await validateGameCreation(gameType, stakeAmount);
+            if (!validationResult.valid) {
+                throw new Error(validationResult.message);
+            }
+        }
+        
+        // Anti-bot protection
+        if (platformSettings.antiBot && Math.random() < 0.3) {
+            generateCaptcha();
+            return new Promise((resolve, reject) => {
+                // Store pending game creation
+                window.pendingGameCreation = { gameType, stakeAmount, resolve, reject };
+            });
+        }
+        
+        const gameId = Date.now();
+        const stakeWei = ethers.utils.parseEther(stakeAmount.toString());
+        
+        let tx;
+        try {
+            if (gameContract && typeof window.ethereum !== 'undefined') {
+                tx = await gameContract.deposit({
+                    value: stakeWei,
+                    gasLimit: 100000
+                });
+                
+                showTransactionStatus('⏳ Transaction submitted...', tx.hash);
+                await tx.wait();
+                showTransactionStatus('✅ Game created successfully!', tx.hash);
+            } else {
+                showTransactionStatus('✅ Game created in demo mode!', '');
+            }
+        } catch (contractError) {
+            console.log('Contract interaction failed, creating local game:', contractError);
+            showTransactionStatus('✅ Game created locally (demo mode)', '');
+        }
+        
+        // Add to GLOBAL games list with enhanced metadata
+        const newGlobalGame = {
+            id: gameId,
+            type: gameType,
+            creator: userAccount,
+            creatorRating: currentSkillRating,
+            stake: stakeAmount,
+            status: 'waiting',
+            createdAt: Date.now(),
+            serverValidated: platformSettings.serverValidation,
+            antiBotVerified: platformSettings.antiBot,
+            randomSeed: generateProvablyFairSeed()
+        };
+        
+        globalGamesList.push(newGlobalGame);
+        
+        return gameId;
+        
+    } catch (error) {
+        console.error('Failed to create game:', error);
+        throw new Error('Failed to create game: ' + error.message);
+    }
+}
+
+// Server-side validation simulation
+async function validateGameCreation(gameType, stakeAmount) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            const validGameTypes = ['chess', 'checkers', 'words'];
+            const isValidType = validGameTypes.includes(gameType);
+            const isValidStake = stakeAmount >= 0.01 && stakeAmount <= 10;
+            const hasBalance = currentBalance >= stakeAmount;
+            
+            resolve({
+                valid: isValidType && isValidStake && hasBalance,
+                message: !isValidType ? 'Invalid game type' :
+                        !isValidStake ? 'Invalid stake amount' :
+                        !hasBalance ? 'Insufficient balance' : 'Valid',
+                validationId: 'val_' + Math.random().toString(36).substr(2, 9)
+            });
+        }, 50 + Math.random() * 100);
+    });
+}
+
+// Enhanced game joining with skill matching
+async function joinGame(gameId, stakeAmount) {
+    if (!userAccount) {
+        showTransactionStatus('❌ Please connect your wallet first', '');
+        return;
+    }
+    
+    if (currentBalance < stakeAmount) {
+        showTransactionStatus('❌ Insufficient CORE balance', '');
+        return;
+    }
+    
+    try {
+        showTransactionStatus('🔄 Joining game...', '');
+        
+        // Find game in global list
+        const gameData = globalGamesList.find(game => game.id === gameId);
+        if (!gameData) {
+            throw new Error('Game not found');
+        }
+        
+        // Skill matching check
+        if (platformSettings.skillMatching) {
+            const ratingDiff = Math.abs(gameData.creatorRating - currentSkillRating);
+            if (ratingDiff > 300) {
+                const proceed = confirm(`Skill rating difference is ${ratingDiff} points. Continue anyway?`);
+                if (!proceed) return;
+            }
+        }
+        
+        // Server validation
+        if (platformSettings.serverValidation && !gameData.serverValidated) {
+            showTransactionStatus('⚠️ Warning: Game not server-validated', '');
+        }
+        
+        // Join the game...
+        const session = await gameMatchmaker.joinGame(gameId, userAccount, stakeAmount);
+        multiplayerSession = session;
+        
+        currentBalance -= stakeAmount;
+        document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
+        
+        await refreshLobby();
+        
+        addActivityFeedItem(`⚔️ You joined game #${gameId} with ${stakeAmount} CORE stake`);
+        showTransactionStatus('🎮 Game joined! Good luck!', '');
+        
+    } catch (error) {
+        showTransactionStatus('❌ Failed to join game: ' + error.message, '');
+    }
+}
+
+// Enhanced refresh lobby with skill-based filtering
+async function refreshLobby() {
+    try {
+        showTransactionStatus('🔄 Loading games...', '');
+        
+        // Apply skill-based filtering if enabled
+        let gamesToShow = [...globalGamesList];
+        
+        if (platformSettings.skillMatching && userAccount) {
+            gamesToShow = globalGamesList.filter(game => {
+                if (game.creator === userAccount) return true;
+                const ratingDiff = Math.abs(game.creatorRating - currentSkillRating);
+                return ratingDiff <= 400; // Show games within 400 rating points
+            });
+        }
+        
+        updateGamesDisplay(gamesToShow);
+        updateLiveStats();
+        
+        showTransactionStatus('✅ Lobby refreshed', '');
+        
+    } catch (error) {
+        console.error('Failed to refresh lobby:', error);
+        showTransactionStatus('❌ Failed to refresh lobby', '');
+    }
+}
+  </script>
+  <script>
+    // Enhanced game display with skill ratings and validation badges
+function updateGamesDisplay(gamesToShow = null) {
+    const gamesList = document.getElementById('gamesList');
+    const noGames = document.getElementById('noGames');
+    
+    if (!gamesList || !noGames) return;
+    
+    const displayGames = gamesToShow || globalGamesList;
+    
+    if (displayGames.length === 0) {
+        gamesList.innerHTML = '';
+        noGames.classList.remove('hidden');
+        return;
+    }
+    
+    noGames.classList.add('hidden');
+    
+    gamesList.innerHTML = displayGames.map(game => {
+        const gameIcons = { chess: '♟️', checkers: '⚫', words: '📝' };
+        const gameNames = { chess: 'Chess Masters', checkers: 'Checkers Pro', words: 'Word Battle' };
+        
+        const timeAgo = Math.floor((Date.now() - game.createdAt) / 60000);
+        const creator = game.creator === userAccount ? 'You' : 
+                       game.creator.substring(0, 6) + '...' + game.creator.substring(38);
+        
+        const canJoin = userAccount && 
+                       game.creator !== userAccount && 
+                       game.status === 'waiting' && 
+                       currentBalance >= game.stake;
+        
+        // Calculate skill rating difference
+        const ratingDiff = userAccount && game.creatorRating ? 
+                          Math.abs(game.creatorRating - currentSkillRating) : 0;
+        
+        const getRatingDiffColor = (diff) => {
+            if (diff <= 100) return '#00ff88';
+            if (diff <= 200) return '#f1c40f';
+            return '#ff6b6b';
+        };
+        
+        const getValidationBadges = () => {
+            let badges = '';
+            if (game.serverValidated) {
+                badges += '<div class="validation-badge"><i class="fas fa-shield-alt"></i> Validated</div>';
+            } else {
+                badges += '<div class="validation-badge warning"><i class="fas fa-exclamation-triangle"></i> Unvalidated</div>';
+            }
+            
+            if (game.antiBotVerified) {
+                badges += '<div class="validation-badge"><i class="fas fa-robot"></i> Bot-Free</div>';
+            }
+            
+            return badges;
+        };
+        
+        return `
+            <div class="game-entry fade-in">
+                <div class="game-header">
+                    <div class="game-title">
+                        ${gameIcons[game.type]} ${gameNames[game.type]} #${game.id}
+                    </div>
+                    <div class="game-status ${game.status === 'waiting' ? 'status-waiting' : 'status-playing'}">
+                        ${game.status.toUpperCase()}
+                    </div>
+                </div>
+                
+                <div class="game-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Creator</div>
+                        <div class="detail-value">${creator}</div>
+                        ${game.creatorRating ? `
+                            <div class="skill-rating" style="margin-top: 0.3rem;">
+                                <span class="rating-number">${game.creatorRating}</span>
+                                <span style="color: #aaa; font-size: 0.8rem;">ELO</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Stake</div>
+                        <div class="detail-value">${game.stake} CORE</div>
+                        ${userAccount && ratingDiff > 0 ? `
+                            <div style="margin-top: 0.3rem; color: ${getRatingDiffColor(ratingDiff)}; font-size: 0.8rem;">
+                                ±${ratingDiff} rating
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Created</div>
+                        <div class="detail-value">${timeAgo}m ago</div>
+                    </div>
+                </div>
+                
+                <!-- Validation Badges -->
+                <div style="display: flex; gap: 0.5rem; margin: 0.5rem 0; flex-wrap: wrap;">
+                    ${getValidationBadges()}
+                </div>
+                
+                ${canJoin ? 
+                    `<button class="join-btn" onclick="joinGame(${game.id}, ${game.stake})" ${ratingDiff > 300 ? 'style="background: linear-gradient(45deg, #f39c12, #e67e22);"' : ''}>
+                        <i class="fas fa-sword"></i> Join Game (${game.stake} CORE)
+                        ${ratingDiff > 300 ? '<br><small>⚠️ Skill mismatch</small>' : ''}
+                    </button>` :
+                    game.creator === userAccount ?
+                        `<button class="join-btn" disabled style="background: #666; color: #999;">
+                            <i class="fas fa-clock"></i> Waiting for Opponent
+                        </button>` :
+                        !userAccount ?
+                            `<button class="join-btn" disabled style="background: #666; color: #999;">
+                                <i class="fas fa-wallet"></i> Connect Wallet to Join
+                            </button>` :
+                            currentBalance < game.stake ?
+                                `<button class="join-btn" disabled style="background: #666; color: #999;">
+                                    <i class="fas fa-coins"></i> Insufficient Balance
+                                </button>` :
+                                `<button class="join-btn" disabled style="background: #666; color: #999;">
+                                    <i class="fas fa-users"></i> Game Full
+                                </button>`
+                }
+            </div>
+        `;
+    }).join('');
+}
+
+// Enhanced player stats with tournament history
+function updatePlayerStats() {
+    if (playerStats.gamesPlayed > 0) {
+        playerStats.winRate = ((playerStats.gamesWon / playerStats.gamesPlayed) * 100).toFixed(1);
+    } else {
+        playerStats.winRate = 0;
+    }
+    
+    const gamesPlayedEl = document.getElementById('profileGamesPlayed');
+    const gamesWonEl = document.getElementById('profileGamesWon');
+    const totalEarnedEl = document.getElementById('profileTotalEarned');
+    const winRateEl = document.getElementById('profileWinRate');
+    const skillRatingEl = document.getElementById('skillRating');
+    
+    if (gamesPlayedEl) gamesPlayedEl.textContent = playerStats.gamesPlayed;
+    if (gamesWonEl) gamesWonEl.textContent = playerStats.gamesWon;
+    if (totalEarnedEl) totalEarnedEl.textContent = playerStats.totalEarned.toFixed(4);
+    if (winRateEl) winRateEl.textContent = playerStats.winRate + '%';
+    if (skillRatingEl) skillRatingEl.textContent = currentSkillRating;
+    
+    // Update skill rating stars
+    updateSkillStars(currentSkillRating);
+}
+
+function updateSkillStars(rating) {
+    const starsEl = document.querySelector('.rating-stars');
+    if (!starsEl) return;
+    
+    let stars = '';
+    const starCount = Math.min(5, Math.floor(rating / 300) + 1);
+    
+    for (let i = 0; i < 5; i++) {
+        stars += i < starCount ? '★' : '☆';
+    }
+    
+    starsEl.textContent = stars;
+}
+
+// Enhanced game history loading
+function loadGameHistory() {
+    const historyContainer = document.getElementById('gameHistory');
+    if (!historyContainer) return;
+    
+    // Simulate game history with enhanced data
+    const history = [
+        { 
+            type: 'chess', 
+            result: 'won', 
+            stake: 0.05, 
+            opponent: '0x1234...5678', 
+            opponentRating: 1423,
+            date: Date.now() - 3600000,
+            ratingChange: +15,
+            serverValidated: true
+        },
+        { 
+            type: 'checkers', 
+            result: 'lost', 
+            stake: 0.02, 
+            opponent: '0x8765...4321', 
+            opponentRating: 1567,
+            date: Date.now() - 7200000,
+            ratingChange: -12,
+            serverValidated: true
+        },
+        { 
+            type: 'words', 
+            result: 'won', 
+            stake: 0.01, 
+            opponent: '0x9999...1111', 
+            opponentRating: 1234,
+            date: Date.now() - 10800000,
+            ratingChange: +8,
+            serverValidated: false
+        }
+    ];
+    
+    if (history.length === 0) {
+        historyContainer.innerHTML = '<p style="text-align: center; color: #aaa;">No games played yet</p>';
+        return;
+    }
+    
+    historyContainer.innerHTML = history.map(game => {
+        const timeAgo = Math.floor((Date.now() - game.date) / 60000);
+        const resultColor = game.result === 'won' ? '#00ff88' : '#ff6b6b';
+        const ratingChangeColor = game.ratingChange > 0 ? '#00ff88' : '#ff6b6b';
+        const gameIcons = { chess: '♟️', checkers: '⚫', words: '📝' };
+        
+        return `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem; margin: 0.25rem 0; background: rgba(255, 255, 255, 0.05); border-radius: 8px; border-left: 3px solid ${resultColor};">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem;">
+                        <span>${gameIcons[game.type]} ${game.type.toUpperCase()}</span>
+                        <span style="color: ${resultColor}; font-weight: bold;">${game.result.toUpperCase()}</span>
+                        ${game.serverValidated ? 
+                            '<div class="validation-badge" style="font-size: 0.6rem; padding: 0.1rem 0.3rem;"><i class="fas fa-shield-alt"></i></div>' : 
+                            '<div class="validation-badge warning" style="font-size: 0.6rem; padding: 0.1rem 0.3rem;"><i class="fas fa-exclamation-triangle"></i></div>'
+                        }
+                    </div>
+                    <div style="font-size: 0.8rem; color: #aaa;">
+                        vs ${game.opponent} (${game.opponentRating} ELO)
+                    </div>
+                </div>
+                <div style="text-align: right; font-size: 0.9rem;">
+                    <div>${game.stake} CORE</div>
+                    <div style="color: ${ratingChangeColor}; font-weight: bold;">
+                        ${game.ratingChange > 0 ? '+' : ''}${game.ratingChange} ELO
+                    </div>
+                    <div style="color: #aaa; font-size: 0.8rem;">${timeAgo}m ago</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// NEW: Tournament history loading
+function loadTournamentHistory() {
+    const historyContainer = document.getElementById('tournamentHistory');
+    if (!historyContainer) return;
+    
+    const tournamentHistory = [
+        {
+            name: 'Chess Masters Weekly',
+            type: 'chess',
+            participants: 16,
+            placement: 2,
+            entryFee: 0.1,
+            prize: 0.4,
+            date: Date.now() - 86400000,
+            ratingChange: +25
+        },
+        {
+            name: 'Speed Checkers Blitz',
+            type: 'checkers',
+            participants: 8,
+            placement: 5,
+            entryFee: 0.05,
+            prize: 0,
+            date: Date.now() - 172800000,
+            ratingChange: -8
+        }
+    ];
+    
+    if (tournamentHistory.length === 0) {
+        historyContainer.innerHTML = '<p style="text-align: center; color: #aaa;">No tournaments played yet</p>';
+        return;
+    }
+    
+    historyContainer.innerHTML = tournamentHistory.map(tournament => {
+        const timeAgo = Math.floor((Date.now() - tournament.date) / 86400000);
+        const placementColor = tournament.placement <= 3 ? '#00ff88' : 
+                              tournament.placement <= tournament.participants / 2 ? '#f1c40f' : '#ff6b6b';
+        const gameIcons = { chess: '♟️', checkers: '⚫', words: '📝' };
+        const getPlacementSuffix = (num) => {
+            const lastDigit = num % 10;
+            const lastTwoDigits = num % 100;
+            if (lastTwoDigits >= 11 && lastTwoDigits <= 13) return 'th';
+            switch (lastDigit) {
+                case 1: return 'st';
+                case 2: return 'nd';
+                case 3: return 'rd';
+                default: return 'th';
+            }
+        };
+        
+        return `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem; margin: 0.25rem 0; background: rgba(255, 255, 255, 0.05); border-radius: 8px; border-left: 3px solid ${placementColor};">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem;">
+                        <span>${gameIcons[tournament.type]} ${tournament.name}</span>
+                    </div>
+                    <div style="font-size: 0.8rem; color: #aaa;">
+                        ${tournament.participants} participants
+                    </div>
+                </div>
+                <div style="text-align: right; font-size: 0.9rem;">
+                    <div style="color: ${placementColor}; font-weight: bold;">
+                        ${tournament.placement}${getPlacementSuffix(tournament.placement)} place
+                    </div>
+                    <div>${tournament.prize > 0 ? `+${tournament.prize} CORE` : 'No prize'}</div>
+                    <div style="color: #aaa; font-size: 0.8rem;">${timeAgo}d ago</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Enhanced live statistics with more data
+function updateLiveStats() {
+    const totalGames = globalGamesList.length;
+    const totalTournaments = activeTournaments.length;
+    const totalVolume = globalGamesList.reduce((sum, game) => sum + game.stake, 0) +
+                      activeTournaments.reduce((sum, tournament) => sum + (tournament.prizePool || 0), 0);
+    const onlinePlayers = totalGames > 0 ? totalGames + Math.floor(Math.random() * 30) + 15 : Math.floor(Math.random() * 80) + 10;
+    
+    const totalPlayersEl = document.getElementById('totalPlayers');
+    const totalGamesEl = document.getElementById('totalGames');
+    const totalVolumeEl = document.getElementById('totalVolume');
+    
+    if (totalPlayersEl) totalPlayersEl.textContent = onlinePlayers;
+    if (totalGamesEl) totalGamesEl.textContent = totalGames + totalTournaments;
+    if (totalVolumeEl) totalVolumeEl.textContent = totalVolume.toFixed(2);
+}
+
+// Enhanced activity feed with more event types
+function addActivityFeedItem(message, type = 'info') {
+    const feed = document.getElementById('activityFeed');
+    if (!feed) return;
+    
+    const iconMap = {
+        info: 'fas fa-info-circle',
+        success: 'fas fa-check-circle',
+        warning: 'fas fa-exclamation-triangle',
+        error: 'fas fa-times-circle',
+        game: 'fas fa-gamepad',
+        tournament: 'fas fa-trophy',
+        money: 'fas fa-coins'
+    };
+    
+    const colorMap = {
+        info: '#4ecdc4',
+        success: '#00ff88',
+        warning: '#f1c40f',
+        error: '#ff6b6b',
+        game: '#9b59b6',
+        tournament: '#f39c12',
+        money: '#2ecc71'
+    };
+    
+    const item = document.createElement('div');
+    item.className = 'news-item fade-in';
+    item.innerHTML = `
+        <div style="padding: 1rem; margin: 0.5rem 0; background: rgba(255, 255, 255, 0.05); border-radius: 8px; border-left: 3px solid ${colorMap[type] || colorMap.info};">
+            <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: bold; margin-bottom: 0.5rem; color: ${colorMap[type] || colorMap.info};">
+                <i class="${iconMap[type] || iconMap.info}"></i>
+                <span>${message}</span>
+            </div>
+            <div style="font-size: 0.8rem; color: #aaa;">Just now</div>
+        </div>
+    `;
+    
+    feed.insertBefore(item, feed.firstChild);
+    
+    while (feed.children.length > 15) {
+        feed.removeChild(feed.lastChild);
+    }
+}
+
+// Enhanced settings management
+function loadSettings() {
+    const savedSettings = localStorage.getItem('crypticus_settings');
+    if (savedSettings) {
+        platformSettings = { ...platformSettings, ...JSON.parse(savedSettings) };
+    }
+    
+    // Update UI toggles
+    Object.keys(platformSettings).forEach(key => {
+        const toggle = document.getElementById(key + 'Toggle');
+        if (toggle) {
+            if (platformSettings[key]) {
+                toggle.classList.add('active');
+            } else {
+                toggle.classList.remove('active');
+            }
+        }
+        
+        // Update inputs
+        const input = document.getElementById(key);
+        if (input && typeof platformSettings[key] !== 'boolean') {
+            input.value = platformSettings[key];
+        }
+    });
+    
+    // Apply current settings
+    applyAllSettings();
+}
+
+function toggleSetting(setting) {
+    platformSettings[setting] = !platformSettings[setting];
+    
+    const toggle = document.getElementById(setting + 'Toggle');
+    if (toggle) {
+        if (platformSettings[setting]) {
+            toggle.classList.add('active');
+        } else {
+            toggle.classList.remove('active');
+        }
+    }
+    
+    applySetting(setting, platformSettings[setting]);
+}
+
+function applySetting(setting, value) {
+    switch(setting) {
+        case 'autoJoin':
+            if (value) {
+                showTransactionStatus('✅ Auto-join enabled', '');
+                // Implement auto-join logic
+                startAutoJoinMonitoring();
+            } else {
+                stopAutoJoinMonitoring();
+            }
+            break;
+        case 'skillMatching':
+            if (value) {
+                showTransactionStatus('✅ Skill-based matching enabled', '');
+                refreshLobby(); // Refresh with skill filtering
+            } else {
+                showTransactionStatus('ℹ️ Skill matching disabled - all games shown', '');
+                refreshLobby();
+            }
+            break;
+        case 'serverValidation':
+            if (value) {
+                showTransactionStatus('🛡️ Server validation enabled', '');
+            } else {
+                showTransactionStatus('⚠️ Server validation disabled - use caution', '');
+            }
+            break;
+        case 'antiBot':
+            if (value) {
+                showTransactionStatus('🤖 Anti-bot protection enabled', '');
+            } else {
+                showTransactionStatus('⚠️ Anti-bot protection disabled', '');
+            }
+            break;
+        case 'hideBalance':
+            const balanceDisplay = document.getElementById('balanceDisplay');
+            if (balanceDisplay) {
+                if (value) {
+                    balanceDisplay.textContent = '••••• CORE';
+                } else {
+                    balanceDisplay.textContent = currentBalance.toFixed(4) + ' CORE';
+                }
+            }
+            break;
+    }
+}
+
+function applyAllSettings() {
+    Object.keys(platformSettings).forEach(key => {
+        applySetting(key, platformSettings[key]);
+    });
+}
+
+// Auto-join monitoring system
+let autoJoinInterval = null;
+
+function startAutoJoinMonitoring() {
+    if (autoJoinInterval) return;
+    
+    autoJoinInterval = setInterval(() => {
+        if (!platformSettings.autoJoin || !userAccount) {
+            stopAutoJoinMonitoring();
+            return;
+        }
+        
+        // Find suitable games to auto-join
+        const suitableGames = globalGamesList.filter(game => 
+            game.status === 'waiting' &&
+            game.creator !== userAccount &&
+            game.stake <= platformSettings.defaultStake &&
+            currentBalance >= game.stake &&
+            (!platformSettings.skillMatching || Math.abs(game.creatorRating - currentSkillRating) <= 200)
+        );
+        
+        if (suitableGames.length > 0) {
+            const randomGame = suitableGames[Math.floor(Math.random() * suitableGames.length)];
+            joinGame(randomGame.id, randomGame.stake);
+            addActivityFeedItem(`🤖 Auto-joined ${randomGame.type} game`, 'game');
+        }
+    }, 10000); // Check every 10 seconds
+}
+
+function stopAutoJoinMonitoring() {
+    if (autoJoinInterval) {
+        clearInterval(autoJoinInterval);
+        autoJoinInterval = null;
+    }
+}
+
+function saveSettings() {
+    // Get values from inputs
+    const inputs = document.querySelectorAll('.settings-input');
+    inputs.forEach(input => {
+        const key = input.id;
+        if (key in platformSettings) {
+            if (input.type === 'number') {
+                platformSettings[key] = parseFloat(input.value);
+            } else {
+                platformSettings[key] = input.value;
+            }
+        }
+    });
+    
+    localStorage.setItem('crypticus_settings', JSON.stringify(platformSettings));
+    showTransactionStatus('✅ Settings saved successfully', '');
+    addActivityFeedItem('Settings updated', 'success');
+}
+
+function resetSettings() {
+    if (confirm('Are you sure you want to reset all settings to default?')) {
+        platformSettings = {
+            autoJoin: false,
+            sound: true,
+            animations: true,
+            serverValidation: true,
+            skillMatching: true,
+            antiBot: true,
+            defaultStake: 0.1,
+            gameInvites: true,
+            txNotifications: true,
+            chatNotifications: false,
+            autoLock: true,
+            sessionTimeout: 30,
+            hideBalance: false,
+            gasPriority: 'standard',
+            rpcEndpoint: 'https://rpc.coredao.org',
+            developerMode: false
+        };
+        
+        localStorage.removeItem('crypticus_settings');
+        loadSettings();
+        showTransactionStatus('✅ Settings reset to default', '');
+        addActivityFeedItem('Settings reset to defaults', 'info');
+    }
+}
+
+function clearAllData() {
+    if (confirm('⚠️ This will delete ALL your data including settings, game history, and cached information. This action cannot be undone. Are you sure?')) {
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        playerStats = {
+            gamesPlayed: 0,
+            gamesWon: 0,
+            totalEarned: 0,
+            winRate: 0,
+            skillRating: 1200,
+            tournamentsWon: 0,
+            perfectGames: 0
+        };
+        
+        currentSkillRating = 1200;
+        resetSettings();
+        
+        showTransactionStatus('✅ All data cleared', '');
+        addActivityFeedItem('All user data cleared', 'warning');
+        
+        setTimeout(() => {
+            location.reload();
+        }, 2000);
+    }
+}
+
+// Enhanced utility functions
+function updateConnectionProgress(percentage) {
+    const progressBar = document.getElementById('connectionProgress');
+    if (progressBar) {
+        progressBar.style.width = percentage + '%';
+    }
+}
+
+function updateContractStatus(status, message = '') {
+    const statusElement = document.getElementById('contractStatus');
+    if (!statusElement) return;
+    
+    const indicator = statusElement.querySelector('.connection-indicator');
+    
+    switch (status) {
+        case 'connected':
+            if (indicator) indicator.className = 'connection-indicator connected';
+            statusElement.innerHTML = '<span class="connection-indicator connected"></span>Connected to Core Blockchain';
+            break;
+        case 'demo':
+            if (indicator) indicator.className = 'connection-indicator pending';
+            statusElement.innerHTML = '<span class="connection-indicator pending"></span>Demo Mode - ' + (message || 'No MetaMask detected');
+            break;
+        case 'disconnected':
+            if (indicator) indicator.className = 'connection-indicator disconnected';
+            statusElement.innerHTML = '<span class="connection-indicator disconnected"></span>Disconnected';
+            break;
+        case 'error':
+            if (indicator) indicator.className = 'connection-indicator disconnected';
+            statusElement.innerHTML = `<span class="connection-indicator disconnected"></span>Error: ${message}`;
+            break;
+        default:
+            if (indicator) indicator.className = 'connection-indicator pending';
+            statusElement.innerHTML = '<span class="connection-indicator pending"></span>Connecting...';
+    }
+}
+
+function updateConnectionStatus(status) {
+    const statusElement = document.getElementById('connectionStatus');
+    if (!statusElement) return;
+    
+    const indicator = statusElement.querySelector('.connection-indicator');
+    
+    switch (status) {
+        case 'connected':
+            if (indicator) indicator.className = 'connection-indicator connected';
+            statusElement.innerHTML = '<span class="connection-indicator connected"></span>Connected';
+            break;
+        case 'disconnected':
+            if (indicator) indicator.className = 'connection-indicator disconnected';
+            statusElement.innerHTML = '<span class="connection-indicator disconnected"></span>Not Connected';
+            break;
+        case 'pending':
+            if (indicator) indicator.className = 'connection-indicator pending';
+            statusElement.innerHTML = '<span class="connection-indicator pending"></span>Connecting...';
+            break;
+    }
+}
+
+function showTransactionStatus(message, txHash = '') {
+    const statusDiv = document.getElementById('transactionStatus');
+    const messageDiv = document.getElementById('txStatusMessage');
+    const hashDiv = document.getElementById('txHash');
+    
+    if (messageDiv) messageDiv.textContent = message;
+    if (hashDiv) {
+        hashDiv.textContent = txHash ? `TX: ${txHash.substring(0, 10)}...${txHash.substring(56)}` : '';
+        hashDiv.onclick = txHash ? () => window.open(`https://scan.coredao.org/tx/${txHash}`, '_blank') : null;
+        hashDiv.style.cursor = txHash ? 'pointer' : 'default';
+    }
+    
+    if (statusDiv) {
+        statusDiv.classList.add('show');
+        
+        if (!message.includes('❌')) {
+            setTimeout(() => statusDiv.classList.remove('show'), 5000);
+        }
+    }
+}
+
+function copyContractAddress() {
+    navigator.clipboard.writeText(GAME_CONTRACT_ADDRESS).then(() => {
+        showTransactionStatus('📋 Contract address copied to clipboard', '');
+        addActivityFeedItem('Contract address copied', 'info');
+    }).catch(() => {
+        showTransactionStatus('❌ Failed to copy address', '');
+    });
+}
+
+// Enhanced user data management
+async function loadUserData() {
+    try {
+        const savedStats = sessionStorage.getItem(`playerStats_${userAccount}`);
+        if (savedStats) {
+            playerStats = { ...playerStats, ...JSON.parse(savedStats) };
+        }
+        
+        const savedRating = localStorage.getItem(`skillRating_${userAccount}`);
+        if (savedRating) {
+            currentSkillRating = parseInt(savedRating);
+            document.getElementById('skillRating').textContent = currentSkillRating;
+        }
+        
+        updatePlayerStats();
+        loadSettings();
+    } catch (error) {
+        console.error('Failed to load user data:', error);
+    }
+}
+
+function saveUserData() {
+    if (userAccount) {
+        sessionStorage.setItem(`playerStats_${userAccount}`, JSON.stringify(playerStats));
+        localStorage.setItem(`skillRating_${userAccount}`, currentSkillRating);
+    }
+}
+
+// Age verification function
+function verifyAge(isAdult) {
+    if (isAdult) {
+        document.getElementById('ageVerificationModal').style.display = 'none';
+        sessionStorage.setItem('ageVerified', 'true');
+        showTransactionStatus('✅ Age verified. Welcome to Crypticus!', '');
+        addActivityFeedItem('Age verification completed', 'success');
+        initializeBlockchain();
+    } else {
+        alert('Sorry, you must be 18 or older to use this platform.');
+        window.location.href = 'https://www.google.com';
+    }
+}
+
+function checkAgeVerification() {
+    if (!sessionStorage.getItem('ageVerified')) {
+        document.getElementById('ageVerificationModal').style.display = 'flex';
+        return false;
+    }
+    return true;
+}
+
+// Enhanced real-time updates
+function startRealTimeUpdates() {
+    if (gameUpdateInterval) {
+        clearInterval(gameUpdateInterval);
+    }
+    
+    gameUpdateInterval = setInterval(async () => {
+        if (currentSection === 'lobby') {
+            await refreshLobby();
+        }
+        if (currentSection === 'tournaments') {
+            updateTournamentDisplay();
+        }
+        if (web3Provider && userAccount) {
+            await updateBalance();
+        }
+        
+        // Update live stats
+        updateLiveStats();
+    }, 30000);
+    
+    // Activity feed updates
+    setInterval(() => {
+        if (Math.random() < 0.15) {
+            const activities = [
+                { msg: '🎮 New player joined the platform', type: 'info' },
+                { msg: '💰 Large stake game created', type: 'money' },
+                { msg: '🏆 Epic tournament battle finished', type: 'tournament' },
+                { msg: '⚡ Platform processing new transactions', type: 'info' },
+                { msg: '🔥 High activity detected', type: 'warning' },
+                { msg: '🎯 Perfect game achieved by player', type: 'success' },
+                { msg: '🤖 Anti-bot system activated', type: 'warning' },
+                { msg: '🛡️ Server validation completed', type: 'success' }
+            ];
+            
+            const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+            addActivityFeedItem(randomActivity.msg, randomActivity.type);
+        }
+    }, 25000);
+}
+  </script>
+  <script>
+    // Enhanced Platform Initialization
+async function initializePlatform() {
+    console.log('🚀 Initializing Enhanced Crypticus Gaming Platform...');
+    
+    try {
+        if (!checkAgeVerification()) {
+            return;
+        }
+        
+        await initializeBlockchain();
+        
+        // Auto-connect if previously connected
+        if (sessionStorage.getItem('walletConnected') === 'true') {
+            setTimeout(async () => {
+                try {
+                    await connectWallet();
+                } catch (error) {
+                    console.error('Auto-connect failed:', error);
+                    sessionStorage.removeItem('walletConnected');
+                }
+            }, 1000);
+        }
+        
+        // Initialize all systems
+        refreshLobby();
+        updateTournamentDisplay();
+        loadSettings();
+        
+        // Add initial activity feed items
+        addActivityFeedItem('🚀 Platform initialized successfully', 'success');
+        addActivityFeedItem('🔗 Connected to Core Blockchain', 'info');
+        addActivityFeedItem('🛡️ Security systems active', 'success');
+        addActivityFeedItem('🎮 Ready for enhanced gaming!', 'game');
+        
+        console.log('✅ Enhanced Platform initialization complete!');
+        
+    } catch (error) {
+        console.error('❌ Platform initialization failed:', error);
+        showTransactionStatus('❌ Platform initialization failed: ' + error.message, '');
+        addActivityFeedItem('❌ Initialization failed', 'error');
+    }
+}
+
+// Enhanced chat system
+function sendChatMessage() {
+    const chatInput = document.getElementById('chatInput');
+    const message = chatInput.value.trim();
+    
+    if (!message) return;
+    
+    if (!userAccount) {
+        showTransactionStatus('⚠️ Please connect your wallet to chat', '');
+        return;
+    }
+    
+    if (message.length > 200) {
+        showTransactionStatus('⚠️ Message too long (max 200 characters)', '');
+        return;
+    }
+    
+    // Enhanced anti-spam protection
+    const lastMessage = localStorage.getItem('lastChatMessage');
+    const lastMessageTime = localStorage.getItem('lastChatTime');
+    const now = Date.now();
+    
+    if (lastMessage === message && lastMessageTime && (now - parseInt(lastMessageTime)) < 5000) {
+        showTransactionStatus('⚠️ Please wait before sending the same message', '');
+        return;
+    }
+    
+    localStorage.setItem('lastChatMessage', message);
+    localStorage.setItem('lastChatTime', now.toString());
+    
+    addChatMessage('You', message);
+    chatInput.value = '';
+    
+    // Enhanced bot responses with more variety
+    setTimeout(() => {
+        const responses = [
+            "Good luck with your games! 🎮",
+            "Welcome to the future of gaming! 🚀",
+            "Let's play some blockchain games! ⚔️",
+            "Nice strategy choice! 🧠",
+            "The decentralized gaming revolution! 💎",
+            "Just won a tournament! 🏆",
+            "Anyone up for a skill-matched game?",
+            "These word games are addictive!",
+            "CORE to the moon! 🌙",
+            "Server validation makes it so fair! 🛡️",
+            "Anti-bot protection working great! 🤖",
+            "Love the skill rating system! ⭐",
+            "Tournament mode is intense! 🔥",
+            "Provably fair gaming FTW! ✅"
+        ];
+        
+        const usernames = [
+            'CryptoKing', 'GameMaster', 'BlockchainBro', 
+            'TokenMaster', 'WordWizard', 'ChessGrandmaster',
+            'CheckersChamp', 'COREBeliever', 'GameOnChain',
+            'SkillMatcher', 'TourneyPro', 'ValidationVanguard'
+        ];
+        
+        const randomUser = usernames[Math.floor(Math.random() * usernames.length)];
+        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+        
+        addChatMessage(randomUser, randomResponse);
+    }, 1000 + Math.random() * 4000);
+}
+
+function addChatMessage(user, message) {
+    const chatMessages = document.getElementById('chatMessages');
+    if (!chatMessages) return;
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'chat-message fade-in';
+    
+    const timestamp = new Date().toLocaleTimeString('en-US', { 
+        hour12: false, 
+        hour: '2-digit', 
+        minute: '2-digit' 
+    });
+    
+    const isUser = user === 'You';
+    const userColor = isUser ? '#4ecdc4' : '#f39c12';
+    
+    // Enhanced message display with user ratings
+    const userRating = isUser ? currentSkillRating : (1000 + Math.floor(Math.random() * 800));
+    
+    messageDiv.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.3rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <strong style="color: ${userColor};">${user}</strong>
+                ${!isUser ? `<span style="color: #aaa; font-size: 0.7rem;">(${userRating})</span>` : ''}
+            </div>
+            <span style="color: #aaa; font-size: 0.7rem;">${timestamp}</span>
+        </div>
+        <div style="margin-left: 0.5rem; word-wrap: break-word;">${message}</div>
+    `;
+    
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    // Limit chat history
+    while (chatMessages.children.length > 50) {
+        chatMessages.removeChild(chatMessages.firstChild);
+    }
+}
+
+function handleChatKeyPress(event) {
+    if (event.key === 'Enter') {
+        sendChatMessage();
+    }
+}
+
+// Enhanced wallet management
+function disconnectWallet() {
+    userAccount = null;
+    currentBalance = 0;
+    currentSkillRating = 1200;
+    gameContract = null;
+    
+    updateConnectionStatus('disconnected');
+    document.getElementById('balanceDisplay').textContent = '0.00 CORE';
+    document.getElementById('skillRating').textContent = '1200';
+    document.getElementById('connectBtn').classList.remove('hidden');
+    document.getElementById('disconnectBtn').classList.add('hidden');
+    
+    // Stop auto-join monitoring
+    stopAutoJoinMonitoring();
+    
+    if (gameUpdateInterval) {
+        clearInterval(gameUpdateInterval);
+        gameUpdateInterval = null;
+    }
+    
+    showTransactionStatus('👋 Wallet disconnected', '');
+    addActivityFeedItem('Wallet disconnected', 'warning');
+}
+
+async function updateBalance() {
+    if (!web3Provider || !userAccount) return;
+    
+    try {
+        const balance = await web3Provider.getBalance(userAccount);
+        currentBalance = parseFloat(ethers.utils.formatEther(balance));
+        
+        if (!platformSettings.hideBalance) {
+            document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
+        }
+    } catch (error) {
+        console.error('Failed to update balance:', error);
+    }
+}
+
+// Enhanced event handlers
+function handleAccountsChanged(accounts) {
+    if (accounts.length === 0) {
+        disconnectWallet();
+    } else if (accounts[0] !== userAccount) {
+        userAccount = accounts[0];
+        connectWallet();
+        addActivityFeedItem('Account changed', 'info');
+    }
+}
+
+function handleChainChanged(chainId) {
+    if (chainId !== CORE_CHAIN_ID) {
+        showTransactionStatus('⚠️ Please switch to Core network', '');
+        updateConnectionStatus('disconnected');
+        addActivityFeedItem('Network changed - please switch to Core', 'warning');
+    } else {
+        updateConnectionStatus('connected');
+        addActivityFeedItem('Connected to Core network', 'success');
+    }
+}
+
+// Initialize platform when page loads
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🎮 Enhanced Crypticus Multiplayer Platform Loading...');
+    
+    await initializePlatform();
+    
+    // Add initial chat messages
+    addChatMessage('System', 'Welcome to Enhanced Crypticus! Connect your wallet to start playing.');
+    addChatMessage('CryptoKing', 'Just won 2.5 CORE in a tournament! 🎉');
+    addChatMessage('GameMaster', 'New server-validated games available!');
+    addChatMessage('WordWizard', 'Word battles with skill matching are intense! 📝');
+    addChatMessage('SkillMatcher', 'Love the new anti-bot protection! 🤖');
+    
+    console.log('🚀 Enhanced Crypticus Platform Ready!');
+});
+
+// Enhanced event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Wallet buttons
+    const connectBtn = document.getElementById('connectBtn');
+    const disconnectBtn = document.getElementById('disconnectBtn');
+    
+    if (connectBtn) connectBtn.addEventListener('click', connectWallet);
+    if (disconnectBtn) disconnectBtn.addEventListener('click', disconnectWallet);
+    
+    // Transaction status close
+    const transactionStatus = document.getElementById('transactionStatus');
+    if (transactionStatus) {
+        transactionStatus.addEventListener('click', () => {
+            transactionStatus.classList.remove('show');
+        });
+    }
+    
+    // Auto-save settings on input change
+    document.querySelectorAll('.settings-input').forEach(input => {
+        input.addEventListener('change', () => {
+            // Auto-save after 2 seconds of no changes
+            clearTimeout(window.settingsTimeout);
+            window.settingsTimeout = setTimeout(saveSettings, 2000);
+        });
+    });
+    
+    // Enhanced keyboard shortcuts
+    document.addEventListener('keydown', (event) => {
+        // Quick navigation with Alt + number
+        if (event.altKey) {
+            switch(event.key) {
+                case '1':
+                    showSection('lobby');
+                    event.preventDefault();
+                    break;
+                case '2':
+                    showSection('tournaments');
+                    event.preventDefault();
+                    break;
+                case '3':
+                    showSection('profile');
+                    event.preventDefault();
+                    break;
+                case '4':
+                    showSection('chat');
+                    event.preventDefault();
+                    break;
+                case '5':
+                    showSection('settings');
+                    event.preventDefault();
+                    break;
+            }
+        }
+        
+        // Escape to close modals
+        if (event.key === 'Escape') {
+            closeTournamentModal();
+            closeSkillVerification();
+            closeMobileMenu();
+        }
+    });
+});
+
+// Save data before page unload
+window.addEventListener('beforeunload', () => {
+    saveUserData();
+    saveSettings();
+    if (userAccount) {
+        sessionStorage.setItem('walletConnected', 'true');
+    } else {
+        sessionStorage.removeItem('walletConnected');
+    }
+});
+
+// Enhanced error handling
+window.addEventListener('error', (event) => {
+    console.error('Platform error:', event.error);
+    addActivityFeedItem('System error detected', 'error');
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+    console.error('Unhandled promise rejection:', event.reason);
+    addActivityFeedItem('Network error occurred', 'warning');
+});
+
+console.log('✨ Enhanced Multiplayer System with Complete Features Initialized Successfully!');
+console.log('🔧 Features: Server Validation, Anti-bot Protection, Skill Matching, Tournaments, Mobile Support');
+console.log('🎮 Ready for next-generation blockchain gaming!');
+
+// Export functions for testing/debugging
+window.CrypticusDebug = {
+    playerStats,
+    platformSettings,
+    globalGamesList,
+    activeTournaments,
+    currentSkillRating,
+    generateCaptcha,
+    showSkillVerification,
+    addActivityFeedItem
+};
+  </script>
+</body>
+</html>

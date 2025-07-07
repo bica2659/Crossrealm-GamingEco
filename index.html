@@ -1633,29 +1633,6 @@
 <!-- Game Overlay -->
 <div class="game-overlay hidden" id="gameOverlay"></div>
 
-<!-- NEW: Tournament Details Modal -->
-<div class="age-verification hidden" id="tournamentModal" style="z-index: 1500;">
-    <div class="verification-content">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h2 id="tournamentModalTitle">Tournament Details</h2>
-            <button onclick="closeTournamentModal()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">×</button>
-        </div>
-        
-        <div id="tournamentModalContent">
-            <!-- Tournament details will be populated here -->
-        </div>
-        
-        <div style="margin-top: 2rem;">
-            <button class="verify-btn accept" id="joinTournamentBtn" onclick="joinTournament()">
-                Join Tournament
-            </button>
-            <button class="verify-btn decline" onclick="closeTournamentModal()">
-                Cancel
-            </button>
-        </div>
-    </div>
-</div>
-
 <!-- NEW: Skill Verification Modal -->
 <div class="age-verification hidden" id="skillVerificationModal" style="z-index: 1600;">
     <div class="verification-content">

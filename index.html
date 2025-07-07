@@ -3893,6 +3893,12 @@ window.CrypticusDebug = {
     showSkillVerification,
     addActivityFeedItem
 };
+      // Add at the very end of your JavaScript
+setTimeout(function() {
+    if (document.getElementById('skillVerificationModal')) {
+        document.getElementById('skillVerificationModal').style.display = 'none';
+    }
+}, 1000);
   </script>
 </body>
 </html>

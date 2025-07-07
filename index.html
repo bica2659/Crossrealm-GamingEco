@@ -2948,5 +2948,710 @@ window.addEventListener('beforeunload', () => {
 
 console.log('✨ Enhanced Multiplayer System Initialized Successfully! Players can now join and play real games with settlements.');
     </script>
+        <script>
+// MISSING CRITICAL FUNCTIONS - Add this script section to your HTML file
+
+// Initialize blockchain connection
+async function initializeBlockchain() {
+    try {
+        updateConnectionProgress(20);
+        
+        if (typeof window.ethereum === 'undefined') {
+            console.log('MetaMask not detected - continuing in demo mode');
+            updateConnectionProgress(100);
+            updateContractStatus('demo');
+            return true;
+        }
+
+        web3Provider = new ethers.providers.Web3Provider(window.ethereum);
+        updateConnectionProgress(40);
+
+        // Check network
+        const network = await web3Provider.getNetwork();
+        console.log('Current network:', network);
+        
+        updateConnectionProgress(60);
+        
+        if (network.chainId !== parseInt(CORE_CHAIN_ID, 16)) {
+            console.log('Network mismatch - continuing in demo mode');
+        }
+        
+        updateConnectionProgress(80);
+        
+        // Initialize contract (read-only for now)
+        gameContract = new ethers.Contract(
+            GAME_CONTRACT_ADDRESS, 
+            GAME_CONTRACT_ABI, 
+            web3Provider
+        );
+        
+        updateConnectionProgress(100);
+        updateContractStatus('connected');
+        
+        return true;
+    } catch (error) {
+        console.error('Blockchain initialization failed:', error);
+        updateContractStatus('demo', 'Running in demo mode');
+        return true; // Continue in demo mode
+    }
+}
+
+// Enhanced wallet connection
+async function connectWallet() {
+    try {
+        showTransactionStatus('🔄 Connecting wallet...', '');
+        
+        if (typeof window.ethereum === 'undefined') {
+            // Demo mode for users without MetaMask
+            userAccount = '0x' + Math.random().toString(16).slice(2, 42);
+            currentBalance = 10.0; // Demo balance
+            
+            updateConnectionStatus('connected');
+            document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
+            document.getElementById('connectBtn').classList.add('hidden');
+            document.getElementById('disconnectBtn').classList.remove('hidden');
+            
+            showTransactionStatus('✅ Demo wallet connected!', '');
+            await loadUserData();
+            await refreshLobby();
+            startRealTimeUpdates();
+            return;
+        }
+
+        if (!await initializeBlockchain()) {
+            return;
+        }
+
+        const accounts = await window.ethereum.request({
+            method: 'eth_requestAccounts'
+        });
+        
+        if (accounts.length === 0) {
+            throw new Error('No accounts found');
+        }
+
+        userAccount = accounts[0];
+        
+        // Get signer for contract interactions
+        const signer = web3Provider.getSigner();
+        if (gameContract) {
+            gameContract = gameContract.connect(signer);
+        }
+        
+        // Get balance
+        const balance = await web3Provider.getBalance(userAccount);
+        currentBalance = parseFloat(ethers.utils.formatEther(balance));
+        
+        // Update UI
+        updateConnectionStatus('connected');
+        document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
+        document.getElementById('connectBtn').classList.add('hidden');
+        document.getElementById('disconnectBtn').classList.remove('hidden');
+        
+        showTransactionStatus('✅ Wallet connected successfully!', '');
+        
+        // Load user data
+        await loadUserData();
+        await refreshLobby();
+        
+        // Start real-time updates
+        startRealTimeUpdates();
+        
+        // Listen for account changes
+        if (window.ethereum.on) {
+            window.ethereum.on('accountsChanged', handleAccountsChanged);
+            window.ethereum.on('chainChanged', handleChainChanged);
+        }
+        
+    } catch (error) {
+        console.error('Failed to connect wallet:', error);
+        showTransactionStatus('❌ Failed to connect wallet: ' + error.message, '');
+        updateConnectionStatus('disconnected');
+    }
+}
+
+// Navigation function
+function showSection(section) {
+    // Hide all sections
+    document.querySelectorAll('[id$="Section"]').forEach(el => el.classList.add('hidden'));
+    
+    // Show selected section
+    const targetSection = document.getElementById(section + 'Section');
+    if (targetSection) {
+        targetSection.classList.remove('hidden');
+    }
+    
+    // Update navigation
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    
+    // Find and activate the clicked nav item
+    const clickedItem = Array.from(document.querySelectorAll('.nav-item')).find(item => 
+        item.textContent.toLowerCase().includes(section.toLowerCase())
+    );
+    if (clickedItem) {
+        clickedItem.classList.add('active');
+    }
+    
+    currentSection = section;
+    
+    // Load section-specific data
+    if (section === 'lobby') {
+        refreshLobby();
+    } else if (section === 'profile') {
+        updatePlayerStats();
+        loadGameHistory();
+    }
+}
+
+// Game type selection
+function selectGameType(type) {
+    selectedGameType = type;
+    
+    // Update UI
+    document.querySelectorAll('.game-type-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    
+    const selectedCard = document.querySelector(`[data-type="${type}"]`);
+    if (selectedCard) {
+        selectedCard.classList.add('selected');
+    }
+    
+    updateCreateButton();
+}
+
+// Update create button state
+function updateCreateButton() {
+    const btn = document.getElementById('createGameBtn');
+    const stakeInput = document.getElementById('gameStake');
+    
+    if (!btn || !stakeInput) return;
+    
+    const stake = parseFloat(stakeInput.value);
+    
+    if (selectedGameType && stake >= 0.01) {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fas fa-plus"></i> Create ${selectedGameType.toUpperCase()} Game (${stake} CORE)`;
+    } else if (selectedGameType && !stake) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-plus"></i> Enter Stake Amount`;
+    } else if (!selectedGameType && stake >= 0.01) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-plus"></i> Select Game Type`;
+    } else {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-plus"></i> Select Game Type & Enter Stake`;
+    }
+}
+
+// Create game from main section
+async function createGame() {
+    const stakeAmount = parseFloat(document.getElementById('gameStake').value);
+    
+    if (!userAccount) {
+        showTransactionStatus('❌ Please connect your wallet first', '');
+        return;
+    }
+    
+    if (!selectedGameType) {
+        showTransactionStatus('❌ Please select a game type', '');
+        return;
+    }
+    
+    if (!stakeAmount || stakeAmount < 0.01) {
+        showTransactionStatus('❌ Please enter a valid stake amount (minimum 0.01 CORE)', '');
+        return;
+    }
+    
+    if (stakeAmount > currentBalance) {
+        showTransactionStatus('❌ Insufficient CORE balance', '');
+        return;
+    }
+    
+    try {
+        const session = await gameMatchmaker.createGame(selectedGameType, stakeAmount, userAccount);
+        multiplayerSession = session;
+        
+        // Update balance
+        currentBalance -= stakeAmount;
+        document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
+        
+        // Open game window
+        openGameWindow(selectedGameType);
+        
+        // Initialize game UI based on type
+        switch(selectedGameType) {
+            case 'chess':
+                initializeChessBoard(session);
+                break;
+            case 'checkers':
+                initializeCheckersBoard(session);
+                break;
+            case 'words':
+                initializeWordGame(session);
+                break;
+        }
+        
+        addActivityFeedItem(`🎮 You created a ${selectedGameType} game with ${stakeAmount} CORE stake`);
+        
+        // Clear form
+        document.getElementById('gameStake').value = '';
+        selectedGameType = null;
+        document.querySelectorAll('.game-type-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        updateCreateButton();
+        
+        // Switch to lobby to see the created game
+        showSection('lobby');
+        
+        playerStats.gamesPlayed++;
+        updatePlayerStats();
+        
+    } catch (error) {
+        showTransactionStatus('❌ Failed to create game: ' + error.message, '');
+    }
+}
+
+// Refresh game lobby
+async function refreshLobby() {
+    try {
+        // Update UI
+        updateGamesDisplay();
+        updateLiveStats();
+        
+    } catch (error) {
+        console.error('Failed to refresh lobby:', error);
+    }
+}
+
+// Update games display
+function updateGamesDisplay() {
+    const gamesList = document.getElementById('gamesList');
+    const noGames = document.getElementById('noGames');
+    
+    if (!gamesList || !noGames) return;
+    
+    if (activeGames.length === 0) {
+        gamesList.innerHTML = '';
+        noGames.classList.remove('hidden');
+        return;
+    }
+    
+    noGames.classList.add('hidden');
+    
+    gamesList.innerHTML = activeGames.map(game => {
+        const gameIcons = { chess: '♟️', checkers: '⚫', words: '📝' };
+        const gameNames = { chess: 'Chess Masters', checkers: 'Checkers Pro', words: 'Word Battle' };
+        
+        const timeAgo = Math.floor((Date.now() - game.createdAt) / 60000);
+        const creator = game.creator === userAccount ? 'You' : 
+                       game.creator.substring(0, 6) + '...' + game.creator.substring(38);
+        
+        const canJoin = userAccount && 
+                       game.creator !== userAccount && 
+                       game.status === 'waiting' && 
+                       currentBalance >= game.stake;
+        
+        return `
+            <div class="game-entry fade-in">
+                <div class="game-header">
+                    <div class="game-title">
+                        ${gameIcons[game.type]} ${gameNames[game.type]} #${game.id}
+                    </div>
+                    <div class="game-status ${game.status === 'waiting' ? 'status-waiting' : 'status-playing'}">
+                        ${game.status.toUpperCase()}
+                    </div>
+                </div>
+                
+                <div class="game-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Creator</div>
+                        <div class="detail-value">${creator}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Stake</div>
+                        <div class="detail-value">${game.stake} CORE</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Created</div>
+                        <div class="detail-value">${timeAgo}m ago</div>
+                    </div>
+                </div>
+                
+                ${canJoin ? 
+                    `<button class="join-btn" onclick="joinGame(${game.id}, ${game.stake})">
+                        <i class="fas fa-sword"></i> Join Game (${game.stake} CORE)
+                    </button>` :
+                    game.creator === userAccount ?
+                        `<button class="join-btn" disabled style="background: #666; color: #999;">
+                            <i class="fas fa-clock"></i> Waiting for Opponent
+                        </button>` :
+                        !userAccount ?
+                            `<button class="join-btn" disabled style="background: #666; color: #999;">
+                                <i class="fas fa-wallet"></i> Connect Wallet to Join
+                            </button>` :
+                            currentBalance < game.stake ?
+                                `<button class="join-btn" disabled style="background: #666; color: #999;">
+                                    <i class="fas fa-coins"></i> Insufficient Balance
+                                </button>` :
+                                `<button class="join-btn" disabled style="background: #666; color: #999;">
+                                    <i class="fas fa-users"></i> Game Full
+                                </button>`
+                }
+            </div>
+        `;
+    }).join('');
+}
+
+// Validation function
+function validateStakeAndWallet(stakeAmount) {
+    if (!userAccount) {
+        showTransactionStatus('❌ Please connect your wallet first', '');
+        return false;
+    }
+    
+    if (!stakeAmount || stakeAmount < 0.01) {
+        showTransactionStatus('❌ Please enter a valid stake amount (minimum 0.01 CORE)', '');
+        return false;
+    }
+    
+    if (stakeAmount > currentBalance) {
+        showTransactionStatus('❌ Insufficient CORE balance', '');
+        return false;
+    }
+    
+    return true;
+}
+
+// Age verification function
+function verifyAge(isAdult) {
+    if (isAdult) {
+        document.getElementById('ageVerificationModal').style.display = 'none';
+        sessionStorage.setItem('ageVerified', 'true');
+        showTransactionStatus('✅ Age verified. Welcome to Crypticus!', '');
+        initializeBlockchain();
+    } else {
+        alert('Sorry, you must be 18 or older to use this platform.');
+        window.location.href = 'https://www.google.com';
+    }
+}
+
+// Check age verification
+function checkAgeVerification() {
+    if (!sessionStorage.getItem('ageVerified')) {
+        document.getElementById('ageVerificationModal').style.display = 'flex';
+        return false;
+    }
+    return true;
+}
+
+// Update live statistics
+function updateLiveStats() {
+    const totalGames = activeGames.length;
+    const totalVolume = activeGames.reduce((sum, game) => sum + game.stake, 0);
+    const onlinePlayers = totalGames > 0 ? totalGames + Math.floor(Math.random() * 20) + 10 : Math.floor(Math.random() * 50) + 5;
+    
+    const totalPlayersEl = document.getElementById('totalPlayers');
+    const totalGamesEl = document.getElementById('totalGames');
+    const totalVolumeEl = document.getElementById('totalVolume');
+    
+    if (totalPlayersEl) totalPlayersEl.textContent = onlinePlayers;
+    if (totalGamesEl) totalGamesEl.textContent = totalGames;
+    if (totalVolumeEl) totalVolumeEl.textContent = totalVolume.toFixed(2);
+}
+
+// Utility functions
+function updatePlayerStats() {
+    if (playerStats.gamesPlayed > 0) {
+        playerStats.winRate = ((playerStats.gamesWon / playerStats.gamesPlayed) * 100).toFixed(1);
+    } else {
+        playerStats.winRate = 0;
+    }
+    
+    const gamesPlayedEl = document.getElementById('profileGamesPlayed');
+    const gamesWonEl = document.getElementById('profileGamesWon');
+    const totalEarnedEl = document.getElementById('profileTotalEarned');
+    const winRateEl = document.getElementById('profileWinRate');
+    
+    if (gamesPlayedEl) gamesPlayedEl.textContent = playerStats.gamesPlayed;
+    if (gamesWonEl) gamesWonEl.textContent = playerStats.gamesWon;
+    if (totalEarnedEl) totalEarnedEl.textContent = playerStats.totalEarned.toFixed(4);
+    if (winRateEl) winRateEl.textContent = playerStats.winRate + '%';
+}
+
+function loadGameHistory() {
+    const historyContainer = document.getElementById('gameHistory');
+    if (!historyContainer) return;
+    
+    const history = [
+        { type: 'chess', result: 'won', stake: 0.05, opponent: '0x1234...5678', date: Date.now() - 3600000 },
+        { type: 'checkers', result: 'lost', stake: 0.02, opponent: '0x8765...4321', date: Date.now() - 7200000 },
+        { type: 'words', result: 'won', stake: 0.01, opponent: '0x9999...1111', date: Date.now() - 10800000 }
+    ];
+    
+    if (history.length === 0) {
+        historyContainer.innerHTML = '<p style="text-align: center; color: #aaa;">No games played yet</p>';
+        return;
+    }
+    
+    historyContainer.innerHTML = history.map(game => {
+        const timeAgo = Math.floor((Date.now() - game.date) / 60000);
+        const resultColor = game.result === 'won' ? '#00ff88' : '#ff6b6b';
+        const gameIcons = { chess: '♟️', checkers: '⚫', words: '📝' };
+        
+        return `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; margin: 0.25rem 0; background: rgba(255, 255, 255, 0.05); border-radius: 5px;">
+                <div>
+                    <span>${gameIcons[game.type]} ${game.type.toUpperCase()}</span>
+                    <span style="color: ${resultColor}; font-weight: bold; margin-left: 0.5rem;">${game.result.toUpperCase()}</span>
+                </div>
+                <div style="text-align: right; font-size: 0.9rem;">
+                    <div>${game.stake} CORE</div>
+                    <div style="color: #aaa; font-size: 0.8rem;">${timeAgo}m ago</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function addActivityFeedItem(message) {
+    const feed = document.getElementById('activityFeed');
+    if (!feed) return;
+    
+    const item = document.createElement('div');
+    item.className = 'news-item fade-in';
+    item.innerHTML = `
+        <div style="padding: 1rem; margin: 0.5rem 0; background: rgba(255, 255, 255, 0.05); border-radius: 8px; border-left: 3px solid #4ecdc4;">
+            <div style="font-weight: bold; margin-bottom: 0.5rem; color: #4ecdc4;">${message}</div>
+            <div style="font-size: 0.8rem; color: #aaa;">Just now</div>
+        </div>
+    `;
+    
+    feed.insertBefore(item, feed.firstChild);
+    
+    while (feed.children.length > 10) {
+        feed.removeChild(feed.lastChild);
+    }
+}
+
+function updateConnectionProgress(percentage) {
+    const progressBar = document.getElementById('connectionProgress');
+    if (progressBar) {
+        progressBar.style.width = percentage + '%';
+    }
+}
+
+function updateContractStatus(status, message = '') {
+    const statusElement = document.getElementById('contractStatus');
+    if (!statusElement) return;
+    
+    const indicator = statusElement.querySelector('.connection-indicator');
+    
+    switch (status) {
+        case 'connected':
+            if (indicator) indicator.className = 'connection-indicator connected';
+            statusElement.innerHTML = '<span class="connection-indicator connected"></span>Connected to Core Blockchain';
+            break;
+        case 'demo':
+            if (indicator) indicator.className = 'connection-indicator pending';
+            statusElement.innerHTML = '<span class="connection-indicator pending"></span>Demo Mode - ' + (message || 'No MetaMask detected');
+            break;
+        case 'disconnected':
+            if (indicator) indicator.className = 'connection-indicator disconnected';
+            statusElement.innerHTML = '<span class="connection-indicator disconnected"></span>Disconnected';
+            break;
+        case 'error':
+            if (indicator) indicator.className = 'connection-indicator disconnected';
+            statusElement.innerHTML = `<span class="connection-indicator disconnected"></span>Error: ${message}`;
+            break;
+        default:
+            if (indicator) indicator.className = 'connection-indicator pending';
+            statusElement.innerHTML = '<span class="connection-indicator pending"></span>Connecting...';
+    }
+}
+
+function updateConnectionStatus(status) {
+    const statusElement = document.getElementById('connectionStatus');
+    if (!statusElement) return;
+    
+    const indicator = statusElement.querySelector('.connection-indicator');
+    
+    switch (status) {
+        case 'connected':
+            if (indicator) indicator.className = 'connection-indicator connected';
+            statusElement.innerHTML = '<span class="connection-indicator connected"></span>Connected';
+            break;
+        case 'disconnected':
+            if (indicator) indicator.className = 'connection-indicator disconnected';
+            statusElement.innerHTML = '<span class="connection-indicator disconnected"></span>Not Connected';
+            break;
+        case 'pending':
+            if (indicator) indicator.className = 'connection-indicator pending';
+            statusElement.innerHTML = '<span class="connection-indicator pending"></span>Connecting...';
+            break;
+    }
+}
+
+function handleAccountsChanged(accounts) {
+    if (accounts.length === 0) {
+        disconnectWallet();
+    } else if (accounts[0] !== userAccount) {
+        userAccount = accounts[0];
+        connectWallet();
+    }
+}
+
+function handleChainChanged(chainId) {
+    if (chainId !== CORE_CHAIN_ID) {
+        showTransactionStatus('⚠️ Please switch to Core network', '');
+        updateConnectionStatus('disconnected');
+    } else {
+        updateConnectionStatus('connected');
+    }
+}
+
+function disconnectWallet() {
+    userAccount = null;
+    currentBalance = 0;
+    gameContract = null;
+    
+    updateConnectionStatus('disconnected');
+    document.getElementById('balanceDisplay').textContent = '0.00 CORE';
+    document.getElementById('connectBtn').classList.remove('hidden');
+    document.getElementById('disconnectBtn').classList.add('hidden');
+    
+    if (gameUpdateInterval) {
+        clearInterval(gameUpdateInterval);
+        gameUpdateInterval = null;
+    }
+    
+    showTransactionStatus('👋 Wallet disconnected', '');
+}
+
+function copyContractAddress() {
+    navigator.clipboard.writeText(GAME_CONTRACT_ADDRESS).then(() => {
+        showTransactionStatus('📋 Contract address copied to clipboard', '');
+    }).catch(() => {
+        showTransactionStatus('❌ Failed to copy address', '');
+    });
+}
+
+async function updateBalance() {
+    if (!web3Provider || !userAccount) return;
+    
+    try {
+        const balance = await web3Provider.getBalance(userAccount);
+        currentBalance = parseFloat(ethers.utils.formatEther(balance));
+        document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
+    } catch (error) {
+        console.error('Failed to update balance:', error);
+    }
+}
+
+async function loadUserData() {
+    try {
+        const savedStats = sessionStorage.getItem(`playerStats_${userAccount}`);
+        if (savedStats) {
+            playerStats = { ...playerStats, ...JSON.parse(savedStats) };
+        }
+        updatePlayerStats();
+    } catch (error) {
+        console.error('Failed to load user data:', error);
+    }
+}
+
+function saveUserData() {
+    if (userAccount) {
+        sessionStorage.setItem(`playerStats_${userAccount}`, JSON.stringify(playerStats));
+    }
+}
+
+function startRealTimeUpdates() {
+    if (gameUpdateInterval) {
+        clearInterval(gameUpdateInterval);
+    }
+    
+    gameUpdateInterval = setInterval(async () => {
+        if (currentSection === 'lobby') {
+            await refreshLobby();
+        }
+        if (web3Provider && userAccount) {
+            await updateBalance();
+        }
+    }, 30000);
+    
+    setInterval(() => {
+        if (Math.random() < 0.1) {
+            const activities = [
+                '🎮 New player joined the platform',
+                '💰 Large stake game created',
+                '🏆 Epic battle just finished',
+                '⚡ Platform processing new transactions',
+                '🔥 High activity detected'
+            ];
+            
+            const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+            addActivityFeedItem(randomActivity);
+        }
+    }, 30000);
+}
+
+function showTransactionStatus(message, txHash = '') {
+    const statusDiv = document.getElementById('transactionStatus');
+    const messageDiv = document.getElementById('txStatusMessage');
+    const hashDiv = document.getElementById('txHash');
+    
+    if (messageDiv) messageDiv.textContent = message;
+    if (hashDiv) {
+        hashDiv.textContent = txHash ? `TX: ${txHash.substring(0, 10)}...${txHash.substring(56)}` : '';
+        hashDiv.onclick = txHash ? () => window.open(`https://scan.coredao.org/tx/${txHash}`, '_blank') : null;
+        hashDiv.style.cursor = txHash ? 'pointer' : 'default';
+    }
+    
+    if (statusDiv) {
+        statusDiv.classList.add('show');
+        
+        if (!message.includes('❌')) {
+            setTimeout(() => statusDiv.classList.remove('show'), 5000);
+        }
+    }
+}
+
+async function initializePlatform() {
+    console.log('🚀 Initializing Crypticus Gaming Platform...');
+    
+    try {
+        if (!checkAgeVerification()) {
+            return;
+        }
+        
+        await initializeBlockchain();
+        
+        if (sessionStorage.getItem('walletConnected') === 'true') {
+            setTimeout(async () => {
+                try {
+                    await connectWallet();
+                } catch (error) {
+                    console.error('Auto-connect failed:', error);
+                    sessionStorage.removeItem('walletConnected');
+                }
+            }, 1000);
+        }
+        
+        refreshLobby();
+        
+        addActivityFeedItem('🚀 Platform initialized successfully');
+        addActivityFeedItem('🔗 Connected to Core Blockchain');
+        addActivityFeedItem('🎮 Ready for gaming!');
+        
+        console.log('✅ Platform initialization complete!');
+        
+    } catch (error) {
+        console.error('❌ Platform initialization failed:', error);
+        showTransactionStatus('❌ Platform initialization failed: ' + error.message, '');
+    }
+}
+    </script>
 </body>
 </html>

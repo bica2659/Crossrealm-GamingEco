@@ -275,8 +275,7 @@
             color: #aaa;
         }
     </style>
-</head>
-<style>
+    <style>
         /* Game Entry Styles */
         .game-entry {
             background: linear-gradient(135deg, rgba(78, 205, 196, 0.1), rgba(68, 160, 141, 0.1));
@@ -1436,6 +1435,204 @@ let playerStats = {
     winRate: 0
 };
 
+// Initialize blockchain connection
+async function initializeBlockchain() {
+    try {
+        updateConnectionProgress(20);
+        
+        if (typeof window.ethereum === 'undefined') {
+            console.log('MetaMask not detected - continuing in demo mode');
+            updateConnectionProgress(100);
+            updateContractStatus('demo');
+            return true;
+        }
+
+        web3Provider = new ethers.providers.Web3Provider(window.ethereum);
+        updateConnectionProgress(40);
+
+        // Check network
+        const network = await web3Provider.getNetwork();
+        console.log('Current network:', network);
+        
+        updateConnectionProgress(60);
+        
+        if (network.chainId !== parseInt(CORE_CHAIN_ID, 16)) {
+            console.log('Network mismatch - continuing in demo mode');
+        }
+        
+        updateConnectionProgress(80);
+        
+        // Initialize contract (read-only for now)
+        gameContract = new ethers.Contract(
+            GAME_CONTRACT_ADDRESS, 
+            GAME_CONTRACT_ABI, 
+            web3Provider
+        );
+        
+        updateConnectionProgress(100);
+        updateContractStatus('connected');
+        
+        return true;
+    } catch (error) {
+        console.error('Blockchain initialization failed:', error);
+        updateContractStatus('demo', 'Running in demo mode');
+        return true; // Continue in demo mode
+    }
+}
+
+// Switch to Core network
+async function switchToCore() {
+    try {
+        await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: CORE_CHAIN_ID }],
+        });
+    } catch (switchError) {
+        if (switchError.code === 4902) {
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_addEthereumChain',
+                    params: [{
+                        chainId: CORE_CHAIN_ID,
+                        chainName: 'Core Blockchain',
+                        nativeCurrency: {
+                            name: 'CORE',
+                            symbol: 'CORE',
+                            decimals: 18
+                        },
+                        rpcUrls: ['https://rpc.coredao.org'],
+                        blockExplorerUrls: ['https://scan.coredao.org']
+                    }],
+                });
+            } catch (addError) {
+                throw new Error('Failed to add Core network');
+            }
+        } else {
+            throw switchError;
+        }
+    }
+}
+
+// Enhanced wallet connection
+async function connectWallet() {
+    try {
+        showTransactionStatus('🔄 Connecting wallet...', '');
+        
+        if (typeof window.ethereum === 'undefined') {
+            // Demo mode for users without MetaMask
+            userAccount = '0x' + Math.random().toString(16).slice(2, 42);
+            currentBalance = 10.0; // Demo balance
+            
+            updateConnectionStatus('connected');
+            document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
+            document.getElementById('connectBtn').classList.add('hidden');
+            document.getElementById('disconnectBtn').classList.remove('hidden');
+            
+            showTransactionStatus('✅ Demo wallet connected!', '');
+            await loadUserData();
+            await refreshLobby();
+            startRealTimeUpdates();
+            return;
+        }
+
+        if (!await initializeBlockchain()) {
+            return;
+        }
+
+        const accounts = await window.ethereum.request({
+            method: 'eth_requestAccounts'
+        });
+        
+        if (accounts.length === 0) {
+            throw new Error('No accounts found');
+        }
+
+        userAccount = accounts[0];
+        
+        // Get signer for contract interactions
+        const signer = web3Provider.getSigner();
+        if (gameContract) {
+            gameContract = gameContract.connect(signer);
+        }
+        
+        // Get balance
+        const balance = await web3Provider.getBalance(userAccount);
+        currentBalance = parseFloat(ethers.utils.formatEther(balance));
+        
+        // Update UI
+        updateConnectionStatus('connected');
+        document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
+        document.getElementById('connectBtn').classList.add('hidden');
+        document.getElementById('disconnectBtn').classList.remove('hidden');
+        
+        showTransactionStatus('✅ Wallet connected successfully!', '');
+        
+        // Load user data
+        await loadUserData();
+        await refreshLobby();
+        
+        // Start real-time updates
+        startRealTimeUpdates();
+        
+        // Listen for account changes
+        if (window.ethereum.on) {
+            window.ethereum.on('accountsChanged', handleAccountsChanged);
+            window.ethereum.on('chainChanged', handleChainChanged);
+        }
+        
+    } catch (error) {
+        console.error('Failed to connect wallet:', error);
+        showTransactionStatus('❌ Failed to connect wallet: ' + error.message, '');
+        updateConnectionStatus('disconnected');
+    }
+}
+
+// Simplified game creation for testing
+async function createGameOnChain(gameType, stakeAmount) {
+    if (!userAccount) {
+        throw new Error('Wallet not connected');
+    }
+    
+    try {
+        showTransactionStatus('🔄 Creating game...', '');
+        
+        // Since the actual contract might not have our game functions,
+        // we'll simulate the transaction and create a local game
+        const gameId = Date.now(); // Use timestamp as game ID
+        
+        // For testing purposes, just do a simple deposit to show blockchain interaction
+        const stakeWei = ethers.utils.parseEther(stakeAmount.toString());
+        
+        // Try to interact with the contract (deposit function)
+        let tx;
+        try {
+            if (gameContract && typeof window.ethereum !== 'undefined') {
+                tx = await gameContract.deposit({
+                    value: stakeWei,
+                    gasLimit: 100000
+                });
+                
+                showTransactionStatus('⏳ Transaction submitted...', tx.hash);
+                await tx.wait();
+                showTransactionStatus('✅ Game created successfully!', tx.hash);
+            } else {
+                // Demo mode
+                showTransactionStatus('✅ Game created in demo mode!', '');
+            }
+        } catch (contractError) {
+            console.log('Contract interaction failed, creating local game:', contractError);
+            // If contract interaction fails, just create a local game
+            showTransactionStatus('✅ Game created locally (demo mode)', '');
+        }
+        
+        return gameId;
+        
+    } catch (error) {
+        console.error('Failed to create game:', error);
+        throw new Error('Failed to create game: ' + error.message);
+    }
+}
+
 // Enhanced Multiplayer System
 class MultiplayerGameSession {
     constructor(gameId, gameType, stake, isHost = false) {
@@ -1893,7 +2090,8 @@ class MultiplayerGameSession {
         }
     }
 }
-
+    </script>
+    <script>
 // Enhanced Game Matchmaking System
 class GameMatchmaker {
     constructor() {
@@ -2111,6 +2309,390 @@ class GameMatchmaker {
 
 // Initialize matchmaker
 const gameMatchmaker = new GameMatchmaker();
+
+// Game Lobby Management
+let currentSection = 'lobby';
+
+// Navigation
+function showSection(section) {
+    // Hide all sections
+    document.querySelectorAll('[id$="Section"]').forEach(el => el.classList.add('hidden'));
+    
+    // Show selected section
+    const targetSection = document.getElementById(section + 'Section');
+    if (targetSection) {
+        targetSection.classList.remove('hidden');
+    }
+    
+    // Update navigation
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    
+    // Find and activate the clicked nav item
+    const clickedItem = Array.from(document.querySelectorAll('.nav-item')).find(item => 
+        item.textContent.toLowerCase().includes(section.toLowerCase())
+    );
+    if (clickedItem) {
+        clickedItem.classList.add('active');
+    }
+    
+    currentSection = section;
+    
+    // Load section-specific data
+    if (section === 'lobby') {
+        refreshLobby();
+    } else if (section === 'profile') {
+        updatePlayerStats();
+        loadGameHistory();
+    }
+}
+
+// Game type selection
+function selectGameType(type) {
+    selectedGameType = type;
+    
+    // Update UI
+    document.querySelectorAll('.game-type-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    
+    const selectedCard = document.querySelector(`[data-type="${type}"]`);
+    if (selectedCard) {
+        selectedCard.classList.add('selected');
+    }
+    
+    updateCreateButton();
+}
+
+// Update create button state
+function updateCreateButton() {
+    const btn = document.getElementById('createGameBtn');
+    const stakeInput = document.getElementById('gameStake');
+    
+    if (!btn || !stakeInput) return;
+    
+    const stake = parseFloat(stakeInput.value);
+    
+    if (selectedGameType && stake >= 0.01) {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fas fa-plus"></i> Create ${selectedGameType.toUpperCase()} Game (${stake} CORE)`;
+    } else if (selectedGameType && !stake) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-plus"></i> Enter Stake Amount`;
+    } else if (!selectedGameType && stake >= 0.01) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-plus"></i> Select Game Type`;
+    } else {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-plus"></i> Select Game Type & Enter Stake`;
+    }
+}
+
+// Create game
+async function createGame() {
+    const stakeAmount = parseFloat(document.getElementById('gameStake').value);
+    
+    if (!userAccount) {
+        showTransactionStatus('❌ Please connect your wallet first', '');
+        return;
+    }
+    
+    if (!selectedGameType) {
+        showTransactionStatus('❌ Please select a game type', '');
+        return;
+    }
+    
+    if (!stakeAmount || stakeAmount < 0.01) {
+        showTransactionStatus('❌ Please enter a valid stake amount (minimum 0.01 CORE)', '');
+        return;
+    }
+    
+    if (stakeAmount > currentBalance) {
+        showTransactionStatus('❌ Insufficient CORE balance', '');
+        return;
+    }
+    
+    try {
+        const gameId = await createGameOnChain(selectedGameType, stakeAmount);
+        
+        // Add to local games list
+        const newGame = {
+            id: gameId,
+            type: selectedGameType,
+            creator: userAccount,
+            stake: stakeAmount,
+            status: 'waiting',
+            createdAt: Date.now()
+        };
+        
+        activeGames.push(newGame);
+        addActivityFeedItem(`🎮 You created a ${selectedGameType} game with ${stakeAmount} CORE stake`);
+        
+        // Clear form
+        document.getElementById('gameStake').value = '';
+        selectedGameType = null;
+        document.querySelectorAll('.game-type-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        updateCreateButton();
+        
+        // Switch to lobby to see the created game
+        showSection('lobby');
+        
+        // Update balance
+        currentBalance -= stakeAmount;
+        document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
+        
+    } catch (error) {
+        showTransactionStatus('❌ Failed to create game: ' + error.message, '');
+    }
+}
+
+// Refresh game lobby
+async function refreshLobby() {
+    try {
+        showTransactionStatus('🔄 Loading games...', '');
+        
+        // Update UI
+        updateGamesDisplay();
+        updateLiveStats();
+        
+        showTransactionStatus('✅ Lobby refreshed', '');
+        
+    } catch (error) {
+        console.error('Failed to refresh lobby:', error);
+        showTransactionStatus('❌ Failed to refresh lobby', '');
+    }
+}
+
+// Update games display
+function updateGamesDisplay() {
+    const gamesList = document.getElementById('gamesList');
+    const noGames = document.getElementById('noGames');
+    
+    if (!gamesList || !noGames) return;
+    
+    if (activeGames.length === 0) {
+        gamesList.innerHTML = '';
+        noGames.classList.remove('hidden');
+        return;
+    }
+    
+    noGames.classList.add('hidden');
+    
+    gamesList.innerHTML = activeGames.map(game => {
+        const gameIcons = { chess: '♟️', checkers: '⚫', words: '📝' };
+        const gameNames = { chess: 'Chess Masters', checkers: 'Checkers Pro', words: 'Word Battle' };
+        
+        const timeAgo = Math.floor((Date.now() - game.createdAt) / 60000);
+        const creator = game.creator === userAccount ? 'You' : 
+                       game.creator.substring(0, 6) + '...' + game.creator.substring(38);
+        
+        const canJoin = userAccount && 
+                       game.creator !== userAccount && 
+                       game.status === 'waiting' && 
+                       currentBalance >= game.stake;
+        
+        return `
+            <div class="game-entry fade-in">
+                <div class="game-header">
+                    <div class="game-title">
+                        ${gameIcons[game.type]} ${gameNames[game.type]} #${game.id}
+                    </div>
+                    <div class="game-status ${game.status === 'waiting' ? 'status-waiting' : 'status-playing'}">
+                        ${game.status.toUpperCase()}
+                    </div>
+                </div>
+                
+                <div class="game-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Creator</div>
+                        <div class="detail-value">${creator}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Stake</div>
+                        <div class="detail-value">${game.stake} CORE</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Created</div>
+                        <div class="detail-value">${timeAgo}m ago</div>
+                    </div>
+                </div>
+                
+                ${canJoin ? 
+                    `<button class="join-btn" onclick="joinGame(${game.id}, ${game.stake})">
+                        <i class="fas fa-sword"></i> Join Game (${game.stake} CORE)
+                    </button>` :
+                    game.creator === userAccount ?
+                        `<button class="join-btn" disabled style="background: #666; color: #999;">
+                            <i class="fas fa-clock"></i> Waiting for Opponent
+                        </button>` :
+                        !userAccount ?
+                            `<button class="join-btn" disabled style="background: #666; color: #999;">
+                                <i class="fas fa-wallet"></i> Connect Wallet to Join
+                            </button>` :
+                            currentBalance < game.stake ?
+                                `<button class="join-btn" disabled style="background: #666; color: #999;">
+                                    <i class="fas fa-coins"></i> Insufficient Balance
+                                </button>` :
+                                `<button class="join-btn" disabled style="background: #666; color: #999;">
+                                    <i class="fas fa-users"></i> Game Full
+                                </button>`
+                }
+            </div>
+        `;
+    }).join('');
+}
+
+// Join game
+async function joinGame(gameId, stakeAmount) {
+    if (!userAccount) {
+        showTransactionStatus('❌ Please connect your wallet first', '');
+        return;
+    }
+    
+    if (currentBalance < stakeAmount) {
+        showTransactionStatus('❌ Insufficient CORE balance', '');
+        return;
+    }
+    
+    try {
+        showTransactionStatus('🔄 Joining game...', '');
+        
+        const session = await gameMatchmaker.joinGame(gameId, userAccount, stakeAmount);
+        multiplayerSession = session;
+        
+        // Update balance (simulate spending)
+        currentBalance -= stakeAmount;
+        document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
+        
+        // Refresh lobby
+        await refreshLobby();
+        
+        addActivityFeedItem(`⚔️ You joined game #${gameId} with ${stakeAmount} CORE stake`);
+        showTransactionStatus('🎮 Game joined! Good luck!', '');
+        
+    } catch (error) {
+        showTransactionStatus('❌ Failed to join game: ' + error.message, '');
+    }
+}
+
+// Individual Game Creation Functions
+async function createChessGame() {
+    const stakeAmount = parseFloat(document.getElementById('chessStake').value);
+    if (!validateStakeAndWallet(stakeAmount)) return;
+    
+    try {
+        showTransactionStatus('🔄 Creating Chess game...', '');
+        
+        const session = await gameMatchmaker.createGame('chess', stakeAmount, userAccount);
+        multiplayerSession = session;
+        
+        // Update balance (simulate spending)
+        currentBalance -= stakeAmount;
+        document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
+        
+        openGameWindow('chess');
+        initializeChessBoard(session);
+        
+        playerStats.gamesPlayed++;
+        updatePlayerStats();
+        updateGamesDisplay();
+        
+        document.getElementById('chessStake').value = '';
+        
+    } catch (error) {
+        showTransactionStatus('❌ Failed to create Chess game: ' + error.message, '');
+    }
+}
+
+async function createCheckersGame() {
+    const stakeAmount = parseFloat(document.getElementById('checkersStake').value);
+    if (!validateStakeAndWallet(stakeAmount)) return;
+    
+    try {
+        showTransactionStatus('🔄 Creating Checkers game...', '');
+        
+        const session = await gameMatchmaker.createGame('checkers', stakeAmount, userAccount);
+        multiplayerSession = session;
+        
+        currentBalance -= stakeAmount;
+        document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
+        
+        openGameWindow('checkers');
+        initializeCheckersBoard(session);
+        
+        playerStats.gamesPlayed++;
+        updatePlayerStats();
+        updateGamesDisplay();
+        
+        document.getElementById('checkersStake').value = '';
+        
+    } catch (error) {
+        showTransactionStatus('❌ Failed to create Checkers game: ' + error.message, '');
+    }
+}
+
+async function createWordGame() {
+    const stakeAmount = parseFloat(document.getElementById('wordStake').value);
+    if (!validateStakeAndWallet(stakeAmount)) return;
+    
+    try {
+        showTransactionStatus('🔄 Creating Word game...', '');
+        
+        const session = await gameMatchmaker.createGame('words', stakeAmount, userAccount);
+        multiplayerSession = session;
+        
+        currentBalance -= stakeAmount;
+        document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
+        
+        openGameWindow('word');
+        initializeWordGame(session);
+        
+        playerStats.gamesPlayed++;
+        updatePlayerStats();
+        updateGamesDisplay();
+        
+        document.getElementById('wordStake').value = '';
+        
+    } catch (error) {
+        showTransactionStatus('❌ Failed to create Word game: ' + error.message, '');
+    }
+}
+
+// Better validation function
+function validateStakeAndWallet(stakeAmount) {
+    if (!userAccount) {
+        showTransactionStatus('❌ Please connect your wallet first', '');
+        return false;
+    }
+    
+    if (!stakeAmount || stakeAmount < 0.01) {
+        showTransactionStatus('❌ Please enter a valid stake amount (minimum 0.01 CORE)', '');
+        return false;
+    }
+    
+    if (stakeAmount > currentBalance) {
+        showTransactionStatus('❌ Insufficient CORE balance', '');
+        return false;
+    }
+    
+    return true;
+}
+
+// Update live statistics
+function updateLiveStats() {
+    const totalGames = activeGames.length;
+    const totalVolume = activeGames.reduce((sum, game) => sum + game.stake, 0);
+    const onlinePlayers = totalGames > 0 ? totalGames + Math.floor(Math.random() * 20) + 10 : Math.floor(Math.random() * 50) + 5;
+    
+    const totalPlayersEl = document.getElementById('totalPlayers');
+    const totalGamesEl = document.getElementById('totalGames');
+    const totalVolumeEl = document.getElementById('totalVolume');
+    
+    if (totalPlayersEl) totalPlayersEl.textContent = onlinePlayers;
+    if (totalGamesEl) totalGamesEl.textContent = totalGames;
+    if (totalVolumeEl) totalVolumeEl.textContent = totalVolume.toFixed(2);
+}
     </script>
     <script>
 // Enhanced Game Logic & UI Functions
@@ -2649,128 +3231,6 @@ function closeGame(gameType) {
 }
     </script>
     <script>
-// Enhanced Game Creation & Management Functions
-async function createChessGame() {
-    const stakeAmount = parseFloat(document.getElementById('chessStake').value);
-    if (!validateStakeAndWallet(stakeAmount)) return;
-    
-    try {
-        showTransactionStatus('🔄 Creating Chess game...', '');
-        
-        const session = await gameMatchmaker.createGame('chess', stakeAmount, userAccount);
-        multiplayerSession = session;
-        
-        // Update balance (simulate spending)
-        currentBalance -= stakeAmount;
-        document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
-        
-        openGameWindow('chess');
-        initializeChessBoard(session);
-        
-        playerStats.gamesPlayed++;
-        updatePlayerStats();
-        updateGamesDisplay();
-        
-        document.getElementById('chessStake').value = '';
-        
-        showTransactionStatus('🎮 Chess game created! Waiting for opponent...', '');
-        
-    } catch (error) {
-        showTransactionStatus('❌ Failed to create Chess game: ' + error.message, '');
-    }
-}
-
-async function createCheckersGame() {
-    const stakeAmount = parseFloat(document.getElementById('checkersStake').value);
-    if (!validateStakeAndWallet(stakeAmount)) return;
-    
-    try {
-        showTransactionStatus('🔄 Creating Checkers game...', '');
-        
-        const session = await gameMatchmaker.createGame('checkers', stakeAmount, userAccount);
-        multiplayerSession = session;
-        
-        currentBalance -= stakeAmount;
-        document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
-        
-        openGameWindow('checkers');
-        initializeCheckersBoard(session);
-        
-        playerStats.gamesPlayed++;
-        updatePlayerStats();
-        updateGamesDisplay();
-        
-        document.getElementById('checkersStake').value = '';
-        
-        showTransactionStatus('🎮 Checkers game created! Waiting for opponent...', '');
-        
-    } catch (error) {
-        showTransactionStatus('❌ Failed to create Checkers game: ' + error.message, '');
-    }
-}
-
-async function createWordGame() {
-    const stakeAmount = parseFloat(document.getElementById('wordStake').value);
-    if (!validateStakeAndWallet(stakeAmount)) return;
-    
-    try {
-        showTransactionStatus('🔄 Creating Word game...', '');
-        
-        const session = await gameMatchmaker.createGame('words', stakeAmount, userAccount);
-        multiplayerSession = session;
-        
-        currentBalance -= stakeAmount;
-        document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
-        
-        openGameWindow('word');
-        initializeWordGame(session);
-        
-        playerStats.gamesPlayed++;
-        updatePlayerStats();
-        updateGamesDisplay();
-        
-        document.getElementById('wordStake').value = '';
-        
-        showTransactionStatus('🎮 Word game created! Waiting for opponent...', '');
-        
-    } catch (error) {
-        showTransactionStatus('❌ Failed to create Word game: ' + error.message, '');
-    }
-}
-
-// Enhanced Join Game Function
-async function joinGame(gameId, stakeAmount) {
-    if (!userAccount) {
-        showTransactionStatus('❌ Please connect your wallet first', '');
-        return;
-    }
-    
-    if (currentBalance < stakeAmount) {
-        showTransactionStatus('❌ Insufficient CORE balance', '');
-        return;
-    }
-    
-    try {
-        showTransactionStatus('🔄 Joining game...', '');
-        
-        const session = await gameMatchmaker.joinGame(gameId, userAccount, stakeAmount);
-        multiplayerSession = session;
-        
-        // Update balance (simulate spending)
-        currentBalance -= stakeAmount;
-        document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
-        
-        // Refresh lobby
-        await refreshLobby();
-        
-        addActivityFeedItem(`⚔️ You joined game #${gameId} with ${stakeAmount} CORE stake`);
-        showTransactionStatus('🎮 Game joined! Good luck!', '');
-        
-    } catch (error) {
-        showTransactionStatus('❌ Failed to join game: ' + error.message, '');
-    }
-}
-
 // Chat Functions
 function sendGameChatMessage(gameType) {
     const chatInput = document.getElementById(gameType + 'ChatInput');
@@ -2911,457 +3371,7 @@ function handleChatKeyPress(event) {
     }
 }
 
-// All remaining utility and initialization functions from original code...
-// (Include all the blockchain, wallet, navigation, stats functions from the original)
-
-// Initialize platform when page loads
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🎮 Crypticus Enhanced Multiplayer Platform Loading...');
-    
-    await initializePlatform();
-    
-    // Add initial chat messages
-    addChatMessage('System', 'Welcome to Crypticus! Connect your wallet to start playing.');
-    addChatMessage('CryptoKing', 'Just won 2.5 CORE in Chess! 🎉');
-    addChatMessage('GameMaster', 'New high stakes games available!');
-    addChatMessage('WordWizard', 'Word battles are intense here! 📝');
-    
-    console.log('🚀 Crypticus Enhanced Multiplayer Platform Ready!');
-});
-
-// Event listeners
-document.getElementById('connectBtn').addEventListener('click', connectWallet);
-document.getElementById('disconnectBtn').addEventListener('click', disconnectWallet);
-
-document.getElementById('transactionStatus').addEventListener('click', () => {
-    document.getElementById('transactionStatus').classList.remove('show');
-});
-
-window.addEventListener('beforeunload', () => {
-    saveUserData();
-    if (userAccount) {
-        sessionStorage.setItem('walletConnected', 'true');
-    } else {
-        sessionStorage.removeItem('walletConnected');
-    }
-});
-
-console.log('✨ Enhanced Multiplayer System Initialized Successfully! Players can now join and play real games with settlements.');
-    </script>
-        <script>
-// MISSING CRITICAL FUNCTIONS - Add this script section to your HTML file
-
-// Initialize blockchain connection
-async function initializeBlockchain() {
-    try {
-        updateConnectionProgress(20);
-        
-        if (typeof window.ethereum === 'undefined') {
-            console.log('MetaMask not detected - continuing in demo mode');
-            updateConnectionProgress(100);
-            updateContractStatus('demo');
-            return true;
-        }
-
-        web3Provider = new ethers.providers.Web3Provider(window.ethereum);
-        updateConnectionProgress(40);
-
-        // Check network
-        const network = await web3Provider.getNetwork();
-        console.log('Current network:', network);
-        
-        updateConnectionProgress(60);
-        
-        if (network.chainId !== parseInt(CORE_CHAIN_ID, 16)) {
-            console.log('Network mismatch - continuing in demo mode');
-        }
-        
-        updateConnectionProgress(80);
-        
-        // Initialize contract (read-only for now)
-        gameContract = new ethers.Contract(
-            GAME_CONTRACT_ADDRESS, 
-            GAME_CONTRACT_ABI, 
-            web3Provider
-        );
-        
-        updateConnectionProgress(100);
-        updateContractStatus('connected');
-        
-        return true;
-    } catch (error) {
-        console.error('Blockchain initialization failed:', error);
-        updateContractStatus('demo', 'Running in demo mode');
-        return true; // Continue in demo mode
-    }
-}
-
-// Enhanced wallet connection
-async function connectWallet() {
-    try {
-        showTransactionStatus('🔄 Connecting wallet...', '');
-        
-        if (typeof window.ethereum === 'undefined') {
-            // Demo mode for users without MetaMask
-            userAccount = '0x' + Math.random().toString(16).slice(2, 42);
-            currentBalance = 10.0; // Demo balance
-            
-            updateConnectionStatus('connected');
-            document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
-            document.getElementById('connectBtn').classList.add('hidden');
-            document.getElementById('disconnectBtn').classList.remove('hidden');
-            
-            showTransactionStatus('✅ Demo wallet connected!', '');
-            await loadUserData();
-            await refreshLobby();
-            startRealTimeUpdates();
-            return;
-        }
-
-        if (!await initializeBlockchain()) {
-            return;
-        }
-
-        const accounts = await window.ethereum.request({
-            method: 'eth_requestAccounts'
-        });
-        
-        if (accounts.length === 0) {
-            throw new Error('No accounts found');
-        }
-
-        userAccount = accounts[0];
-        
-        // Get signer for contract interactions
-        const signer = web3Provider.getSigner();
-        if (gameContract) {
-            gameContract = gameContract.connect(signer);
-        }
-        
-        // Get balance
-        const balance = await web3Provider.getBalance(userAccount);
-        currentBalance = parseFloat(ethers.utils.formatEther(balance));
-        
-        // Update UI
-        updateConnectionStatus('connected');
-        document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
-        document.getElementById('connectBtn').classList.add('hidden');
-        document.getElementById('disconnectBtn').classList.remove('hidden');
-        
-        showTransactionStatus('✅ Wallet connected successfully!', '');
-        
-        // Load user data
-        await loadUserData();
-        await refreshLobby();
-        
-        // Start real-time updates
-        startRealTimeUpdates();
-        
-        // Listen for account changes
-        if (window.ethereum.on) {
-            window.ethereum.on('accountsChanged', handleAccountsChanged);
-            window.ethereum.on('chainChanged', handleChainChanged);
-        }
-        
-    } catch (error) {
-        console.error('Failed to connect wallet:', error);
-        showTransactionStatus('❌ Failed to connect wallet: ' + error.message, '');
-        updateConnectionStatus('disconnected');
-    }
-}
-
-// Navigation function
-function showSection(section) {
-    // Hide all sections
-    document.querySelectorAll('[id$="Section"]').forEach(el => el.classList.add('hidden'));
-    
-    // Show selected section
-    const targetSection = document.getElementById(section + 'Section');
-    if (targetSection) {
-        targetSection.classList.remove('hidden');
-    }
-    
-    // Update navigation
-    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-    
-    // Find and activate the clicked nav item
-    const clickedItem = Array.from(document.querySelectorAll('.nav-item')).find(item => 
-        item.textContent.toLowerCase().includes(section.toLowerCase())
-    );
-    if (clickedItem) {
-        clickedItem.classList.add('active');
-    }
-    
-    currentSection = section;
-    
-    // Load section-specific data
-    if (section === 'lobby') {
-        refreshLobby();
-    } else if (section === 'profile') {
-        updatePlayerStats();
-        loadGameHistory();
-    }
-}
-
-// Game type selection
-function selectGameType(type) {
-    selectedGameType = type;
-    
-    // Update UI
-    document.querySelectorAll('.game-type-card').forEach(card => {
-        card.classList.remove('selected');
-    });
-    
-    const selectedCard = document.querySelector(`[data-type="${type}"]`);
-    if (selectedCard) {
-        selectedCard.classList.add('selected');
-    }
-    
-    updateCreateButton();
-}
-
-// Update create button state
-function updateCreateButton() {
-    const btn = document.getElementById('createGameBtn');
-    const stakeInput = document.getElementById('gameStake');
-    
-    if (!btn || !stakeInput) return;
-    
-    const stake = parseFloat(stakeInput.value);
-    
-    if (selectedGameType && stake >= 0.01) {
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fas fa-plus"></i> Create ${selectedGameType.toUpperCase()} Game (${stake} CORE)`;
-    } else if (selectedGameType && !stake) {
-        btn.disabled = true;
-        btn.innerHTML = `<i class="fas fa-plus"></i> Enter Stake Amount`;
-    } else if (!selectedGameType && stake >= 0.01) {
-        btn.disabled = true;
-        btn.innerHTML = `<i class="fas fa-plus"></i> Select Game Type`;
-    } else {
-        btn.disabled = true;
-        btn.innerHTML = `<i class="fas fa-plus"></i> Select Game Type & Enter Stake`;
-    }
-}
-
-// Create game from main section
-async function createGame() {
-    const stakeAmount = parseFloat(document.getElementById('gameStake').value);
-    
-    if (!userAccount) {
-        showTransactionStatus('❌ Please connect your wallet first', '');
-        return;
-    }
-    
-    if (!selectedGameType) {
-        showTransactionStatus('❌ Please select a game type', '');
-        return;
-    }
-    
-    if (!stakeAmount || stakeAmount < 0.01) {
-        showTransactionStatus('❌ Please enter a valid stake amount (minimum 0.01 CORE)', '');
-        return;
-    }
-    
-    if (stakeAmount > currentBalance) {
-        showTransactionStatus('❌ Insufficient CORE balance', '');
-        return;
-    }
-    
-    try {
-        const session = await gameMatchmaker.createGame(selectedGameType, stakeAmount, userAccount);
-        multiplayerSession = session;
-        
-        // Update balance
-        currentBalance -= stakeAmount;
-        document.getElementById('balanceDisplay').textContent = currentBalance.toFixed(4) + ' CORE';
-        
-        // Open game window
-        openGameWindow(selectedGameType);
-        
-        // Initialize game UI based on type
-        switch(selectedGameType) {
-            case 'chess':
-                initializeChessBoard(session);
-                break;
-            case 'checkers':
-                initializeCheckersBoard(session);
-                break;
-            case 'words':
-                initializeWordGame(session);
-                break;
-        }
-        
-        addActivityFeedItem(`🎮 You created a ${selectedGameType} game with ${stakeAmount} CORE stake`);
-        
-        // Clear form
-        document.getElementById('gameStake').value = '';
-        selectedGameType = null;
-        document.querySelectorAll('.game-type-card').forEach(card => {
-            card.classList.remove('selected');
-        });
-        updateCreateButton();
-        
-        // Switch to lobby to see the created game
-        showSection('lobby');
-        
-        playerStats.gamesPlayed++;
-        updatePlayerStats();
-        
-    } catch (error) {
-        showTransactionStatus('❌ Failed to create game: ' + error.message, '');
-    }
-}
-
-// Refresh game lobby
-async function refreshLobby() {
-    try {
-        // Update UI
-        updateGamesDisplay();
-        updateLiveStats();
-        
-    } catch (error) {
-        console.error('Failed to refresh lobby:', error);
-    }
-}
-
-// Update games display
-function updateGamesDisplay() {
-    const gamesList = document.getElementById('gamesList');
-    const noGames = document.getElementById('noGames');
-    
-    if (!gamesList || !noGames) return;
-    
-    if (activeGames.length === 0) {
-        gamesList.innerHTML = '';
-        noGames.classList.remove('hidden');
-        return;
-    }
-    
-    noGames.classList.add('hidden');
-    
-    gamesList.innerHTML = activeGames.map(game => {
-        const gameIcons = { chess: '♟️', checkers: '⚫', words: '📝' };
-        const gameNames = { chess: 'Chess Masters', checkers: 'Checkers Pro', words: 'Word Battle' };
-        
-        const timeAgo = Math.floor((Date.now() - game.createdAt) / 60000);
-        const creator = game.creator === userAccount ? 'You' : 
-                       game.creator.substring(0, 6) + '...' + game.creator.substring(38);
-        
-        const canJoin = userAccount && 
-                       game.creator !== userAccount && 
-                       game.status === 'waiting' && 
-                       currentBalance >= game.stake;
-        
-        return `
-            <div class="game-entry fade-in">
-                <div class="game-header">
-                    <div class="game-title">
-                        ${gameIcons[game.type]} ${gameNames[game.type]} #${game.id}
-                    </div>
-                    <div class="game-status ${game.status === 'waiting' ? 'status-waiting' : 'status-playing'}">
-                        ${game.status.toUpperCase()}
-                    </div>
-                </div>
-                
-                <div class="game-details">
-                    <div class="detail-item">
-                        <div class="detail-label">Creator</div>
-                        <div class="detail-value">${creator}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Stake</div>
-                        <div class="detail-value">${game.stake} CORE</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Created</div>
-                        <div class="detail-value">${timeAgo}m ago</div>
-                    </div>
-                </div>
-                
-                ${canJoin ? 
-                    `<button class="join-btn" onclick="joinGame(${game.id}, ${game.stake})">
-                        <i class="fas fa-sword"></i> Join Game (${game.stake} CORE)
-                    </button>` :
-                    game.creator === userAccount ?
-                        `<button class="join-btn" disabled style="background: #666; color: #999;">
-                            <i class="fas fa-clock"></i> Waiting for Opponent
-                        </button>` :
-                        !userAccount ?
-                            `<button class="join-btn" disabled style="background: #666; color: #999;">
-                                <i class="fas fa-wallet"></i> Connect Wallet to Join
-                            </button>` :
-                            currentBalance < game.stake ?
-                                `<button class="join-btn" disabled style="background: #666; color: #999;">
-                                    <i class="fas fa-coins"></i> Insufficient Balance
-                                </button>` :
-                                `<button class="join-btn" disabled style="background: #666; color: #999;">
-                                    <i class="fas fa-users"></i> Game Full
-                                </button>`
-                }
-            </div>
-        `;
-    }).join('');
-}
-
-// Validation function
-function validateStakeAndWallet(stakeAmount) {
-    if (!userAccount) {
-        showTransactionStatus('❌ Please connect your wallet first', '');
-        return false;
-    }
-    
-    if (!stakeAmount || stakeAmount < 0.01) {
-        showTransactionStatus('❌ Please enter a valid stake amount (minimum 0.01 CORE)', '');
-        return false;
-    }
-    
-    if (stakeAmount > currentBalance) {
-        showTransactionStatus('❌ Insufficient CORE balance', '');
-        return false;
-    }
-    
-    return true;
-}
-
-// Age verification function
-function verifyAge(isAdult) {
-    if (isAdult) {
-        document.getElementById('ageVerificationModal').style.display = 'none';
-        sessionStorage.setItem('ageVerified', 'true');
-        showTransactionStatus('✅ Age verified. Welcome to Crypticus!', '');
-        initializeBlockchain();
-    } else {
-        alert('Sorry, you must be 18 or older to use this platform.');
-        window.location.href = 'https://www.google.com';
-    }
-}
-
-// Check age verification
-function checkAgeVerification() {
-    if (!sessionStorage.getItem('ageVerified')) {
-        document.getElementById('ageVerificationModal').style.display = 'flex';
-        return false;
-    }
-    return true;
-}
-
-// Update live statistics
-function updateLiveStats() {
-    const totalGames = activeGames.length;
-    const totalVolume = activeGames.reduce((sum, game) => sum + game.stake, 0);
-    const onlinePlayers = totalGames > 0 ? totalGames + Math.floor(Math.random() * 20) + 10 : Math.floor(Math.random() * 50) + 5;
-    
-    const totalPlayersEl = document.getElementById('totalPlayers');
-    const totalGamesEl = document.getElementById('totalGames');
-    const totalVolumeEl = document.getElementById('totalVolume');
-    
-    if (totalPlayersEl) totalPlayersEl.textContent = onlinePlayers;
-    if (totalGamesEl) totalGamesEl.textContent = totalGames;
-    if (totalVolumeEl) totalVolumeEl.textContent = totalVolume.toFixed(2);
-}
-
-// Utility functions
+// Utility Functions
 function updatePlayerStats() {
     if (playerStats.gamesPlayed > 0) {
         playerStats.winRate = ((playerStats.gamesWon / playerStats.gamesPlayed) * 100).toFixed(1);
@@ -3618,6 +3628,28 @@ function showTransactionStatus(message, txHash = '') {
     }
 }
 
+// Age verification function
+function verifyAge(isAdult) {
+    if (isAdult) {
+        document.getElementById('ageVerificationModal').style.display = 'none';
+        sessionStorage.setItem('ageVerified', 'true');
+        showTransactionStatus('✅ Age verified. Welcome to Crypticus!', '');
+        initializeBlockchain();
+    } else {
+        alert('Sorry, you must be 18 or older to use this platform.');
+        window.location.href = 'https://www.google.com';
+    }
+}
+
+// Check age verification
+function checkAgeVerification() {
+    if (!sessionStorage.getItem('ageVerified')) {
+        document.getElementById('ageVerificationModal').style.display = 'flex';
+        return false;
+    }
+    return true;
+}
+
 async function initializePlatform() {
     console.log('🚀 Initializing Crypticus Gaming Platform...');
     
@@ -3652,6 +3684,40 @@ async function initializePlatform() {
         showTransactionStatus('❌ Platform initialization failed: ' + error.message, '');
     }
 }
+
+// Initialize platform when page loads
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🎮 Crypticus Enhanced Multiplayer Platform Loading...');
+    
+    await initializePlatform();
+    
+    // Add initial chat messages
+    addChatMessage('System', 'Welcome to Crypticus! Connect your wallet to start playing.');
+    addChatMessage('CryptoKing', 'Just won 2.5 CORE in Chess! 🎉');
+    addChatMessage('GameMaster', 'New high stakes games available!');
+    addChatMessage('WordWizard', 'Word battles are intense here! 📝');
+    
+    console.log('🚀 Crypticus Enhanced Multiplayer Platform Ready!');
+});
+
+// Event listeners
+document.getElementById('connectBtn').addEventListener('click', connectWallet);
+document.getElementById('disconnectBtn').addEventListener('click', disconnectWallet);
+
+document.getElementById('transactionStatus').addEventListener('click', () => {
+    document.getElementById('transactionStatus').classList.remove('show');
+});
+
+window.addEventListener('beforeunload', () => {
+    saveUserData();
+    if (userAccount) {
+        sessionStorage.setItem('walletConnected', 'true');
+    } else {
+        sessionStorage.removeItem('walletConnected');
+    }
+});
+
+console.log('✨ Enhanced Multiplayer System Initialized Successfully! Players can now join and play real games with settlements.');
     </script>
 </body>
 </html>

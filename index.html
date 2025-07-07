@@ -1483,7 +1483,7 @@ async function initializeBlockchain() {
         return false;
     }
 }
-      // Enhanced wallet connection
+        // Enhanced wallet connection
 async function connectWallet() {
     try {
         showTransactionStatus('🔄 Connecting wallet...', '');
@@ -1658,7 +1658,7 @@ async function joinGameOnChain(gameId, stakeAmount) {
         throw new Error('Failed to join game: ' + error.message);
     }
 }
-      // Load active games from blockchain
+        // Load active games from blockchain
 async function loadActiveGamesFromChain() {
     if (!gameContract) {
         return [];
@@ -1929,7 +1929,7 @@ async function joinGame(gameId, stakeAmount) {
         showTransactionStatus('❌ Failed to join game: ' + error.message, '');
     }
 }
-      // Individual Game Creation Functions
+        // Individual Game Creation Functions
 async function createChessGame() {
     const stakeAmount = parseFloat(document.getElementById('chessStake').value);
     if (!validateStakeAndWallet(stakeAmount)) return;
@@ -2143,7 +2143,7 @@ function addActivityFeedItem(message) {
         feed.removeChild(feed.lastChild);
     }
 }
-      // Game Window Management
+        // Game Window Management
 let openWindows = [];
 let windowZIndex = 1000;
 
@@ -2467,8 +2467,45 @@ function calculatePossibleMoves(row, col) {
             
         case 'q': // Queen
             for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1], 
-                                   [1, 1], [1, -1], [-1, 1], [-1, -1]])
-              // Chess move functions
+                                   [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+                for (let i = 1; i < 8; i++) {
+                    const newRow = row + dr * i;
+                    const newCol = col + dc * i;
+                    
+                    if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) break;
+                    
+                    const target = chessGameState.board[newRow][newCol];
+                    if (!target) {
+                        moves.push({ row: newRow, col: newCol });
+                    } else {
+                        if (isPlayerPiece(target, color === 'white' ? 'black' : 'white')) {
+                            moves.push({ row: newRow, col: newCol });
+                        }
+                        break;
+                    }
+                }
+            }
+            break;
+            
+        case 'k': // King
+            for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1], 
+                                   [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+                const newRow = row + dr;
+                const newCol = col + dc;
+                
+                if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+                    const target = chessGameState.board[newRow][newCol];
+                    if (!target || isPlayerPiece(target, color === 'white' ? 'black' : 'white')) {
+                        moves.push({ row: newRow, col: newCol });
+                    }
+                }
+            }
+            break;
+    }
+    
+    return moves;
+}
+        // Chess move functions
 async function makeChessMove(fromRow, fromCol, toRow, toCol) {
     const piece = chessGameState.board[fromRow][fromCol];
     const capturedPiece = chessGameState.board[toRow][toCol];

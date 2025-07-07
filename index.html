@@ -3899,8 +3899,14 @@ setTimeout(function() {
         document.getElementById('skillVerificationModal').style.display = 'none';
     }
 }, 1000);
-      // Add this line to your Section 12 script:
-window.showTournamentDetails = function() { return; };
+      // Add this to your Section 12 script:
+setInterval(function() {
+    const modal = document.getElementById('tournamentModal');
+    if (modal && !modal.classList.contains('hidden')) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+    }
+}, 1000);
   </script>
 </body>
 </html>

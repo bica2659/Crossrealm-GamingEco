@@ -128,8 +128,7 @@
             border-top-color: var(--accent);
             animation: spin 1s ease-in-out infinite;
         }
-    </style>
-    /* Header Styles */
+        /* Header Styles */
         .header {
             position: relative;
             z-index: 100;
@@ -237,7 +236,7 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(78, 205, 196, 0.3);
         }
-  /* Main Layout */
+        /* Main Layout */
         .main-container {
             display: flex;
             min-height: calc(100vh - 80px);
@@ -353,7 +352,7 @@
             border-radius: 2px;
             transition: width 0.3s ease;
         }
-  /* Game Entry Styles */
+        /* Game Entry Styles */
         .game-entry {
             background: linear-gradient(135deg, rgba(78, 205, 196, 0.1), rgba(68, 160, 141, 0.1));
             border: 1px solid rgba(78, 205, 196, 0.3);
@@ -543,7 +542,7 @@
             transform: none;
             box-shadow: none;
         }
-  /* Tournament Styles */
+        /* Tournament Styles */
         .tournament-section {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
@@ -694,7 +693,7 @@
             background: rgba(78, 205, 196, 0.4);
             border-color: var(--accent);
         }
-  /* Age Verification Modal */
+        /* Age Verification Modal */
         .age-verification {
             position: fixed;
             top: 0;
@@ -891,7 +890,7 @@
             margin-top: 0.5rem;
             cursor: pointer;
         }
-  /* Game Window Styles */
+        /* Game Window Styles */
         .game-window {
             position: fixed;
             top: 50%;
@@ -1091,7 +1090,7 @@
             font-weight: bold;
             animation: pulse 1.5s infinite;
         }
-  /* In-Game Chat */
+        /* In-Game Chat */
         .game-chat {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 10px;
@@ -1233,7 +1232,7 @@
             color: white;
             transform: translateY(-2px);
         }
-  /* Enhanced Mobile Optimization */
+        /* Enhanced Mobile Optimization */
         @media (max-width: 768px) {
             .main-container {
                 flex-direction: column;
@@ -2234,7 +2233,7 @@
             </div>
         </div>
     </div>
-  <!-- Enhanced Footer -->
+    <!-- Enhanced Footer -->
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-section">
@@ -2383,7 +2382,7 @@ let activeTournaments = [
     }
 ];
     </script>
-  // Initialize blockchain connection
+    // Initialize blockchain connection
 async function initializeBlockchain() {
     try {
         updateConnectionProgress(20);
@@ -2525,7 +2524,7 @@ async function switchToCore() {
         }
     }
 }
-          // Enhanced wallet connection (KEEP ORIGINAL)
+            // Enhanced wallet connection (KEEP ORIGINAL)
 async function connectWallet() {
     try {
         showTransactionStatus('🔄 Connecting wallet...', '');
@@ -2634,7 +2633,7 @@ function handleChainChanged(chainId) {
         updateConnectionStatus('connected');
     }
 }
-          // NEW: Anti-Bot Protection System
+            // NEW: Anti-Bot Protection System
 function showAntiBotChallenge() {
     if (!platformSettings.antiBot) return true; // Skip if disabled
     
@@ -2827,7 +2826,7 @@ async function generateBlockHashRandom(gameId) {
     // Fallback to pseudo-random
     return Math.random();
 }
-              // NEW: Server-Side Move Validation
+                // NEW: Server-Side Move Validation
 async function validateMoveOnServer(gameId, moveData) {
     if (!platformSettings.serverValidation) {
         return { valid: true, reason: 'Client-side validation only' };
@@ -3068,7 +3067,7 @@ function updateTournamentTimers() {
 
 // Start tournament timer updates
 setInterval(updateTournamentTimers, 1000);
-          // Enhanced game creation with complete blockchain settlement and anti-bot protection
+            // Enhanced game creation with complete blockchain settlement and anti-bot protection
 async function createGameOnChain(gameType, stakeAmount) {
     if (!userAccount) {
         throw new Error('Wallet not connected');
@@ -3232,7 +3231,7 @@ async function settleGame(gameId, winnerAddress, totalPot) {
         throw error;
     }
 }
-          // Enhanced Multiplayer System
+            // Enhanced Multiplayer System
 class MultiplayerGameSession {
     constructor(gameId, gameType, stake, isHost = false) {
         this.gameId = gameId;
@@ -3451,7 +3450,7 @@ class MultiplayerGameSession {
             message: `Scored ${score} points for "${word}"`
         };
     }
-                      // Enhanced Game Matchmaking System
+                        // Enhanced Game Matchmaking System
 class GameMatchmaker {
     constructor() {
         this.waitingPlayers = new Map();
@@ -3735,7 +3734,7 @@ function updateCreateButton() {
         btn.innerHTML = `<i class="fas fa-plus"></i> Select Game Type & Enter Stake`;
     }
 }
-                      // Create game
+                        // Create game
 async function createGame() {
     const stakeAmount = parseFloat(document.getElementById('gameStake').value);
     
@@ -4050,7 +4049,7 @@ function updateLiveStats() {
     if (totalGamesEl) totalGamesEl.textContent = totalGames;
     if (totalVolumeEl) totalVolumeEl.textContent = totalVolume.toFixed(2);
 }
-      // NEW: Settings Functions
+        // NEW: Settings Functions
 let platformSettings = {
     autoJoin: false,
     sound: true,
@@ -4277,7 +4276,7 @@ function validateGameSettings() {
     
     return true;
 }
-      // Enhanced initialization with new features
+        // Enhanced initialization with new features
 async function initializePlatform() {
     console.log('🚀 Initializing Enhanced Crypticus Gaming Platform...');
     
@@ -4381,4 +4380,3 @@ console.log('🎯 Features: Tournament System, Anti-Bot Protection, Server Valid
     </script>
 </body>
 </html>
-    

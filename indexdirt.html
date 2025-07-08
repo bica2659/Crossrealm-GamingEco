@@ -2288,20 +2288,32 @@
 const GAME_CONTRACT_ADDRESS = "0x7af2cB8f93D0a75E0ba39E974B4e968EAe49028A";
 const CORE_CHAIN_ID = "0x45c";
 
-// Simplified working ABI - Only include functions that actually exist on the contract
 const GAME_CONTRACT_ABI = [
-    // Read functions
+    // Game Management Functions
+    "function createGame(string memory gameType, uint256 timeLimit) external payable returns (uint256)",
+    "function joinGame(uint256 gameId) external payable",
+    "function submitMove(uint256 gameId, bytes memory moveData) external",
+    "function finalizeGame(uint256 gameId, address winner) external",
+    "function claimWinnings(uint256 gameId) external",
+    "function refundStake(uint256 gameId) external",
+    
+    // Tournament Functions
+    "function createTournament(string memory name, uint256 entryFee, uint256 maxPlayers) external payable returns (uint256)",
+    "function joinTournament(uint256 tournamentId) external payable",
+    
+    // View Functions
+    "function getGame(uint256 gameId) external view returns (address player1, address player2, uint256 stake, uint256 status, string memory gameType)",
+    "function getTotalGames() external view returns (uint256)",
+    "function getPlayerGames(address player) external view returns (uint256[] memory)",
     "function owner() external view returns (address)",
     "function paused() external view returns (bool)",
-    "function totalGames() external view returns (uint256)",
     
-    // Write functions that should work (simplified)
-    "function deposit() external payable",
-    "function withdraw(uint256 amount) external",
-    
-    // Events
-    "event Deposit(address indexed user, uint256 amount)",
-    "event Withdrawal(address indexed user, uint256 amount)"
+    // Gaming Events
+    "event GameCreated(uint256 indexed gameId, address indexed creator, uint256 stake, string gameType)",
+    "event GameJoined(uint256 indexed gameId, address indexed player)",
+    "event GameFinalized(uint256 indexed gameId, address indexed winner, uint256 payout)",
+    "event TournamentCreated(uint256 indexed tournamentId, address indexed creator, uint256 entryFee)",
+    "event TournamentJoined(uint256 indexed tournamentId, address indexed player)"
 ];
 
 // Enhanced Global Variables for Multiplayer with Global Lobby Fix

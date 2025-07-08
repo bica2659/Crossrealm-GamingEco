@@ -235,6 +235,113 @@
         .connect-btn:hover, .disconnect-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(78, 205, 196, 0.3);
+        }/* Header Styles */
+        .header {
+            position: relative;
+            z-index: 100;
+            background: linear-gradient(135deg, #1a1c2c, #2c3e50);
+            padding: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            min-height: 80px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--secondary);
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-item {
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(78, 205, 196, 0.5);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(45deg, var(--accent), #44a08d);
+            color: white;
+        }
+
+        .live-badge {
+            background: linear-gradient(45deg, #00ff88, #00cc6a);
+            color: #000;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            animation: pulse 2s infinite;
+        }
+
+        .wallet-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .wallet-info {
+            text-align: right;
+        }
+
+        .connection-status {
+            font-size: 0.9rem;
+            color: #ff6b6b;
+        }
+
+        .balance {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .connect-btn, .disconnect-btn {
+            background: linear-gradient(45deg, var(--accent), #44a08d);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .disconnect-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            margin-left: 0.5rem;
+        }
+
+        .connect-btn:hover, .disconnect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(78, 205, 196, 0.3);
         }
         /* Main Layout */
         .main-container {
@@ -1366,7 +1473,7 @@
         }
     </style>
 </head>
-<body>
+    <body>
     <div class="background"></div>
     <!-- Header -->
     <div class="header">
@@ -1450,7 +1557,7 @@
 
     <!-- Game Overlay -->
     <div class="game-overlay hidden" id="gameOverlay"></div>
-    <!-- Chess Game Window -->
+        <!-- Chess Game Window -->
     <div class="game-window hidden" id="chessGameWindow">
         <div class="game-window-header">
             <div class="game-window-title">♟️ Chess Masters 
@@ -1554,7 +1661,7 @@
             </div>
         </div>
     </div>
-    <!-- Main Container -->
+        <!-- Main Container -->
     <div class="main-container">
         <!-- Sidebar -->
         <div class="sidebar">
@@ -2233,7 +2340,7 @@
             </div>
         </div>
     </div>
-    <!-- Enhanced Footer -->
+        <!-- Enhanced Footer -->
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-section">
@@ -3450,7 +3557,222 @@ class MultiplayerGameSession {
             message: `Scored ${score} points for "${word}"`
         };
     }
-                        // Enhanced Game Matchmaking System
+                        // Game validation methods
+    isValidChessMove(from, to, piece) {
+        // Simplified chess move validation
+        const deltaRow = Math.abs(to.row - from.row);
+        const deltaCol = Math.abs(to.col - from.col);
+        
+        // Basic bounds checking
+        if (to.row < 0 || to.row > 7 || to.col < 0 || to.col > 7) {
+            return false;
+        }
+        
+        // Prevent moving to same position
+        if (from.row === to.row && from.col === to.col) {
+            return false;
+        }
+        
+        // Simplified piece movement rules
+        const pieceType = piece.toLowerCase();
+        switch(pieceType) {
+            case 'p': // Pawn
+                return deltaCol <= 1 && deltaRow <= 2;
+            case 'r': // Rook
+                return deltaRow === 0 || deltaCol === 0;
+            case 'n': // Knight
+                return (deltaRow === 2 && deltaCol === 1) || (deltaRow === 1 && deltaCol === 2);
+            case 'b': // Bishop
+                return deltaRow === deltaCol;
+            case 'q': // Queen
+                return deltaRow === 0 || deltaCol === 0 || deltaRow === deltaCol;
+            case 'k': // King
+                return deltaRow <= 1 && deltaCol <= 1;
+            default:
+                return false;
+        }
+    }
+    
+    isValidCheckersMove(from, to, piece) {
+        const deltaRow = to.row - from.row;
+        const deltaCol = Math.abs(to.col - from.col);
+        
+        // Basic bounds checking
+        if (to.row < 0 || to.row > 7 || to.col < 0 || to.col > 7) {
+            return false;
+        }
+        
+        // Must move diagonally
+        if (Math.abs(deltaRow) !== deltaCol) {
+            return false;
+        }
+        
+        // Regular pieces can only move forward
+        if (!piece.includes('king')) {
+            if (piece === 'red' && deltaRow < 0) return false;
+            if (piece === 'black' && deltaRow > 0) return false;
+        }
+        
+        // Must move to empty square
+        if (this.gameState.board[to.row][to.col] !== null) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    isValidWord(word) {
+        // Basic word validation
+        if (!word || word.length < 3) return false;
+        
+        // Check if word can be made from current letters
+        const letters = this.gameState.currentLetters.toLowerCase();
+        const wordLetters = word.toLowerCase();
+        
+        for (let char of wordLetters) {
+            if (!letters.includes(char)) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    calculateWordScore(word) {
+        return word.length * 10 + (word.length > 5 ? 20 : 0);
+    }
+    
+    checkCheckersCapture(from, to) {
+        const deltaRow = to.row - from.row;
+        const deltaCol = to.col - from.col;
+        
+        if (Math.abs(deltaRow) === 2 && Math.abs(deltaCol) === 2) {
+            const captureRow = from.row + deltaRow / 2;
+            const captureCol = from.col + deltaCol / 2;
+            const capturedPiece = this.gameState.board[captureRow][captureCol];
+            
+            if (capturedPiece) {
+                this.gameState.board[captureRow][captureCol] = null;
+                return capturedPiece;
+            }
+        }
+        
+        return null;
+    }
+    
+    isPlayerTurn(playerId) {
+        if (this.gameType === 'words') return true; // Words can be submitted by either player
+        
+        const playerRole = playerId === userAccount ? (this.isHost ? 'host' : 'guest') : (this.isHost ? 'guest' : 'host');
+        const playerColor = this.gameState.playerColors[playerRole];
+        
+        return this.gameState.turn === playerColor;
+    }
+    
+    switchTurn() {
+        switch(this.gameType) {
+            case 'chess':
+                this.gameState.turn = this.gameState.turn === 'white' ? 'black' : 'white';
+                break;
+            case 'checkers':
+                this.gameState.turn = this.gameState.turn === 'red' ? 'black' : 'red';
+                break;
+        }
+    }
+    
+    checkGameEnd() {
+        switch(this.gameType) {
+            case 'chess':
+                // Simplified: Check if king is captured
+                let whiteKing = false, blackKing = false;
+                for (let row of this.gameState.board) {
+                    for (let piece of row) {
+                        if (piece === 'K') whiteKing = true;
+                        if (piece === 'k') blackKing = true;
+                    }
+                }
+                if (!whiteKing) {
+                    this.endGame('black');
+                } else if (!blackKing) {
+                    this.endGame('white');
+                }
+                break;
+                
+            case 'checkers':
+                // Check if either player has no pieces left
+                let redPieces = 0, blackPieces = 0;
+                for (let row of this.gameState.board) {
+                    for (let piece of row) {
+                        if (piece && piece.includes('red')) redPieces++;
+                        if (piece && piece.includes('black')) blackPieces++;
+                    }
+                }
+                if (redPieces === 0) {
+                    this.endGame('black');
+                } else if (blackPieces === 0) {
+                    this.endGame('red');
+                }
+                break;
+                
+            case 'words':
+                if (this.gameState.round >= this.gameState.maxRounds) {
+                    const winner = this.gameState.scores.host > this.gameState.scores.guest ? 'host' : 'guest';
+                    this.endGame(winner);
+                }
+                break;
+        }
+    }
+    
+    async endGame(winner) {
+        this.gameState.gameOver = true;
+        this.winner = winner;
+        this.isActive = false;
+        
+        // Process settlement
+        await this.processGameSettlement();
+    }
+    
+    async processGameSettlement() {
+        try {
+            const isWinner = this.isPlayerWinner();
+            const winnerAddress = isWinner ? userAccount : (this.opponent || 'AI_OPPONENT');
+            const totalPot = this.stake * 2; // Both players' stakes
+            
+            // Call the settlement function
+            await settleGame(this.gameId, winnerAddress, totalPot);
+            
+        } catch (error) {
+            console.error('Settlement error:', error);
+            showTransactionStatus('❌ Settlement error: ' + error.message, '');
+        }
+    }
+    
+    isPlayerWinner() {
+        if (this.gameType === 'words') {
+            const myRole = this.isHost ? 'host' : 'guest';
+            const opponentRole = this.isHost ? 'guest' : 'host';
+            return this.gameState.scores[myRole] > this.gameState.scores[opponentRole];
+        } else {
+            const myColor = this.isHost ? this.gameState.playerColors.host : this.gameState.playerColors.guest;
+            return this.winner === myColor;
+        }
+    }
+    
+    // Chat functionality
+    addChatMessage(sender, message) {
+        this.chatMessages.push({
+            sender,
+            message,
+            timestamp: Date.now()
+        });
+        
+        // Update UI if this is the active game
+        if (multiplayerSession && multiplayerSession.gameId === this.gameId) {
+            addGameChatMessage(this.gameType, sender, message);
+        }
+    }
+}
+            // Enhanced Game Matchmaking System
 class GameMatchmaker {
     constructor() {
         this.waitingPlayers = new Map();
@@ -3898,7 +4220,7 @@ function updateGamesDisplay() {
         `;
     }).join('');
 }
-
+        <script>
 // FIXED: Join game from global lobby
 async function joinGame(gameId, stakeAmount) {
     if (!userAccount) {

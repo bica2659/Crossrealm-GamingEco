@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypticus - Enhanced Gaming Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4e54c8;
+            --secondary: #f39c12;
+            --dark: #1a1c2c;
+            --light: #f5f7fa;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --accent: #4ecdc4;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1c2c, #2c3e50);
+            color: var(--light);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .wallet-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #e74c3c;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.connected {
+            background: #2ecc71;
+        }
+
+        .wallet-btn {
+            background: linear-gradient(45deg, var(--accent), #44a08d);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .wallet-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(78, 205, 196, 0.3);
+        }
+
+        .wallet-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .network-status {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .network-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-top: 0.5rem;
+        }
+
+        .error-message {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid #e74c3c;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            color: #e74c3c;
+        }
+
+        .success-message {
+            background: rgba(46, 204, 113, 0.1);
+            border: 1px solid #2ecc71;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            color: #2ecc71;
+        }
+
+        .demo-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .demo-game {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border: 1px solid rgba(78, 205, 196, 0.3);
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(8, 40px);
+            grid-template-rows: repeat(8, 40px);
+            gap: 1px;
+            margin: 1rem auto;
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            width: fit-content;
+        }
+
+        .board-square {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .board-square.light {
+            background: #f0d9b5;
+            color: #333;
+        }
+
+        .board-square.dark {
+            background: #b58863;
+            color: #fff;
+        }
+
+        .board-square:hover {
+            background: rgba(78, 205, 196, 0.3) !important;
+        }
+
+        .chat-section {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 2rem;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .chat-message {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            color: white;
+        }
+
+        .send-btn {
+            background: var(--accent);
+            border: none;
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            color: white;
+            cursor: pointer;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .network-info {
+                grid-template-columns: 1fr;
+            }
+
+            .game-board {
+                grid-template-columns: repeat(8, 35px);
+                grid-template-rows: repeat(8, 35px);
+            }
+
+            .board-square {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">
+            <i class="fas fa-dice-d20" style="font-size: 2rem; color: var(--secondary);"></i>
+            <h1>CRYPTICUS</h1>
+        </div>
+        <div class="wallet-section">
+            <div class="connection-status">
+                <div class="status-indicator" id="statusIndicator"></div>
+                <span id="connectionText">Not Connected</span>
+            </div>
+            <div id="balanceDisplay">0.00 CORE</div>
+            <button class="wallet-btn" id="walletBtn">Connect Wallet</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Network Status -->
+        <div class="network-status">
+            <h3>🔗 Network Status</h3>
+            <div class="network-info">
+                <div class="info-item">
+                    <div class="info-value" id="networkName">Not Connected</div>
+                    <div class="info-label">Network</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value" id="blockNumber">-</div>
+                    <div class="info-label">Block Number</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value" id="gasPrice">-</div>
+                    <div class="info-label">Gas Price (Gwei)</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value" id="walletAddress">Not Connected</div>
+                    <div class="info-label">Wallet Address</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error/Success Messages -->
+        <div id="messageContainer"></div>
+
+        <!-- Demo Games Section -->
+        <div class="demo-section">
+            <h2>🎮 Demo Games</h2>
+            <p>Experience our games in demo mode while we work on wallet connectivity!</p>
+            
+            <!-- Chess Demo -->
+            <div class="demo-game">
+                <h3>♟️ Chess Demo</h3>
+                <div class="game-board" id="chessBoard"></div>
+                <button class="wallet-btn" onclick="resetChessBoard()">Reset Board</button>
+            </div>
+
+            <!-- Checkers Demo -->
+            <div class="demo-game">
+                <h3>⚫ Checkers Demo</h3>
+                <div class="game-board" id="checkersBoard"></div>
+                <button class="wallet-btn" onclick="resetCheckersBoard()">Reset Board</button>
+            </div>
+        </div>
+
+        <!-- Chat Section -->
+        <div class="chat-section">
+            <h3>💬 Global Chat</h3>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Type a message..." maxlength="200">
+                <button class="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced Web3 Integration
+        let provider = null;
+        let signer = null;
+        let userAccount = null;
+        let currentNetwork = null;
+        let connectionAttempts = 0;
+        const maxRetries = 3;
+
+        // Core Blockchain Configuration
+        const CORE_NETWORK = {
+            chainId: '0x45c', // 1116 in decimal
+            chainName: 'Core Blockchain',
+            nativeCurrency: {
+                name: 'CORE',
+                symbol: 'CORE',
+                decimals: 18
+            },
+            rpcUrls: [
+                'https://rpc.coredao.org',
+                'https://rpc-core.icecreamswap.com'
+            ],
+            blockExplorerUrls: ['https://scan.coredao.org']
+        };
+
+        // Initialize Web3 Connection
+        async function initializeWeb3() {
+            try {
+                showMessage('🔄 Initializing Web3 connection...', 'info');
+
+                if (typeof window.ethereum === 'undefined') {
+                    throw new Error('MetaMask or Web3 wallet not detected. Please install MetaMask to continue.');
+                }
+
+                // Create provider
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                
+                // Get network info
+                const network = await provider.getNetwork();
+                currentNetwork = network;
+                
+                updateNetworkInfo();
+                showMessage('✅ Web3 initialized successfully!', 'success');
+                
+                return true;
+            } catch (error) {
+                console.error('Web3 initialization failed:', error);
+                showMessage(`❌ Web3 initialization failed: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        // Connect Wallet with Enhanced Error Handling
+        async function connectWallet() {
+            const btn = document.getElementById('walletBtn');
+            btn.disabled = true;
+            btn.textContent = 'Connecting...';
+
+            try {
+                connectionAttempts++;
+                showMessage('🔄 Connecting to wallet...', 'info');
+
+                if (!provider) {
+                    const initialized = await initializeWeb3();
+                    if (!initialized) {
+                        throw new Error('Failed to initialize Web3');
+                    }
+                }
+
+                // Request account access
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+
+                if (accounts.length === 0) {
+                    throw new Error('No accounts found. Please unlock your wallet.');
+                }
+
+                userAccount = accounts[0];
+                signer = provider.getSigner();
+
+                // Check if we're on Core network
+                const network = await provider.getNetwork();
+                if (network.chainId !== 1116) {
+                    showMessage('⚠️ Please switch to Core Blockchain network', 'warning');
+                    await switchToCore();
+                }
+
+                // Get balance
+                const balance = await provider.getBalance(userAccount);
+                const balanceInEther = ethers.utils.formatEther(balance);
+
+                // Update UI
+                updateConnectionStatus(true);
+                updateWalletInfo(userAccount, balanceInEther);
+                updateNetworkInfo();
+
+                showMessage(`✅ Wallet connected successfully! Balance: ${balanceInEther} CORE`, 'success');
+
+                // Set up event listeners
+                setupEventListeners();
+
+            } catch (error) {
+                console.error('Connection failed:', error);
+                updateConnectionStatus(false);
+                
+                if (connectionAttempts < maxRetries) {
+                    showMessage(`❌ Connection failed: ${error.message}. Retrying... (${connectionAttempts}/${maxRetries})`, 'error');
+                    setTimeout(() => connectWallet(), 2000);
+                } else {
+                    showMessage(`❌ Connection failed after ${maxRetries} attempts: ${error.message}`, 'error');
+                    btn.textContent = 'Connect Wallet';
+                    btn.disabled = false;
+                    connectionAttempts = 0;
+                }
+            }
+        }
+
+        // Switch to Core Network
+        async function switchToCore() {
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: CORE_NETWORK.chainId }],
+                });
+            } catch (switchError) {
+                // Network not added to wallet
+                if (switchError.code === 4902) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [CORE_NETWORK],
+                        });
+                    } catch (addError) {
+                        throw new Error('Failed to add Core network to wallet');
+                    }
+                } else {
+                    throw switchError;
+                }
+            }
+        }
+
+        // Disconnect Wallet
+        function disconnectWallet() {
+            userAccount = null;
+            signer = null;
+            provider = null;
+            updateConnectionStatus(false);
+            updateWalletInfo('', '0.00');
+            showMessage('👋 Wallet disconnected', 'info');
+            connectionAttempts = 0;
+        }
+
+        // Update Connection Status
+        function updateConnectionStatus(connected) {
+            const indicator = document.getElementById('statusIndicator');
+            const text = document.getElementById('connectionText');
+            const btn = document.getElementById('walletBtn');
+
+            if (connected) {
+                indicator.classList.add('connected');
+                text.textContent = 'Connected';
+                btn.textContent = 'Disconnect';
+                btn.onclick = disconnectWallet;
+            } else {
+                indicator.classList.remove('connected');
+                text.textContent = 'Not Connected';
+                btn.textContent = 'Connect Wallet';
+                btn.onclick = connectWallet;
+                btn.disabled = false;
+            }
+        }
+
+        // Update Wallet Info
+        function updateWalletInfo(address, balance) {
+            const balanceDisplay = document.getElementById('balanceDisplay');
+            const walletAddress = document.getElementById('walletAddress');
+            
+            balanceDisplay.textContent = `${parseFloat(balance).toFixed(4)} CORE`;
+            walletAddress.textContent = address ? `${address.substring(0, 6)}...${address.substring(38)}` : 'Not Connected';
+        }
+
+        // Update Network Info
+        async function updateNetworkInfo() {
+            if (!provider) return;
+
+            try {
+                const network = await provider.getNetwork();
+                const blockNumber = await provider.getBlockNumber();
+                const gasPrice = await provider.getGasPrice();
+
+                document.getElementById('networkName').textContent = network.name === 'unknown' ? 'Core Blockchain' : network.name;
+                document.getElementById('blockNumber').textContent = blockNumber.toLocaleString();
+                document.getElementById('gasPrice').textContent = ethers.utils.formatUnits(gasPrice, 'gwei');
+            } catch (error) {
+                console.error('Failed to update network info:', error);
+            }
+        }
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            if (!window.ethereum) return;
+
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    disconnectWallet();
+                } else if (accounts[0] !== userAccount) {
+                    userAccount = accounts[0];
+                    connectWallet();
+                }
+            });
+
+            window.ethereum.on('chainChanged', (chainId) => {
+                if (parseInt(chainId, 16) !== 1116) {
+                    showMessage('⚠️ Please switch back to Core Blockchain', 'warning');
+                }
+                setTimeout(() => window.location.reload(), 1000);
+            });
+        }
+
+        // Show Message Function
+        function showMessage(message, type = 'info') {
+            const container = document.getElementById('messageContainer');
+            const messageDiv = document.createElement('div');
+            
+            messageDiv.className = type === 'error' ? 'error-message' : 
+                                  type === 'success' ? 'success-message' : 
+                                  'success-message';
+            messageDiv.textContent = message;
+            
+            container.appendChild(messageDiv);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.parentNode.removeChild(messageDiv);
+                }
+            }, 5000);
+        }
+
+        // Demo Game Functions
+        function initializeChessBoard() {
+            const board = document.getElementById('chessBoard');
+            const pieces = [
+                ['♜', '♞', '♝', '♛', '♚', '♝', '♞', '♜'],
+                ['♟', '♟', '♟', '♟', '♟', '♟', '♟', '♟'],
+                ['', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', ''],
+                ['♙', '♙', '♙', '♙', '♙', '♙', '♙', '♙'],
+                ['♖', '♘', '♗', '♕', '♔', '♗', '♘', '♖']
+            ];
+
+            board.innerHTML = '';
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const square = document.createElement('div');
+                    square.className = `board-square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+                    square.textContent = pieces[row][col];
+                    square.onclick = () => handleSquareClick(row, col, 'chess');
+                    board.appendChild(square);
+                }
+            }
+        }
+
+        function initializeCheckersBoard() {
+            const board = document.getElementById('checkersBoard');
+            board.innerHTML = '';
+            
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const square = document.createElement('div');
+                    square.className = `board-square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+                    
+                    // Place checker pieces
+                    if ((row + col) % 2 === 1) {
+                        if (row < 3) {
+                            square.textContent = '⚫';
+                        } else if (row > 4) {
+                            square.textContent = '🔴';
+                        }
+                    }
+                    
+                    square.onclick = () => handleSquareClick(row, col, 'checkers');
+                    board.appendChild(square);
+                }
+            }
+        }
+
+        function handleSquareClick(row, col, gameType) {
+            showMessage(`Clicked ${gameType} square at ${row}, ${col}`, 'info');
+        }
+
+        function resetChessBoard() {
+            initializeChessBoard();
+            showMessage('♟️ Chess board reset!', 'success');
+        }
+
+        function resetCheckersBoard() {
+            initializeCheckersBoard();
+            showMessage('⚫ Checkers board reset!', 'success');
+        }
+
+        // Chat Functions
+        let chatMessages = [];
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            addChatMessage('You', message);
+            input.value = '';
+            
+            // Simulate other users
+            setTimeout(() => {
+                const responses = [
+                    'Great game!', 'Good luck!', 'Nice move!', 'GG!', 'Well played!',
+                    'Ready for another round?', 'That was intense!', 'Love this platform!'
+                ];
+                const users = ['Player1', 'CryptoGamer', 'BlockchainMaster', 'Web3Player'];
+                
+                const randomUser = users[Math.floor(Math.random() * users.length)];
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                
+                addChatMessage(randomUser, randomResponse);
+            }, 1000 + Math.random() * 3000);
+        }
+
+        function addChatMessage(sender, message) {
+            const container = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message';
+            messageDiv.innerHTML = `<strong>${sender}:</strong> ${message}`;
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Enter key for chat
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatInput = document.getElementById('chatInput');
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        });
+
+        // Initialize Platform
+        async function initializePlatform() {
+            console.log('🚀 Initializing Crypticus Gaming Platform...');
+            
+            // Initialize demo games
+            initializeChessBoard();
+            initializeCheckersBoard();
+            
+            // Add welcome messages
+            addChatMessage('System', 'Welcome to Crypticus! 🎮');
+            addChatMessage('System', 'Connect your wallet to start playing with real stakes!');
+            addChatMessage('CryptoKing', 'The games here are amazing! 🚀');
+            
+            // Try to initialize Web3
+            await initializeWeb3();
+            
+            // Update network info periodically
+            setInterval(updateNetworkInfo, 30000);
+            
+            console.log('✅ Platform initialized successfully!');
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initializePlatform);
+
+        // Connect wallet button
+        document.getElementById('walletBtn').addEventListener('click', connectWallet);
+    </script>
+</body>
+</html>

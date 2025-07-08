@@ -235,113 +235,6 @@
         .connect-btn:hover, .disconnect-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(78, 205, 196, 0.3);
-        }/* Header Styles */
-        .header {
-            position: relative;
-            z-index: 100;
-            background: linear-gradient(135deg, #1a1c2c, #2c3e50);
-            padding: 1rem;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            min-height: 80px;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logo h1 {
-            font-size: 1.8rem;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .logo-icon {
-            font-size: 2.5rem;
-            color: var(--secondary);
-        }
-
-        .nav-menu {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .nav-item {
-            padding: 0.5rem 1rem;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 1px solid transparent;
-        }
-
-        .nav-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(78, 205, 196, 0.5);
-        }
-
-        .nav-item.active {
-            background: linear-gradient(45deg, var(--accent), #44a08d);
-            color: white;
-        }
-
-        .live-badge {
-            background: linear-gradient(45deg, #00ff88, #00cc6a);
-            color: #000;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.8rem;
-            animation: pulse 2s infinite;
-        }
-
-        .wallet-section {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .wallet-info {
-            text-align: right;
-        }
-
-        .connection-status {
-            font-size: 0.9rem;
-            color: #ff6b6b;
-        }
-
-        .balance {
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-
-        .connect-btn, .disconnect-btn {
-            background: linear-gradient(45deg, var(--accent), #44a08d);
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 25px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .disconnect-btn {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
-            margin-left: 0.5rem;
-        }
-
-        .connect-btn:hover, .disconnect-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(78, 205, 196, 0.3);
         }
         /* Main Layout */
         .main-container {
@@ -2340,7 +2233,7 @@
             </div>
         </div>
     </div>
-        <!-- Enhanced Footer -->
+    <!-- Enhanced Footer -->
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-section">
@@ -2488,8 +2381,7 @@ let activeTournaments = [
         participants: []
     }
 ];
-    </script>
-    // Initialize blockchain connection
+        // Initialize blockchain connection
 async function initializeBlockchain() {
     try {
         updateConnectionProgress(20);
@@ -2631,7 +2523,7 @@ async function switchToCore() {
         }
     }
 }
-            // Enhanced wallet connection (KEEP ORIGINAL)
+        // Enhanced wallet connection (KEEP ORIGINAL)
 async function connectWallet() {
     try {
         showTransactionStatus('🔄 Connecting wallet...', '');
@@ -2740,7 +2632,7 @@ function handleChainChanged(chainId) {
         updateConnectionStatus('connected');
     }
 }
-            // NEW: Anti-Bot Protection System
+        // NEW: Anti-Bot Protection System
 function showAntiBotChallenge() {
     if (!platformSettings.antiBot) return true; // Skip if disabled
     
@@ -2933,7 +2825,7 @@ async function generateBlockHashRandom(gameId) {
     // Fallback to pseudo-random
     return Math.random();
 }
-                // NEW: Server-Side Move Validation
+        // NEW: Server-Side Move Validation
 async function validateMoveOnServer(gameId, moveData) {
     if (!platformSettings.serverValidation) {
         return { valid: true, reason: 'Client-side validation only' };
@@ -3174,7 +3066,7 @@ function updateTournamentTimers() {
 
 // Start tournament timer updates
 setInterval(updateTournamentTimers, 1000);
-            // Enhanced game creation with complete blockchain settlement and anti-bot protection
+        // Enhanced game creation with complete blockchain settlement and anti-bot protection
 async function createGameOnChain(gameType, stakeAmount) {
     if (!userAccount) {
         throw new Error('Wallet not connected');
@@ -3338,7 +3230,7 @@ async function settleGame(gameId, winnerAddress, totalPot) {
         throw error;
     }
 }
-            // Enhanced Multiplayer System
+         // Enhanced Multiplayer System
 class MultiplayerGameSession {
     constructor(gameId, gameType, stake, isHost = false) {
         this.gameId = gameId;
@@ -3557,7 +3449,7 @@ class MultiplayerGameSession {
             message: `Scored ${score} points for "${word}"`
         };
     }
-                        // Game validation methods
+    // Game validation methods
     isValidChessMove(from, to, piece) {
         // Simplified chess move validation
         const deltaRow = Math.abs(to.row - from.row);
@@ -3772,7 +3664,7 @@ class MultiplayerGameSession {
         }
     }
 }
-            // Enhanced Game Matchmaking System
+        // Enhanced Game Matchmaking System
 class GameMatchmaker {
     constructor() {
         this.waitingPlayers = new Map();
@@ -4056,7 +3948,7 @@ function updateCreateButton() {
         btn.innerHTML = `<i class="fas fa-plus"></i> Select Game Type & Enter Stake`;
     }
 }
-                        // Create game
+        // Create game
 async function createGame() {
     const stakeAmount = parseFloat(document.getElementById('gameStake').value);
     
@@ -4220,7 +4112,7 @@ function updateGamesDisplay() {
         `;
     }).join('');
 }
-        <script>
+
 // FIXED: Join game from global lobby
 async function joinGame(gameId, stakeAmount) {
     if (!userAccount) {

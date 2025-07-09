@@ -4073,20 +4073,25 @@ function syncGlobalGames() {
 // Run sync every 3 seconds
 setInterval(syncGlobalGames, 3000);
 
-// Refresh game lobby
 async function refreshLobby() {
     try {
-        showTransactionStatus('🔄 Loading games...', '');
+        // Remove the transaction status that's causing the error
+        console.log('Refreshing lobby...');
+        
+        // Sync with other users
+        if (typeof syncGlobalGames === 'function') {
+            syncGlobalGames();
+        }
         
         // Update UI
         updateGamesDisplay();
         updateLiveStats();
         
-        showTransactionStatus('✅ Lobby refreshed', '');
+        console.log('Lobby refreshed successfully');
         
     } catch (error) {
         console.error('Failed to refresh lobby:', error);
-        showTransactionStatus('❌ Failed to refresh lobby', '');
+        // Don't show error to user since lobby is still working
     }
 }
 

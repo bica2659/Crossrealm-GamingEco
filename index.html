@@ -1647,50 +1647,7 @@
         </div>
         <!-- Content Area -->
         <div class="content-area">
-            <!-- Game Lobby Section -->
-            <!-- ========== START REPLACE ========== -->
-<!-- REPLACE YOUR EXISTING LOBBY SECTION WITH THIS -->
-<div id="lobbySection">
-    <div class="live-lobby">
-        <div class="lobby-header">
-            <h2>🎯 Live Game Lobby</h2>
-            <button onclick="refreshLobby()" class="game-btn" style="width: auto; padding: 0.5rem 1rem;">
-                <i class="fas fa-sync-alt"></i> Refresh
-            </button>
-        </div>
-        
-        <!-- Skill-Based Matchmaking Filter -->
-        <div style="margin-bottom: 1rem; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
-            <h4 style="margin-bottom: 0.5rem; color: #4ecdc4;">🎯 Skill-Based Matchmaking</h4>
-            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-                <label style="color: #aaa;">Skill Level:</label>
-                <select id="skillFilter" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 5px; padding: 0.5rem; color: white;">
-                    <option value="any">Any Skill Level</option>
-                    <option value="bronze">Bronze (0-100)</option>
-                    <option value="silver">Silver (101-300)</option>
-                    <option value="gold">Gold (301-600)</option>
-                    <option value="diamond">Diamond (601+)</option>
-                </select>
-                <button onclick="applySkillFilter()" class="game-btn" style="padding: 0.5rem 1rem;">Apply Filter</button>
-            </div>
-        </div>
-        
-        <div id="gamesList">
-            <!-- Games will be populated here -->
-        </div>
-        
-        <div id="noGames" class="hidden" style="text-align: center; padding: 3rem; color: #aaa;">
-            <i class="fas fa-gamepad" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
-            <h3>No Active Games</h3>
-            <p>Be the first to create a game and start earning CORE!</p>
-            <button onclick="showSection('create')" class="game-btn" style="margin-top: 1rem;">
-                Create First Game
-            </button>
-        </div>
-    </div>
-</div>
-<!-- ========== END REPLACE ========== -->
-                    
+                
                     <!-- Skill-Based Matchmaking Filter -->
                     <div style="margin-bottom: 1rem; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
                         <h4 style="margin-bottom: 0.5rem; color: #4ecdc4;">🎯 Skill-Based Matchmaking</h4>
@@ -1721,85 +1678,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Create Game Section -->
-            <!-- ========== START REPLACE ========== -->
-<!-- REPLACE YOUR EXISTING CREATE SECTION WITH THIS -->
-<div id="createSection" class="hidden">
-    <div class="create-game-section">
-        <h2>🎮 Create New Game</h2>
-        
-        <div class="game-type-selector">
-            <div class="game-type-card" data-type="chess" onclick="selectGameType('chess')">
-                <div class="game-icon">♟️</div>
-                <h3>Chess Masters</h3>
-                <p>Strategic blockchain chess</p>
-                <small>5-30 minutes per game</small>
-            </div>
-            <div class="game-type-card" data-type="checkers" onclick="selectGameType('checkers')">
-                <div class="game-icon">⚫</div>
-                <h3>Checkers Pro</h3>
-                <p>Fast-paced checkers</p>
-                <small>3-15 minutes per game</small>
-            </div>
-            <div class="game-type-card" data-type="words" onclick="selectGameType('words')">
-                <div class="game-icon">📝</div>
-                <h3>Word Battle</h3>
-                <p>Quick word game</p>
-                <small>1-3 minutes per round</small>
-            </div>
-        </div>
-        
-        <div style="margin: 2rem 0;">
-            <label for="gameStake" style="display: block; margin-bottom: 0.5rem; color: #4ecdc4; font-weight: bold;">
-                Stake Amount (CORE)
-            </label>
-            <input type="number" class="stake-input" id="gameStake" 
-                   placeholder="Enter stake amount (min 0.01 CORE)" 
-                   min="0.01" step="0.01" 
-                   oninput="updateCreateButton()">
-            <small style="color: #aaa; display: block; margin-top: 0.5rem;">
-                Winner takes 97% of total pool (3% platform fee)
-            </small>
-        </div>
-
-        <!-- Advanced Game Settings -->
-        <div style="background: rgba(255, 255, 255, 0.05); border-radius: 10px; padding: 1.5rem; margin: 1rem 0;">
-            <h4 style="margin-bottom: 1rem; color: #4ecdc4;">⚙️ Advanced Settings</h4>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                <div>
-                    <label style="display: block; margin-bottom: 0.5rem; color: #aaa;">Time Control</label>
-                    <select id="timeControl" class="stake-input" style="margin: 0;">
-                        <option value="blitz">Blitz (5+3)</option>
-                        <option value="rapid" selected>Rapid (10+5)</option>
-                        <option value="classical">Classical (30+0)</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="display: block; margin-bottom: 0.5rem; color: #aaa;">Skill Range</label>
-                    <select id="skillRange" class="stake-input" style="margin: 0;">
-                        <option value="any">Any Skill Level</option>
-                        <option value="similar" selected>Similar Skill (±100)</option>
-                        <option value="strict">Exact Skill (±50)</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="display: block; margin-bottom: 0.5rem; color: #aaa;">Server Validation</label>
-                    <select id="serverValidation" class="stake-input" style="margin: 0;">
-                        <option value="full" selected>Full Validation</option>
-                        <option value="light">Light Validation</option>
-                        <option value="off">Client Only</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-        
-        <button class="create-btn" id="createGameBtn" onclick="createGame()" disabled>
-            <i class="fas fa-plus"></i> Select Game Type & Enter Stake
-        </button>
-    </div>
-</div>
-<!-- ========== END REPLACE ========== -->
 
                     <!-- Advanced Game Settings -->
                     <div style="background: rgba(255, 255, 255, 0.05); border-radius: 10px; padding: 1.5rem; margin: 1rem 0;">

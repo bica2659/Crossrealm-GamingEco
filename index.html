@@ -3998,6 +3998,11 @@ async function createGame() {
         };
         
         activeGames.push(newGame);
+        // Add this right after activeGames.push(newGame);
+globalGamesList.push(newGame);
+
+// Also add this to broadcast the game to other users
+broadcastGameCreation(newGame);
         addActivityFeedItem(`🎮 You created a ${selectedGameType} game with ${stakeAmount} CORE stake`);
         
         // Clear form
@@ -4019,6 +4024,54 @@ async function createGame() {
         showTransactionStatus('❌ Failed to create game: ' + error.message, '');
     }
 }
+        // Add this function to broadcast games to other users
+function broadcastGameCreation(game) {
+    // Store in localStorage so other tabs/devices can see it
+    const broadcastKey = 'crypticus_broadcast_' + Date.now();
+    localStorage.setItem(broadcastKey, JSON.stringify({
+        type: 'new_game',
+        game: game,
+        timestamp: Date.now()
+    }));
+    
+    // Clean up old broadcasts after 5 seconds
+    setTimeout(() => {
+        localStorage.removeItem(broadcastKey);
+    }, 5000);
+}
+
+// Add this event listener to receive games from other users
+window.addEventListener('storage', function(e) {
+    if (e.key && e.key.startsWith('crypticus_broadcast_')) {
+        try {
+            const data = JSON.parse(e.newValue);
+            if (data.type === 'new_game' && data.game) {
+                // Check if game already exists
+                const exists = globalGamesList.find(g => g.id === data.game.id);
+                if (!exists) {
+                    globalGamesList.push(data.game);
+                    if (currentSection === 'lobby') {
+                        updateGamesDisplay();
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Failed to process broadcast:', error);
+        }
+    }
+});
+
+// Optional: Add periodic sync function
+function syncGlobalGames() {
+    // Store current global games
+    localStorage.setItem('crypticus_global_games', JSON.stringify({
+        games: globalGamesList,
+        timestamp: Date.now()
+    }));
+}
+
+// Run sync every 3 seconds
+setInterval(syncGlobalGames, 3000);
 
 // Refresh game lobby
 async function refreshLobby() {

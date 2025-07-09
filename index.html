@@ -4769,6 +4769,339 @@ if (typeof addChatMessage === 'undefined') {
         }
     }
 }
+        // Game Window Management Functions
+function openGameWindow(gameType) {
+    console.log('Opening game window for:', gameType);
+    
+    // Hide any other game windows
+    document.querySelectorAll('.game-window').forEach(w => w.classList.add('hidden'));
+    document.getElementById('gameOverlay').classList.remove('hidden');
+    
+    const windowId = gameType + 'GameWindow';
+    const gameWindow = document.getElementById(windowId);
+    if (gameWindow) {
+        gameWindow.classList.remove('hidden');
+        gameWindow.classList.remove('minimized');
+    }
+}
+
+function closeGame(gameType) {
+    const windowId = gameType + 'GameWindow';
+    const gameWindow = document.getElementById(windowId);
+    if (gameWindow) {
+        gameWindow.classList.add('hidden');
+    }
+    document.getElementById('gameOverlay').classList.add('hidden');
+    
+    // Clear the session
+    if (multiplayerSession && multiplayerSession.gameType === gameType) {
+        multiplayerSession = null;
+    }
+}
+
+function minimizeGame(gameType) {
+    const windowId = gameType + 'GameWindow';
+    const gameWindow = document.getElementById(windowId);
+    if (gameWindow) {
+        gameWindow.classList.toggle('minimized');
+    }
+}
+
+// Chess Game Functions
+function initializeChessBoard(session) {
+    const board = document.getElementById('chessBoard');
+    if (!board) return;
+    
+    board.innerHTML = '';
+    renderChessBoard(session);
+}
+
+function renderChessBoard(session) {
+    const board = document.getElementById('chessBoard');
+    if (!board || !session) return;
+    
+    board.innerHTML = '';
+    const gameBoard = session.gameState.board;
+    
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            const square = document.createElement('div');
+            square.className = `chess-square ${(row + col) % 2 === 0 ? 'white' : 'black'}`;
+            square.dataset.row = row;
+            square.dataset.col = col;
+            
+            const piece = gameBoard[row][col];
+            if (piece) {
+                square.textContent = getChessPieceSymbol(piece);
+            }
+            
+            square.onclick = () => handleChessClick(row, col, session);
+            board.appendChild(square);
+        }
+    }
+}
+
+function getChessPieceSymbol(piece) {
+    const symbols = {
+        'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙',
+        'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟'
+    };
+    return symbols[piece] || '';
+}
+
+function handleChessClick(row, col, session) {
+    if (!session || !session.isActive) return;
+    
+    // Handle piece selection and moves
+    console.log('Chess click at:', row, col);
+    // Add your chess move logic here
+}
+
+function updateChessStatus(session) {
+    const status = document.getElementById('chessStatus');
+    if (status && session) {
+        if (session.gameState.gameOver) {
+            status.textContent = 'Game Over!';
+            status.classList.add('game-over-message');
+        } else {
+            status.textContent = `Turn: ${session.gameState.turn}`;
+        }
+    }
+}
+
+// Checkers Game Functions
+function initializeCheckersBoard(session) {
+    const board = document.getElementById('checkersBoard');
+    if (!board) return;
+    
+    board.innerHTML = '';
+    renderCheckersBoard(session);
+}
+
+function renderCheckersBoard(session) {
+    const board = document.getElementById('checkersBoard');
+    if (!board || !session) return;
+    
+    board.innerHTML = '';
+    const gameBoard = session.gameState.board;
+    
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            const square = document.createElement('div');
+            square.className = `checkers-square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+            square.dataset.row = row;
+            square.dataset.col = col;
+            
+            const piece = gameBoard[row][col];
+            if (piece) {
+                const pieceElement = document.createElement('div');
+                pieceElement.className = `checker-piece ${piece.includes('red') ? 'red-piece' : 'black-piece'}`;
+                if (piece.includes('king')) {
+                    pieceElement.classList.add('king');
+                }
+                square.appendChild(pieceElement);
+            }
+            
+            square.onclick = () => handleCheckersClick(row, col, session);
+            board.appendChild(square);
+        }
+    }
+}
+
+function handleCheckersClick(row, col, session) {
+    if (!session || !session.isActive) return;
+    
+    console.log('Checkers click at:', row, col);
+    // Add your checkers move logic here
+}
+
+function updateCheckersStatus(session) {
+    const status = document.getElementById('checkersStatus');
+    if (status && session) {
+        if (session.gameState.gameOver) {
+            status.textContent = 'Game Over!';
+            status.classList.add('game-over-message');
+        } else {
+            status.textContent = `Turn: ${session.gameState.turn}`;
+        }
+    }
+}
+
+// Word Game Functions
+function initializeWordGame(session) {
+    const letters = document.getElementById('wordLetters');
+    const input = document.getElementById('wordInput');
+    
+    if (letters && session) {
+        letters.textContent = session.gameState.currentLetters;
+    }
+    
+    if (input) {
+        input.value = '';
+        input.focus();
+    }
+    
+    updateWordGameUI(session);
+}
+
+function updateWordGameUI(session) {
+    if (!session) return;
+    
+    const status = document.getElementById('wordStatus');
+    const playerScore = document.getElementById('playerScore');
+    const opponentScore = document.getElementById('opponentScore');
+    
+    if (status) {
+        status.textContent = `Round ${session.gameState.round} of ${session.gameState.maxRounds}`;
+    }
+    
+    if (playerScore) {
+        const myRole = session.isHost ? 'host' : 'guest';
+        playerScore.textContent = session.gameState.scores[myRole];
+    }
+    
+    if (opponentScore) {
+        const oppRole = session.isHost ? 'guest' : 'host';
+        opponentScore.textContent = session.gameState.scores[oppRole];
+    }
+}
+
+function submitWord() {
+    if (!multiplayerSession || multiplayerSession.gameType !== 'words') return;
+    
+    const input = document.getElementById('wordInput');
+    if (!input) return;
+    
+    const word = input.value.trim().toUpperCase();
+    if (!word) return;
+    
+    const result = multiplayerSession.makeMove({
+        word: word,
+        playerId: userAccount
+    });
+    
+    if (result.success) {
+        showTransactionStatus(`✅ ${result.message}`, '');
+        input.value = '';
+        updateWordGameUI(multiplayerSession);
+    } else {
+        showTransactionStatus(`❌ ${result.error}`, '');
+    }
+}
+
+function skipRound() {
+    if (!multiplayerSession || multiplayerSession.gameType !== 'words') return;
+    
+    multiplayerSession.gameState.round++;
+    multiplayerSession.gameState.currentLetters = multiplayerSession.generateRandomLetters();
+    initializeWordGame(multiplayerSession);
+    
+    if (multiplayerSession.gameState.round > multiplayerSession.gameState.maxRounds) {
+        multiplayerSession.checkGameEnd();
+    }
+}
+
+// Chess specific functions
+function resignChess() {
+    if (multiplayerSession && multiplayerSession.gameType === 'chess') {
+        if (confirm('Are you sure you want to resign?')) {
+            multiplayerSession.endGame(multiplayerSession.isHost ? 'black' : 'white');
+        }
+    }
+}
+
+function drawChess() {
+    if (multiplayerSession && multiplayerSession.gameType === 'chess') {
+        multiplayerSession.addChatMessage('You', 'offered a draw');
+        showTransactionStatus('Draw offer sent', '');
+    }
+}
+
+function resignCheckers() {
+    if (multiplayerSession && multiplayerSession.gameType === 'checkers') {
+        if (confirm('Are you sure you want to resign?')) {
+            multiplayerSession.endGame(multiplayerSession.isHost ? 'black' : 'red');
+        }
+    }
+}
+
+// Game chat functions
+function handleGameChatKeyPress(event, gameType) {
+    if (event.key === 'Enter') {
+        sendGameChatMessage(gameType);
+    }
+}
+
+function sendGameChatMessage(gameType) {
+    const input = document.getElementById(gameType + 'ChatInput');
+    if (!input || !input.value.trim()) return;
+    
+    if (multiplayerSession) {
+        multiplayerSession.addChatMessage('You', input.value.trim());
+    }
+    
+    input.value = '';
+}
+
+function addGameChatMessage(gameType, sender, message) {
+    const chatContainer = document.getElementById(gameType + 'GameChat');
+    if (chatContainer) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'game-chat-message';
+        messageDiv.innerHTML = `<strong>${sender}:</strong> ${message}`;
+        chatContainer.appendChild(messageDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+}
+
+// Chat functions for global chat
+function handleChatKeyPress(event) {
+    if (event.key === 'Enter') {
+        sendChatMessage();
+    }
+}
+
+function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    if (!input || !input.value.trim()) return;
+    
+    const message = input.value.trim();
+    const sender = userAccount ? userAccount.substring(0, 6) + '...' : 'Anonymous';
+    
+    addChatMessage(sender, message);
+    input.value = '';
+}
+
+// Update player stats display
+function updatePlayerStats() {
+    const gamesPlayedEl = document.getElementById('profileGamesPlayed');
+    const gamesWonEl = document.getElementById('profileGamesWon');
+    const totalEarnedEl = document.getElementById('profileTotalEarned');
+    const winRateEl = document.getElementById('profileWinRate');
+    
+    if (gamesPlayedEl) gamesPlayedEl.textContent = playerStats.gamesPlayed;
+    if (gamesWonEl) gamesWonEl.textContent = playerStats.gamesWon;
+    if (totalEarnedEl) totalEarnedEl.textContent = playerStats.totalEarned.toFixed(4);
+    if (winRateEl) {
+        const winRate = playerStats.gamesPlayed > 0 
+            ? ((playerStats.gamesWon / playerStats.gamesPlayed) * 100).toFixed(1) 
+            : 0;
+        winRateEl.textContent = winRate + '%';
+    }
+}
+
+// Load game history
+function loadGameHistory() {
+    const historyContainer = document.getElementById('gameHistory');
+    if (!historyContainer) return;
+    
+    // For now, show a placeholder
+    historyContainer.innerHTML = `
+        <div style="text-align: center; padding: 2rem; color: #aaa;">
+            <p>No game history yet. Play some games to see your history!</p>
+        </div>
+    `;
+}
     </script>
 </body>
 </html>

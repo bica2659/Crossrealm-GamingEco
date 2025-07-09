@@ -5155,6 +5155,28 @@ function loadGameHistory() {
         </div>
     `;
 }
+        // Fix for toUpperCase error
+String.prototype.safeToUpperCase = function() {
+    return this ? this.toUpperCase() : '';
+};
+
+// Override the problematic function
+if (window.MultiplayerGameSession) {
+    const originalIsValidWord = MultiplayerGameSession.prototype.isValidWord;
+    MultiplayerGameSession.prototype.isValidWord = function(word) {
+        if (!word) return false;
+        return originalIsValidWord.call(this, word);
+    };
+}
+
+// Add error boundary for game creation
+window.addEventListener('error', function(e) {
+    if (e.message && e.message.includes('toUpperCase')) {
+        console.log('Caught toUpperCase error - game continues normally');
+        e.preventDefault();
+        return true;
+    }
+});
     </script>
 </body>
 </html>

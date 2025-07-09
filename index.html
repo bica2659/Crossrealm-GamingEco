@@ -4603,6 +4603,172 @@ console.log('🎯 Features: Tournament System, Anti-Bot Protection, Server Valid
 
 // [NOTE: All the original game logic functions (chess, checkers, word games, chat, etc.) 
 // would continue to work exactly as before - they are included in the existing functionality]
+        // FIX: Move event listeners inside DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Re-attach event listeners after DOM is ready
+    const connectBtn = document.getElementById('connectBtn');
+    const disconnectBtn = document.getElementById('disconnectBtn');
+    
+    if (connectBtn) {
+        connectBtn.removeEventListener('click', connectWallet); // Remove any existing
+        connectBtn.addEventListener('click', connectWallet);
+    }
+    
+    if (disconnectBtn) {
+        disconnectBtn.removeEventListener('click', disconnectWallet); // Remove any existing
+        disconnectBtn.addEventListener('click', disconnectWallet);
+    }
+});
+
+// Add missing UI update functions if they don't exist
+if (typeof updateConnectionProgress === 'undefined') {
+    window.updateConnectionProgress = function(progress) {
+        const progressBar = document.getElementById('connectionProgress');
+        if (progressBar) {
+            progressBar.style.width = progress + '%';
+        }
+    }
+}
+
+if (typeof updateContractStatus === 'undefined') {
+    window.updateContractStatus = function(status, message = '') {
+        const statusElement = document.getElementById('contractStatus');
+        if (statusElement) {
+            if (status === 'connected') {
+                statusElement.innerHTML = '<span class="connection-indicator connected"></span>Connected to Core Blockchain';
+            } else if (status === 'demo') {
+                statusElement.innerHTML = '<span class="connection-indicator pending"></span>' + (message || 'Demo Mode');
+            } else {
+                statusElement.innerHTML = '<span class="connection-indicator disconnected"></span>Disconnected';
+            }
+        }
+    }
+}
+
+if (typeof updateConnectionStatus === 'undefined') {
+    window.updateConnectionStatus = function(status) {
+        const statusElement = document.getElementById('connectionStatus');
+        if (statusElement) {
+            if (status === 'connected') {
+                statusElement.innerHTML = '<span class="connection-indicator connected"></span>Connected';
+            } else {
+                statusElement.innerHTML = '<span class="connection-indicator disconnected"></span>Not Connected';
+            }
+        }
+    }
+}
+
+if (typeof showTransactionStatus === 'undefined') {
+    window.showTransactionStatus = function(message, txHash = '') {
+        const statusElement = document.getElementById('transactionStatus');
+        const messageElement = document.getElementById('txStatusMessage');
+        const hashElement = document.getElementById('txHash');
+        
+        if (statusElement && messageElement) {
+            messageElement.textContent = message;
+            if (hashElement && txHash) {
+                hashElement.textContent = txHash;
+                hashElement.style.display = 'block';
+            } else if (hashElement) {
+                hashElement.style.display = 'none';
+            }
+            
+            statusElement.classList.add('show');
+            
+            setTimeout(() => {
+                statusElement.classList.remove('show');
+            }, 5000);
+        }
+    }
+}
+
+if (typeof startRealTimeUpdates === 'undefined') {
+    window.startRealTimeUpdates = function() {
+        if (gameUpdateInterval) {
+            clearInterval(gameUpdateInterval);
+        }
+        
+        gameUpdateInterval = setInterval(() => {
+            updateLiveStats();
+            if (currentSection === 'lobby') {
+                updateGamesDisplay();
+            }
+        }, 5000);
+    }
+}
+
+if (typeof loadUserData === 'undefined') {
+    window.loadUserData = async function() {
+        try {
+            const savedData = localStorage.getItem('crypticus_user_' + userAccount);
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                playerStats = data.playerStats || playerStats;
+                playerSkillRatings = data.playerSkillRatings || playerSkillRatings;
+            }
+        } catch (error) {
+            console.error('Failed to load user data:', error);
+        }
+    }
+}
+
+if (typeof saveUserData === 'undefined') {
+    window.saveUserData = function() {
+        try {
+            if (userAccount) {
+                const data = {
+                    playerStats,
+                    playerSkillRatings,
+                    lastSaved: Date.now()
+                };
+                localStorage.setItem('crypticus_user_' + userAccount, JSON.stringify(data));
+            }
+        } catch (error) {
+            console.error('Failed to save user data:', error);
+        }
+    }
+}
+
+if (typeof copyContractAddress === 'undefined') {
+    window.copyContractAddress = function() {
+        const address = GAME_CONTRACT_ADDRESS;
+        navigator.clipboard.writeText(address).then(() => {
+            showTransactionStatus('✅ Contract address copied to clipboard!', '');
+        }).catch(err => {
+            console.error('Failed to copy address:', err);
+            showTransactionStatus('❌ Failed to copy address', '');
+        });
+    }
+}
+
+if (typeof addActivityFeedItem === 'undefined') {
+    window.addActivityFeedItem = function(message) {
+        const feed = document.getElementById('activityFeed');
+        if (feed) {
+            const item = document.createElement('div');
+            item.style.cssText = 'padding: 0.5rem; margin: 0.25rem 0; background: rgba(78, 205, 196, 0.1); border-radius: 5px; font-size: 0.9rem;';
+            item.textContent = message;
+            feed.insertBefore(item, feed.firstChild);
+            
+            while (feed.children.length > 5) {
+                feed.removeChild(feed.lastChild);
+            }
+        }
+    }
+}
+
+if (typeof addChatMessage === 'undefined') {
+    window.addChatMessage = function(sender, message) {
+        const chatMessages = document.getElementById('chatMessages');
+        if (chatMessages) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'game-chat-message';
+            messageDiv.innerHTML = `<strong>${sender}:</strong> ${message}`;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    }
+}
     </script>
 </body>
 </html>

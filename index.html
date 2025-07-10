@@ -1648,7 +1648,7 @@
         <!-- Content Area -->
         <div class="content-area">
             <!-- Game Lobby Section -->
-<div id="lobbySection">
+            <div id="lobbySection">
     <div class="live-lobby">
         <div class="lobby-header">
             <h2>🎯 Live Game Lobby</h2>
@@ -2352,6 +2352,25 @@ let verifiableRandomness = {
     source: 'chainlink',
     lastSeed: null,
     commitHash: null
+};
+                // NEW: Settings Functions
+let platformSettings = {
+    autoJoin: false,
+    sound: true,
+    animations: true,
+    defaultStake: 0.1,
+    gameInvites: true,
+    txNotifications: true,
+    chatNotifications: false,
+    autoLock: true,
+    sessionTimeout: 30,
+    hideBalance: false,
+    gasPriority: 'standard',
+    rpcEndpoint: 'https://rpc.coredao.org',
+    developerMode: false,
+    serverValidation: true,
+    antiBot: true,
+    randomnessSource: 'chainlink'
 };
 
 // Tournament System - Add to your existing JavaScript
@@ -4149,9 +4168,6 @@ setInterval(syncGlobalGames, 5000);
 // Also sync when page loads
 syncGlobalGames();
 
-// Run sync every 3 seconds
-setInterval(syncGlobalGames, 3000);
-
 async function refreshLobby() {
     try {
         // Remove the transaction status that's causing the error
@@ -4412,26 +4428,7 @@ function updateLiveStats() {
     if (totalGamesEl) totalGamesEl.textContent = totalGames;
     if (totalVolumeEl) totalVolumeEl.textContent = totalVolume.toFixed(2);
 }
-        // NEW: Settings Functions
-let platformSettings = {
-    autoJoin: false,
-    sound: true,
-    animations: true,
-    defaultStake: 0.1,
-    gameInvites: true,
-    txNotifications: true,
-    chatNotifications: false,
-    autoLock: true,
-    sessionTimeout: 30,
-    hideBalance: false,
-    gasPriority: 'standard',
-    rpcEndpoint: 'https://rpc.coredao.org',
-    developerMode: false,
-    serverValidation: true,
-    antiBot: true,
-    randomnessSource: 'chainlink'
-};
-
+ 
 function loadSettings() {
     // Load settings from localStorage
     const savedSettings = localStorage.getItem('crypticus_settings');
@@ -5419,7 +5416,53 @@ document.addEventListener('DOMContentLoaded', function() {
         disconnectBtn.addEventListener('click', disconnectWallet);
     }
 });
-// ========== END COPY ==========
+        // Initialize platform when page loads
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🎮 Enhanced Crypticus Multiplayer Platform Loading...');
+    
+    // Initialize platform
+    await initializePlatform();
+    
+    // Add initial chat messages
+    addChatMessage('System', 'Welcome to Crypticus! Connect your wallet to start playing.');
+    addChatMessage('CryptoKing', 'Just won 2.5 CORE in Chess! 🎉');
+    addChatMessage('GameMaster', 'New high stakes games available!');
+    addChatMessage('WordWizard', 'Word battles are intense here! 📝');
+    addChatMessage('AntiBotGuard', 'All games are protected against bots! 🛡️');
+    
+    // Attach event listeners
+    const connectBtn = document.getElementById('connectBtn');
+    const disconnectBtn = document.getElementById('disconnectBtn');
+    const transactionStatus = document.getElementById('transactionStatus');
+    
+    if (connectBtn) {
+        connectBtn.addEventListener('click', connectWallet);
+    }
+    
+    if (disconnectBtn) {
+        disconnectBtn.addEventListener('click', disconnectWallet);
+    }
+    
+    if (transactionStatus) {
+        transactionStatus.addEventListener('click', () => {
+            transactionStatus.classList.remove('show');
+        });
+    }
+    
+    console.log('🚀 Enhanced Crypticus Platform Ready with ALL Features!');
+});
+
+// Window beforeunload event
+window.addEventListener('beforeunload', () => {
+    saveUserData();
+    if (userAccount) {
+        sessionStorage.setItem('walletConnected', 'true');
+    } else {
+        sessionStorage.removeItem('walletConnected');
+    }
+});
+
+console.log('✨ Enhanced Multiplayer System with ALL Features Initialized Successfully!');
     </script>
 </body>
 </html>

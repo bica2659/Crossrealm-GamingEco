@@ -4016,6 +4016,16 @@ input:checked + .toggle-slider:before {
     }
 }
       <script>
+// ADD THIS AT THE VERY TOP
+window.addEventListener('error', function(e) {
+    console.error('JavaScript Error:', e.error);
+    console.error('Error details:', e.filename, e.lineno, e.colno);
+});
+
+// ADD THIS TOO
+window.addEventListener('unhandledrejection', function(e) {
+    console.error('Promise Error:', e.reason);
+});
 /* ===========================
    CROSSREALM GAMING PLATFORM
    CORE JAVASCRIPT - BLOCKCHAIN INTEGRATION & STATE MANAGEMENT
@@ -4029,7 +4039,7 @@ const GAME_CONTRACT_ADDRESS = "0x7af2cB8f93D0a75E0ba39E974B4e968EAe49028A";
 const CORE_CHAIN_ID = "0x45c"; // Core Blockchain Chain ID
 
 // JSONBin Configuration with working credentials
-const JSONBIN_API_KEY = '$2a$10$Ppx.2Z91xbnEF57ad1FmZOIkkmy.0QJbB8b1.IP561Z.px8smIRBe';
+const JSONBIN_API_KEY = '$2a$10$GtV1/gAxPuNYbKEoKNghTu9NiX3OyvrEw6ir4vJA2Nu/U7KGAnkC6';
 const JSONBIN_BIN_ID = '686ea4c0c264cf03d2e83902';
 const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
 
@@ -4192,6 +4202,113 @@ function showNotification(title, message, type = 'info', actions = null, autoHid
         return notificationId;
     } catch (error) {
         logError(error, 'Showing notification');
+    }
+}
+        // ADD THESE FUNCTIONS after your existing showNotification function:
+
+// Enhanced error handling for missing functions
+function safeCall(functionName, ...args) {
+    try {
+        if (typeof window[functionName] === 'function') {
+            return window[functionName](...args);
+        } else {
+            console.error(`Function ${functionName} not found`);
+            showFallbackError(`Function ${functionName} is not available`);
+        }
+    } catch (error) {
+        console.error(`Error calling ${functionName}:`, error);
+        showFallbackError(`Error in ${functionName}: ${error.message}`);
+    }
+}
+
+// Simple error display function
+function showFallbackError(message) {
+    console.error('Fallback Error:', message);
+    
+    // Try to show in existing notification system
+    if (typeof showNotification === 'function') {
+        try {
+            showNotification('Error', message, 'error');
+            return;
+        } catch (e) {
+            console.error('showNotification failed:', e);
+        }
+    }
+    
+    // Try to show in transaction status
+    if (typeof showTransactionStatus === 'function') {
+        try {
+            showTransactionStatus('❌ ' + message, '');
+            return;
+        } catch (e) {
+            console.error('showTransactionStatus failed:', e);
+        }
+    }
+    
+    // Last resort - alert
+    alert('Error: ' + message);
+}
+
+// Enhanced function to check if critical functions exist
+function checkCriticalFunctions() {
+    const criticalFunctions = [
+        'showSection', 'connectWallet', 'disconnectWallet', 
+        'verifyAge', 'testServerConnection', 'refreshLobby',
+        'showNotification', 'showTransactionStatus', 'initializePlatform'
+    ];
+    
+    const missingFunctions = [];
+    
+    criticalFunctions.forEach(funcName => {
+        if (typeof window[funcName] !== 'function') {
+            missingFunctions.push(funcName);
+            console.error(`❌ Missing critical function: ${funcName}`);
+        }
+    });
+    
+    if (missingFunctions.length > 0) {
+        console.error('Missing functions:', missingFunctions);
+        showFallbackError(`Missing functions: ${missingFunctions.join(', ')}`);
+        return false;
+    }
+    
+    console.log('✅ All critical functions found');
+    return true;
+}
+
+// Safe initialization wrapper
+function safeInitialization() {
+    try {
+        console.log('🔍 Checking critical functions...');
+        
+        if (!checkCriticalFunctions()) {
+            console.error('❌ Critical functions missing - cannot continue');
+            return false;
+        }
+        
+        console.log('🚀 Starting safe initialization...');
+        
+        // Test basic functionality
+        try {
+            showTransactionStatus('🔄 Platform starting...', '');
+        } catch (error) {
+            console.error('showTransactionStatus failed:', error);
+        }
+        
+        // Initialize the platform
+        if (typeof initializePlatform === 'function') {
+            initializePlatform();
+        } else {
+            console.error('❌ initializePlatform function not found');
+            showFallbackError('Platform initialization function missing');
+        }
+        
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Safe initialization failed:', error);
+        showFallbackError('Platform initialization failed: ' + error.message);
+        return false;
     }
 }
 
@@ -10181,14 +10298,178 @@ if (typeof window !== 'undefined') {
 // FINAL STARTUP
 // ===========================
 
-// Main initialization when DOM is ready
+// REPLACE your existing DOMContentLoaded section with this:
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🎮 CrossRealm Gaming Platform v1.0.0');
-    console.log('🚀 Starting complete platform initialization...');
+    console.log('🎮 CrossRealm Gaming Platform - DOM Ready');
     
-    // Initialize the complete platform
-    initializeCompletePlatform();
+    // Initialize critical variables first
+    try {
+        // Make sure these exist
+        if (typeof globalGamesList === 'undefined') {
+            window.globalGamesList = [];
+        }
+        if (typeof myActiveGamesList === 'undefined') {
+            window.myActiveGamesList = new Map();
+        }
+        if (typeof currentGameSessions === 'undefined') {
+            window.currentGameSessions = new Map();
+        }
+        if (typeof gameInvitations === 'undefined') {
+            window.gameInvitations = new Map();
+        }
+        if (typeof userAccount === 'undefined') {
+            window.userAccount = null;
+        }
+        if (typeof currentBalance === 'undefined') {
+            window.currentBalance = 0;
+        }
+        if (typeof currentSection === 'undefined') {
+            window.currentSection = 'lobby';
+        }
+        if (typeof selectedGameType === 'undefined') {
+            window.selectedGameType = null;
+        }
+        if (typeof isConnectedToServer === 'undefined') {
+            window.isConnectedToServer = false;
+        }
+        if (typeof platformSettings === 'undefined') {
+            window.platformSettings = {
+                autoJoin: false,
+                sound: true,
+                animations: true,
+                defaultStake: 0.1,
+                gameInvites: true,
+                txNotifications: true,
+                chatNotifications: false,
+                autoLock: true,
+                sessionTimeout: 30,
+                hideBalance: false,
+                gasPriority: 'standard',
+                rpcEndpoint: 'https://rpc.coredao.org',
+                developerMode: false,
+                serverValidation: true,
+                antiBot: true,
+                randomnessSource: 'chainlink',
+                realTimeSync: true
+            };
+        }
+        if (typeof playerStats === 'undefined') {
+            window.playerStats = {
+                gamesPlayed: 0,
+                gamesWon: 0,
+                totalEarned: 0,
+                winRate: 0
+            };
+        }
+        
+        console.log('✅ Variables initialized');
+        
+        // Add click event listeners for buttons that might not work
+        setTimeout(function() {
+            addEventListeners();
+        }, 1000);
+        
+        // Initialize the platform
+        initializePlatform();
+        
+    } catch (error) {
+        console.error('❌ Critical initialization error:', error);
+        alert('Platform failed to initialize: ' + error.message);
+    }
 });
+
+// ADD THIS NEW FUNCTION after the DOMContentLoaded section:
+function addEventListeners() {
+    try {
+        console.log('🔗 Adding event listeners...');
+        
+        // Connect wallet button
+        const connectBtn = document.getElementById('connectBtn');
+        if (connectBtn) {
+            connectBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Connect button clicked');
+                connectWallet();
+            });
+        }
+        
+        // Disconnect wallet button
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        if (disconnectBtn) {
+            disconnectBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Disconnect button clicked');
+                disconnectWallet();
+            });
+        }
+        
+        // Navigation items
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(function(item) {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const text = this.textContent.trim();
+                console.log('Nav clicked:', text);
+                
+                if (text.includes('Game Lobby')) {
+                    showSection('lobby');
+                } else if (text.includes('Create Game')) {
+                    showSection('create');
+                } else if (text.includes('Games')) {
+                    showSection('games');
+                } else if (text.includes('Tournaments')) {
+                    showSection('tournaments');
+                } else if (text.includes('Profile')) {
+                    showSection('profile');
+                } else if (text.includes('Chat')) {
+                    showSection('chat');
+                } else if (text.includes('Settings')) {
+                    showSection('settings');
+                }
+            });
+        });
+        
+        // Age verification buttons
+        const ageButtons = document.querySelectorAll('.verify-btn');
+        ageButtons.forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (this.textContent.includes('18+')) {
+                    console.log('Age verification: accepted');
+                    verifyAge(true);
+                } else {
+                    console.log('Age verification: declined');
+                    verifyAge(false);
+                }
+            });
+        });
+        
+        // Test connection button
+        const testBtn = document.querySelector('button[onclick*="testServerConnection"]');
+        if (testBtn) {
+            testBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Test connection clicked');
+                testServerConnection();
+            });
+        }
+        
+        // Refresh button
+        const refreshBtn = document.querySelector('button[onclick*="refreshLobby"]');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Refresh lobby clicked');
+                refreshLobby();
+            });
+        }
+        
+        console.log('✅ Event listeners added');
+        
+    } catch (error) {
+        console.error('❌ Event listeners failed:', error);
+    }
+}
 
 // Performance logging after page load
 window.addEventListener('load', function() {

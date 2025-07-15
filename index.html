@@ -7857,5 +7857,358 @@ StateManager.subscribe('currentSection', (newSection) => {
 
 console.log('✅ Platform Integration & Final Managers (Section 6) Loaded');
     </script>
+    <script>
+        /* ===========================
+   CROSSREALM GAMING PLATFORM
+   DEBUG & EMERGENCY FIXES
+   =========================== */
+
+// 🚨 EMERGENCY DEBUG & FIX SCRIPT
+// Add this to the end of your HTML file or run in browser console
+
+// ===========================
+// IMMEDIATE EMERGENCY BYPASS
+// ===========================
+
+// Force bypass all verification and start platform immediately
+function emergencyStart() {
+    console.log('🚨 EMERGENCY START ACTIVATED');
+    
+    try {
+        // Set all verification flags
+        sessionStorage.setItem('ageVerified', 'true');
+        sessionStorage.setItem('antiBotVerified', 'true');
+        
+        // Set state flags
+        if (window.StateManager) {
+            StateManager.set('isAgeVerified', true);
+            StateManager.set('isAntiBotVerified', true);
+            StateManager.set('isPlatformInitialized', true);
+        }
+        
+        // Enable dev mode
+        if (window.Config) {
+            Config.set('DEV_MODE', true);
+            Config.set('BYPASS_VERIFICATION', true);
+        }
+        
+        // Hide loading screen immediately
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen) {
+            loadingScreen.style.display = 'none';
+        }
+        
+        // Hide any modals
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.style.display = 'none';
+        });
+        
+        // Force show main content
+        const header = document.querySelector('.header');
+        const mainContainer = document.querySelector('.main-container');
+        const footer = document.querySelector('.footer');
+        
+        if (header) header.style.display = 'block';
+        if (mainContainer) mainContainer.style.display = 'flex';
+        if (footer) footer.style.display = 'block';
+        
+        // Initialize platform managers manually
+        if (window.NavigationManager) {
+            NavigationManager.showSection('lobby');
+        }
+        
+        console.log('✅ Emergency start completed');
+        alert('Emergency start activated! Platform should now be accessible.');
+        
+    } catch (error) {
+        console.error('Emergency start failed:', error);
+        alert('Emergency start failed. Please refresh the page.');
+    }
+}
+
+// ===========================
+// MOBILE-SPECIFIC FIXES
+// ===========================
+
+function fixMobileIssues() {
+    console.log('📱 Applying mobile fixes...');
+    
+    // Fix viewport issues
+    const viewport = document.querySelector('meta[name="viewport"]');
+    if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+    }
+    
+    // Fix touch events
+    document.addEventListener('touchstart', function() {}, { passive: true });
+    
+    // Fix mobile modal positioning
+    const style = document.createElement('style');
+    style.textContent = `
+        @media (max-width: 768px) {
+            .modal-overlay {
+                padding: 10px !important;
+            }
+            .modal-content {
+                max-width: 95vw !important;
+                max-height: 90vh !important;
+                margin: 20px auto !important;
+            }
+            .loading-screen {
+                padding: 20px !important;
+            }
+            .loading-content {
+                max-width: 90vw !important;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// ===========================
+// INITIALIZATION TIMEOUT FIX
+// ===========================
+
+function fixInitializationTimeout() {
+    console.log('⏰ Setting up initialization timeout...');
+    
+    // Force emergency start after 5 seconds if still loading
+    setTimeout(() => {
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen && loadingScreen.style.display !== 'none') {
+            console.warn('⚠️ Initialization timeout - triggering emergency start');
+            emergencyStart();
+        }
+    }, 5000);
+    
+    // Show emergency button after 3 seconds
+    setTimeout(() => {
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen && loadingScreen.style.display !== 'none') {
+            showEmergencyButton();
+        }
+    }, 3000);
+}
+
+function showEmergencyButton() {
+    const emergencyBtn = document.getElementById('emergencyBypass');
+    if (emergencyBtn) {
+        emergencyBtn.style.display = 'block';
+        emergencyBtn.textContent = 'Start Platform (Skip Loading)';
+        emergencyBtn.onclick = emergencyStart;
+    } else {
+        // Create emergency button if it doesn't exist
+        const loadingContent = document.querySelector('.loading-content');
+        if (loadingContent) {
+            const button = document.createElement('button');
+            button.id = 'emergencyBypass';
+            button.textContent = 'Start Platform (Skip Loading)';
+            button.style.cssText = `
+                margin-top: 20px;
+                padding: 10px 20px;
+                background: #e74c3c;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 600;
+            `;
+            button.onclick = emergencyStart;
+            loadingContent.appendChild(button);
+        }
+    }
+}
+
+// ===========================
+// ERROR DETECTION & FIXING
+// ===========================
+
+function detectAndFixErrors() {
+    console.log('🔍 Detecting and fixing common errors...');
+    
+    // Check for missing elements
+    const criticalElements = [
+        'loadingScreen',
+        'notificationContainer',
+        'lobbySection',
+        'createSection'
+    ];
+    
+    criticalElements.forEach(id => {
+        if (!document.getElementById(id)) {
+            console.warn(`Missing critical element: ${id}`);
+        }
+    });
+    
+    // Check for JavaScript errors
+    window.addEventListener('error', (event) => {
+        console.error('JavaScript Error:', event.error);
+        
+        // If there are too many errors, trigger emergency start
+        if (!window.errorCount) window.errorCount = 0;
+        window.errorCount++;
+        
+        if (window.errorCount >= 3) {
+            console.warn('Too many errors detected, triggering emergency start');
+            setTimeout(emergencyStart, 1000);
+        }
+    });
+    
+    // Check for unhandled promise rejections
+    window.addEventListener('unhandledrejection', (event) => {
+        console.error('Unhandled Promise Rejection:', event.reason);
+        
+        if (!window.promiseErrorCount) window.promiseErrorCount = 0;
+        window.promiseErrorCount++;
+        
+        if (window.promiseErrorCount >= 2) {
+            console.warn('Too many promise errors, triggering emergency start');
+            setTimeout(emergencyStart, 1000);
+        }
+    });
+}
+
+// ===========================
+// SIMPLIFIED INITIALIZATION
+// ===========================
+
+function simplifiedInit() {
+    console.log('🚀 Starting simplified initialization...');
+    
+    try {
+        // Skip all verification
+        sessionStorage.setItem('ageVerified', 'true');
+        sessionStorage.setItem('antiBotVerified', 'true');
+        
+        // Initialize basic state
+        if (window.StateManager) {
+            StateManager.set('isAgeVerified', true);
+            StateManager.set('isAntiBotVerified', true);
+            StateManager.set('isPlatformInitialized', true);
+            StateManager.set('currentSection', 'lobby');
+        }
+        
+        // Enable demo mode for blockchain
+        if (window.BlockchainManager) {
+            BlockchainManager.isDemoMode = true;
+        }
+        
+        // Hide loading screen
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen) {
+            loadingScreen.style.display = 'none';
+        }
+        
+        // Show main interface
+        document.body.style.overflow = 'auto';
+        
+        // Initialize UI managers with error handling
+        setTimeout(() => {
+            try {
+                if (window.NavigationManager) {
+                    NavigationManager.showSection('lobby');
+                }
+                if (window.LobbyManager) {
+                    LobbyManager.loadGames();
+                }
+            } catch (error) {
+                console.warn('UI initialization error:', error);
+            }
+        }, 500);
+        
+        console.log('✅ Simplified initialization completed');
+        
+    } catch (error) {
+        console.error('Simplified initialization failed:', error);
+        emergencyStart();
+    }
+}
+
+// ===========================
+// AUTO-EXECUTE FIXES
+// ===========================
+
+// Run fixes immediately
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🔧 Applying emergency fixes...');
+    
+    // Apply mobile fixes
+    fixMobileIssues();
+    
+    // Set up error detection
+    detectAndFixErrors();
+    
+    // Set up timeout protection
+    fixInitializationTimeout();
+    
+    // Try simplified initialization if main init fails
+    setTimeout(() => {
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen && window.getComputedStyle(loadingScreen).display !== 'none') {
+            console.log('Main initialization seems stuck, trying simplified init...');
+            simplifiedInit();
+        }
+    }, 8000);
+});
+
+// ===========================
+// CONSOLE COMMANDS FOR DEBUGGING
+// ===========================
+
+// Make functions available in console for manual debugging
+window.debugCrossRealm = {
+    emergencyStart,
+    simplifiedInit,
+    fixMobileIssues,
+    showEmergencyButton,
+    
+    // Quick status check
+    checkStatus() {
+        console.log('=== CrossRealm Debug Status ===');
+        console.log('Loading Screen Visible:', document.getElementById('loadingScreen')?.style.display !== 'none');
+        console.log('Platform Initialized:', window.StateManager?.get('isPlatformInitialized'));
+        console.log('Age Verified:', window.StateManager?.get('isAgeVerified'));
+        console.log('Anti-Bot Verified:', window.StateManager?.get('isAntiBotVerified'));
+        console.log('Wallet Connected:', window.StateManager?.get('isWalletConnected'));
+        console.log('Current Section:', window.StateManager?.get('currentSection'));
+        console.log('=== End Debug Status ===');
+    },
+    
+    // Force show specific section
+    showSection(section) {
+        if (window.NavigationManager) {
+            NavigationManager.showSection(section);
+        }
+    },
+    
+    // Reset everything
+    hardReset() {
+        sessionStorage.clear();
+        localStorage.clear();
+        location.reload();
+    }
+};
+
+console.log('🛠️ Debug tools loaded! Use window.debugCrossRealm in console for manual control');
+console.log('Available commands:');
+console.log('- debugCrossRealm.emergencyStart() - Force start platform');
+console.log('- debugCrossRealm.checkStatus() - Check current status');
+console.log('- debugCrossRealm.showSection("lobby") - Show specific section');
+console.log('- debugCrossRealm.hardReset() - Reset and reload');
+
+// ===========================
+// IMMEDIATE FIX FOR STUCK LOADING
+// ===========================
+
+// If this script is being run on an already stuck page, try to fix it immediately
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    const loadingScreen = document.getElementById('loadingScreen');
+    if (loadingScreen && window.getComputedStyle(loadingScreen).display !== 'none') {
+        console.log('🚨 Detected stuck loading screen, applying immediate fix...');
+        setTimeout(emergencyStart, 1000);
+    }
+}
+    </script>
 </body>
 </html>

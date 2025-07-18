@@ -2843,7 +2843,7 @@ async function joinGame(gameId, stakeAmount) {
         
         if (gameData.creator === userAccount) {
             showTransactionStatus('❌ Cannot join your own game', '
-            return;
+                                  return;
         }
         
         // Join game via API

@@ -3427,7 +3427,7 @@ function updateCreateButton() {
     }
 }
 
-// Override the createGame function with better error handling
+// Fixed createGame function with proper error handling
 async function createGame() {
     console.log('=== CREATE GAME CALLED ===');
     
@@ -3439,15 +3439,16 @@ async function createGame() {
     
     const stakeAmount = parseFloat(stakeInput.value);
     console.log('Stake amount:', stakeAmount);
+    console.log('Selected game type:', selectedGameType);
     
     if (!userAccount) {
         showTransactionStatus('❌ Please connect your wallet first', '');
         return;
     }
     
-    if (!selectedGameType) {
-        showTransactionStatus('❌ Please select a game type', '');
-        console.log('selectedGameType is:', selectedGameType);
+    if (!selectedGameType || selectedGameType === null || selectedGameType === undefined) {
+        showTransactionStatus('❌ Please select a game type first', '');
+        console.log('selectedGameType is invalid:', selectedGameType);
         return;
     }
     
@@ -3464,11 +3465,15 @@ async function createGame() {
     try {
         showTransactionStatus('🔄 Creating game...', '');
         
-        // Safe skill level calculation
+        // Ensure selectedGameType is a valid string
+        const gameType = String(selectedGameType).toLowerCase();
+        console.log('Processed game type:', gameType);
+        
+        // Safe skill level calculation with fallback
         let playerSkill = 'bronze';
         try {
-            if (selectedGameType && playerSkillRatings && playerSkillRatings[selectedGameType]) {
-                const rating = playerSkillRatings[selectedGameType];
+            if (gameType && playerSkillRatings && typeof playerSkillRatings === 'object') {
+                const rating = playerSkillRatings[gameType] || 0;
                 if (rating < 100) playerSkill = 'bronze';
                 else if (rating < 300) playerSkill = 'silver';
                 else if (rating < 600) playerSkill = 'gold';
@@ -3479,14 +3484,27 @@ async function createGame() {
             playerSkill = 'bronze';
         }
         
-        // Safe element access
-        const timeControlEl = document.getElementById('timeControl');
-        const serverValidationEl = document.getElementById('serverValidation');
-        const timeControl = (timeControlEl && timeControlEl.value) ? timeControlEl.value : 'rapid';
-        const serverValidation = serverValidationEl ? (serverValidationEl.value !== 'off') : true;
+        // Safe element access with fallbacks
+        let timeControl = 'rapid';
+        let serverValidation = true;
+        
+        try {
+            const timeControlEl = document.getElementById('timeControl');
+            const serverValidationEl = document.getElementById('serverValidation');
+            
+            if (timeControlEl && timeControlEl.value) {
+                timeControl = timeControlEl.value;
+            }
+            
+            if (serverValidationEl && serverValidationEl.value) {
+                serverValidation = (serverValidationEl.value !== 'off');
+            }
+        } catch (elementError) {
+            console.error('Element access error:', elementError);
+        }
         
         console.log('Game data being created:', {
-            type: selectedGameType,
+            type: gameType,
             creator: userAccount,
             stake: stakeAmount,
             skillLevel: playerSkill,
@@ -3495,7 +3513,7 @@ async function createGame() {
         });
         
         const gameData = {
-            type: selectedGameType,
+            type: gameType,
             creator: userAccount,
             stake: stakeAmount,
             skillLevel: playerSkill,
@@ -3507,34 +3525,55 @@ async function createGame() {
         const newGame = await gameAPI.createGame(gameData);
         console.log('Game created successfully:', newGame);
         
-        globalGamesList.push(newGame);
+        // Add to global games list
+        if (Array.isArray(globalGamesList)) {
+            globalGamesList.push(newGame);
+        } else {
+            globalGamesList = [newGame];
+        }
         
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // Show success message
         showTransactionStatus('✅ Game created successfully!', '');
         
-        // Reset form
-        stakeInput.value = '';
-        selectedGameType = null;
-        document.querySelectorAll('.game-type-card').forEach(card => {
-            card.classList.remove('selected');
-        });
-        updateCreateButton();
+        // Reset form safely
+        try {
+            if (stakeInput) stakeInput.value = '';
+            selectedGameType = null;
+            
+            document.querySelectorAll('.game-type-card').forEach(card => {
+                if (card && typeof card.classList !== 'undefined') {
+                    card.classList.remove('selected');
+                }
+            });
+            
+            updateCreateButton();
+        } catch (resetError) {
+            console.error('Form reset error:', resetError);
+        }
         
+        // Navigate to lobby
         showSection('lobby');
         
-        currentBalance -= stakeAmount;
-        const balanceEl = document.getElementById('balanceDisplay');
-        if (balanceEl) balanceEl.textContent = currentBalance.toFixed(4) + ' CORE';
+        // Update balance
+        try {
+            currentBalance -= stakeAmount;
+            const balanceEl = document.getElementById('balanceDisplay');
+            if (balanceEl) {
+                balanceEl.textContent = currentBalance.toFixed(4) + ' CORE';
+            }
+        } catch (balanceError) {
+            console.error('Balance update error:', balanceError);
+        }
         
+        // Update display
         updateGamesDisplay();
         
     } catch (error) {
         console.error('Detailed create game error:', error);
-        showTransactionStatus('❌ Failed to create game: ' + error.message, '');
+        console.error('Error stack:', error.stack);
+        showTransactionStatus('❌ Failed to create game: ' + (error.message || 'Unknown error'), '');
     }
 }
-
-console.log('✅ Fixed createGame function loaded!');
 
 function getPlayerSkillLevel(gameType) {
     if (!gameType) return 'bronze'; // Default fallback

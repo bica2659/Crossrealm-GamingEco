@@ -3462,7 +3462,7 @@ async function createGame() {
         const playerSkill = getPlayerSkillLevel(selectedGameType);
         const timeControlEl = document.getElementById('timeControl');
         const serverValidationEl = document.getElementById('serverValidation');
-        const timeControl = timeControlEl ? timeControlEl.value : 'rapid';
+        const timeControl = timeControlEl ? timeControlEl.value || 'rapid' : 'rapid';
         const serverValidation = serverValidationEl ? serverValidationEl.value !== 'off' : true;
         
         const gameData = {
@@ -3503,6 +3503,7 @@ async function createGame() {
 }
 
 function getPlayerSkillLevel(gameType) {
+    if (!gameType) return 'bronze'; // Default fallback
     const rating = playerSkillRatings[gameType] || 0;
     
     if (rating < 100) return 'bronze';

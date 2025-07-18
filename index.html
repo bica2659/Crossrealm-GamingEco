@@ -1,0 +1,4868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CrossRealm Gaming - Blockchain gaming platform on Core Network">
+    <meta name="keywords" content="blockchain gaming, Core Network, cryptocurrency games, chess, checkers">
+    <meta name="author" content="CrossRealm Gaming">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="theme-color" content="#4e54c8">
+    
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.ethers.io;
+        style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
+        font-src 'self' https://cdnjs.cloudflare.com;
+        img-src 'self' data: https: blob:;
+        connect-src 'self' https://api.jsonbin.io https://rpc.coredao.org https://scan.coredao.org wss://*;
+        frame-ancestors 'none';
+        base-uri 'self';
+        form-action 'self';
+    ">
+    
+    <title>CrossRealm Gaming - Blockchain Gaming on Core Network</title>
+    
+    <!-- Preconnect to external resources -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://rpc.coredao.org" crossorigin>
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+    
+    <!-- External CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+          crossorigin="anonymous" referrerpolicy="no-referrer">
+    
+    <!-- External Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js" 
+            integrity="sha512-JNGbhLCEQuKMUOdNuY3iDeApC5A3VdMGGqLfGKFqN4iIdFJX3J0sEF8HWjKgw9LhJHQ8Qj9K4i2kGY1tCXKSMQ==" 
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <style>
+        /* ===========================
+           CSS CUSTOM PROPERTIES & RESET
+           =========================== */
+        
+        :root {
+            /* Color Palette */
+            --color-primary: #4e54c8;
+            --color-primary-dark: #363a9e;
+            --color-secondary: #f39c12;
+            --color-accent: #4ecdc4;
+            --color-accent-dark: #44a08d;
+            --color-success: #2ecc71;
+            --color-warning: #f1c40f;
+            --color-danger: #e74c3c;
+            --color-info: #3498db;
+            
+            /* Background Colors */
+            --bg-primary: #1a1c2c;
+            --bg-secondary: #2c3e50;
+            --bg-surface: rgba(255, 255, 255, 0.05);
+            --bg-glass: rgba(255, 255, 255, 0.1);
+            --bg-overlay: rgba(0, 0, 0, 0.8);
+            
+            /* Text Colors */
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #888888;
+            
+            /* Border Colors */
+            --border-primary: rgba(255, 255, 255, 0.2);
+            --border-accent: rgba(78, 205, 196, 0.5);
+            
+            /* Spacing */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-xxl: 3rem;
+            
+            /* Border Radius */
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-pill: 50px;
+            
+            /* Shadows */
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --shadow-glow: 0 0 20px rgba(78, 205, 196, 0.3);
+            
+            /* Transitions */
+            --transition-fast: 0.15s ease-out;
+            --transition-normal: 0.3s ease-out;
+            --transition-slow: 0.5s ease-out;
+            
+            /* Z-index Scale */
+            --z-background: -1;
+            --z-base: 0;
+            --z-elevated: 10;
+            --z-dropdown: 100;
+            --z-sticky: 200;
+            --z-fixed: 300;
+            --z-modal-backdrop: 900;
+            --z-modal: 1000;
+            --z-notification: 1100;
+            --z-tooltip: 1200;
+        }
+        
+        /* CSS Reset */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* Focus Styles */
+        :focus {
+            outline: 2px solid var(--color-accent);
+            outline-offset: 2px;
+        }
+        
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-surface);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-accent);
+            border-radius: var(--radius-sm);
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--color-accent-dark);
+        }
+        
+        /* ===========================
+           UTILITY CLASSES
+           =========================== */
+        
+        .hidden { 
+            display: none !important; 
+        }
+        
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
+        }
+        
+        /* Loading States */
+        .skeleton {
+            background: linear-gradient(90deg, 
+                var(--bg-surface) 25%, 
+                rgba(255, 255, 255, 0.1) 50%, 
+                var(--bg-surface) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+        
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* ===========================
+           LOADING SCREEN STYLES
+           =========================== */
+        
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-overlay);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: var(--z-modal);
+            backdrop-filter: blur(10px);
+            transition: opacity var(--transition-slow);
+        }
+        
+        .loading-content {
+            text-align: center;
+            max-width: 400px;
+            padding: var(--spacing-xl);
+        }
+        
+        .logo-loading {
+            margin-bottom: var(--spacing-xl);
+            animation: fade-in var(--transition-slow) ease-out;
+        }
+        
+        .logo-icon {
+            font-size: 4rem;
+            color: var(--color-accent);
+            margin-bottom: var(--spacing-md);
+            animation: pulse 2s infinite;
+        }
+        
+        .logo-loading h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, var(--color-primary), var(--color-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+        
+        .loading-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--bg-surface);
+            border-radius: var(--radius-pill);
+            overflow: hidden;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-accent), var(--color-primary));
+            width: 0%;
+            transition: width var(--transition-normal);
+            border-radius: var(--radius-pill);
+        }
+        
+        .loading-status {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .loading-debug {
+            margin-top: var(--spacing-lg);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        .emergency-bypass {
+            margin-top: var(--spacing-md);
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: var(--color-danger);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: none;
+            transition: all var(--transition-fast);
+        }
+        
+        .emergency-bypass:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+        
+        /* ===========================
+           MODAL SYSTEM STYLES
+           =========================== */
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-overlay);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: var(--z-modal-backdrop);
+            backdrop-filter: blur(8px);
+            animation: fade-in var(--transition-normal) ease-out;
+            padding: var(--spacing-md);
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+            border: 2px solid var(--color-accent);
+            border-radius: var(--radius-xl);
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: slide-in-scale var(--transition-normal) ease-out;
+        }
+        
+        .modal-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--border-primary);
+            background: rgba(78, 205, 196, 0.05);
+        }
+        
+        .modal-header h2,
+        .modal-header h3 {
+            margin: 0;
+            color: var(--color-accent);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            font-size: 1.5rem;
+        }
+        
+        .modal-body {
+            padding: var(--spacing-lg);
+        }
+        
+        .modal-body p {
+            margin-bottom: var(--spacing-md);
+            line-height: 1.8;
+        }
+        
+        .modal-footer {
+            padding: var(--spacing-lg);
+            border-top: 1px solid var(--border-primary);
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            background: var(--bg-surface);
+        }
+        
+        .warning-box {
+            background: rgba(241, 196, 15, 0.1);
+            border: 1px solid rgba(241, 196, 15, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            margin: var(--spacing-md) 0;
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-sm);
+        }
+        
+        .warning-box i {
+            color: var(--color-warning);
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+        
+        /* ===========================
+           BUTTON SYSTEM
+           =========================== */
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            position: relative;
+            overflow: hidden;
+            min-height: 44px;
+            white-space: nowrap;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left var(--transition-slow);
+        }
+        
+        .btn:hover:not(:disabled)::before {
+            left: 100%;
+        }
+        
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        
+        /* Button Variants */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--color-success), #27ae60);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--color-danger), #c0392b);
+            color: white;
+        }
+        
+        .btn-accent {
+            background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+            color: white;
+        }
+        
+        /* Button Sizes */
+        .btn-sm {
+            padding: var(--spacing-xs) var(--spacing-sm);
+            font-size: 0.8rem;
+            min-height: 36px;
+        }
+        
+        .btn-lg {
+            padding: var(--spacing-md) var(--spacing-xl);
+            font-size: 1.1rem;
+            min-height: 52px;
+        }
+        
+        .btn-block {
+            width: 100%;
+        }
+        
+        /* ===========================
+           CAPTCHA STYLES
+           =========================== */
+        
+        .captcha-container {
+            text-align: center;
+        }
+        
+        .captcha-instructions {
+            margin-bottom: var(--spacing-md);
+            padding: var(--spacing-sm);
+            background: var(--bg-surface);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            color: var(--color-warning);
+        }
+        
+        .captcha-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-sm);
+            max-width: 240px;
+            margin: 0 auto var(--spacing-md);
+        }
+        
+        .captcha-tile {
+            aspect-ratio: 1;
+            background: var(--bg-surface);
+            border: 2px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            user-select: none;
+        }
+        
+        .captcha-tile:hover {
+            background: rgba(78, 205, 196, 0.1);
+            border-color: var(--color-accent);
+        }
+        
+        .captcha-tile.selected {
+            background: rgba(78, 205, 196, 0.2);
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-glow);
+        }
+        
+        /* ===========================
+           ANIMATIONS
+           =========================== */
+        
+        @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slide-in-scale {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1); 
+                opacity: 1; 
+            }
+            50% { 
+                transform: scale(1.05); 
+                opacity: 0.8; 
+            }
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* ===========================
+           RESPONSIVE DESIGN
+           =========================== */
+        
+        @media (max-width: 768px) {
+            html {
+                font-size: 14px;
+            }
+            
+            .modal-content {
+                margin: var(--spacing-sm);
+                max-width: 100%;
+            }
+            
+            .loading-content {
+                padding: var(--spacing-md);
+            }
+            
+            .logo-loading h1 {
+                font-size: 2rem;
+            }
+            
+            .captcha-grid {
+                max-width: 200px;
+            }
+        }
+        
+        /* High Contrast Mode Support */
+        @media (prefers-contrast: high) {
+            :root {
+                --bg-surface: rgba(255, 255, 255, 0.15);
+                --border-primary: rgba(255, 255, 255, 0.4);
+                --text-secondary: #e0e0e0;
+            }
+            
+            .btn {
+                border: 2px solid currentColor;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Overlay -->
+    <div class="background-overlay" aria-hidden="true"></div>
+    
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="logo-loading">
+                <i class="fas fa-dice-d20 logo-icon" aria-hidden="true"></i>
+                <h1>CROSSREALM</h1>
+            </div>
+            <div class="loading-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <div class="loading-progress" id="loadingProgress"></div>
+            </div>
+            <div class="loading-status" id="loadingStatus">Initializing platform...</div>
+            <div class="loading-debug">
+                <div id="debugInfo">Loading...</div>
+                <button class="emergency-bypass" id="emergencyBypass" onclick="CrossRealmPlatform.emergencyStart()">
+                    Emergency Bypass (Dev)
+                </button>
+                <div id="loadingTimer">Time: <span id="timerCount">0</span>s</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Age Verification Modal -->
+    <div class="modal-overlay" id="ageVerificationModal" style="display: none;" role="dialog" aria-labelledby="ageVerificationTitle" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="ageVerificationTitle">
+                    <i class="fas fa-exclamation-triangle" aria-hidden="true"></i> 
+                    Age Verification Required
+                </h2>
+            </div>
+            <div class="modal-body">
+                <p>This platform contains blockchain-based games that involve financial stakes. You must be 18 years or older to access this content.</p>
+                <div class="warning-box">
+                    <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                    <p>Gambling involves risk. Please play responsibly. Only gamble with funds you can afford to lose.</p>
+                </div>
+                <p>By entering this site, you confirm that you are at least 18 years of age and agree to our Terms of Service.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" data-action="verify-age" data-value="true">
+                    I am 18+
+                </button>
+                <button class="btn btn-danger" data-action="verify-age" data-value="false">
+                    Under 18
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Anti-Bot Challenge Modal -->
+    <div class="modal-overlay" id="antiBotModal" style="display: none;" role="dialog" aria-labelledby="antiBotTitle" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="antiBotTitle">
+                    <i class="fas fa-shield-alt" aria-hidden="true"></i> 
+                    Human Verification
+                </h3>
+            </div>
+            <div class="modal-body">
+                <p>Please complete this challenge to continue:</p>
+                <div class="captcha-container">
+                    <div class="captcha-instructions" id="captchaInstructions">
+                        Select all squares containing chess pieces
+                    </div>
+                    <div class="captcha-grid" id="captchaGrid" role="group" aria-label="Captcha challenge grid">
+                        <!-- Grid will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="verifyCaptchaBtn" disabled>
+                    Verify
+                </button>
+                <button class="btn btn-secondary" id="refreshCaptchaBtn">
+                    <i class="fas fa-sync-alt" aria-hidden="true"></i> 
+                    New Challenge
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Header -->
+    <header class="main-header" id="mainHeader" style="display: none;">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <i class="fas fa-dice-d20 logo-icon" aria-hidden="true"></i>
+                    <h1 class="logo-text">CROSSREALM</h1>
+                </div>
+                
+                <nav class="main-nav" aria-label="Main navigation">
+                    <button class="nav-item active" data-section="lobby" aria-current="page">
+                        <i class="fas fa-home" aria-hidden="true"></i>
+                        <span>Lobby</span>
+                    </button>
+                    <button class="nav-item" data-section="create">
+                        <i class="fas fa-plus" aria-hidden="true"></i>
+                        <span>Create</span>
+                    </button>
+                    <button class="nav-item" data-section="games">
+                        <i class="fas fa-gamepad" aria-hidden="true"></i>
+                        <span>Games</span>
+                    </button>
+                    <button class="nav-item" data-section="tournaments">
+                        <i class="fas fa-trophy" aria-hidden="true"></i>
+                        <span>Tournaments</span>
+                    </button>
+                    <button class="nav-item" data-section="profile">
+                        <i class="fas fa-user" aria-hidden="true"></i>
+                        <span>Profile</span>
+                    </button>
+                    <button class="nav-item" data-section="settings">
+                        <i class="fas fa-cog" aria-hidden="true"></i>
+                        <span>Settings</span>
+                    </button>
+                </nav>
+                
+                <div class="status-section">
+                    <div class="network-status">
+                        <div class="status-indicator" id="networkIndicator"></div>
+                        <span>CORE Network</span>
+                    </div>
+                </div>
+                
+                <div class="wallet-section">
+                    <div class="wallet-info" id="walletInfo">
+                        <div class="wallet-status" id="walletStatus">
+                            <span class="status-dot"></span>
+                            <span class="status-text">Not Connected</span>
+                        </div>
+                        <div class="wallet-balance" id="walletBalance">0.0000 CORE</div>
+                    </div>
+                    <button class="btn btn-primary" id="connectWalletBtn">
+                        <i class="fas fa-plug" aria-hidden="true"></i>
+                        <span>Connect</span>
+                    </button>
+                    <button class="btn btn-secondary hidden" id="disconnectWalletBtn">
+                        <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                        <span>Disconnect</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Notification Container -->
+    <div class="notification-container" id="notificationContainer" aria-live="polite" aria-atomic="true">
+        <!-- Notifications will be dynamically added here -->
+    </div>
+    
+    <!-- Transaction Status -->
+    <div class="transaction-status" id="transactionStatus" aria-live="polite">
+        <div class="tx-content">
+            <div class="tx-message" id="txMessage">Processing...</div>
+            <div class="tx-hash" id="txHash"></div>
+        </div>
+        <button class="tx-close" id="txClose" aria-label="Close transaction status">
+            <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+    </div>
+    
+    <!-- Main Content Container -->
+    <main class="main-container" id="mainContainer" style="display: none;">
+        <div class="container">
+            <div class="content-layout">
+                <!-- Sidebar -->
+                <aside class="sidebar" aria-label="Game statistics and information">
+                    <!-- Contract Status Widget -->
+                    <div class="widget" id="contractWidget">
+                        <div class="widget-header">
+                            <h3><i class="fas fa-file-contract" aria-hidden="true"></i> Smart Contract</h3>
+                        </div>
+                        <div class="widget-content">
+                            <div class="contract-info">
+                                <div class="contract-address" id="contractAddress">
+                                    <span class="address-text">0x7af2...49028A</span>
+                                    <button class="btn-copy" data-copy="contract-address" aria-label="Copy contract address">
+                                        <i class="fas fa-copy" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                                <div class="contract-status" id="contractStatus">
+                                    <span class="status-indicator"></span>
+                                    <span class="status-text">Connecting...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Live Stats Widget -->
+                    <div class="widget" id="statsWidget">
+                        <div class="widget-header">
+                            <h3><i class="fas fa-chart-line" aria-hidden="true"></i> Live Statistics</h3>
+                        </div>
+                        <div class="widget-content">
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="stat-value" id="onlinePlayers">0</div>
+                                    <div class="stat-label">Online Players</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="activeGames">0</div>
+                                    <div class="stat-label">Active Games</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="totalVolume">0.00</div>
+                                    <div class="stat-label">CORE Volume</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="serverLatency">--ms</div>
+                                    <div class="stat-label">Latency</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Activity Feed Widget -->
+                    <div class="widget" id="activityWidget">
+                        <div class="widget-header">
+                            <h3><i class="fas fa-fire" aria-hidden="true"></i> Recent Activity</h3>
+                        </div>
+                        <div class="widget-content">
+                            <div class="activity-feed" id="activityFeed">
+                                <div class="activity-item">
+                                    <i class="fas fa-rocket" aria-hidden="true"></i>
+                                    <span>Platform initialized</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+                
+                <!-- Main Content Area -->
+                <div class="content-area">
+                    <!-- Lobby Section -->
+                    <section class="content-section active" id="lobbySection" aria-label="Game lobby">
+                        <div class="section-header">
+                            <h2><i class="fas fa-home" aria-hidden="true"></i> Game Lobby</h2>
+                            <div class="section-actions">
+                                <button class="btn btn-sm btn-secondary" id="refreshLobbyBtn">
+                                    <i class="fas fa-sync-alt" aria-hidden="true"></i> Refresh
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="lobby-filters">
+                            <div class="filter-group">
+                                <label for="gameTypeFilter">Game Type</label>
+                                <select id="gameTypeFilter" class="form-control">
+                                    <option value="all">All Games</option>
+                                    <option value="chess">Chess</option>
+                                    <option value="checkers">Checkers</option>
+                                    <option value="words">Word Battle</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="skillFilter">Skill Level</label>
+                                <select id="skillFilter" class="form-control">
+                                    <option value="all">All Levels</option>
+                                    <option value="bronze">Bronze</option>
+                                    <option value="silver">Silver</option>
+                                    <option value="gold">Gold</option>
+                                    <option value="diamond">Diamond</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary" id="applyFiltersBtn">Apply Filters</button>
+                        </div>
+                        
+                        <div class="games-grid" id="lobbyGames">
+                            <!-- Games will be dynamically loaded here -->
+                        </div>
+                    </section>
+                    
+                    <!-- Create Game Section -->
+                    <section class="content-section" id="createSection" aria-label="Create new game">
+                        <div class="section-header">
+                            <h2><i class="fas fa-plus" aria-hidden="true"></i> Create New Game</h2>
+                        </div>
+                        
+                        <div class="create-game-form">
+                            <div class="game-type-selector">
+                                <h3>Select Game Type</h3>
+                                <div class="game-types">
+                                    <button class="game-type-card" data-game-type="chess">
+                                        <i class="fas fa-chess" aria-hidden="true"></i>
+                                        <span>Chess</span>
+                                    </button>
+                                    <button class="game-type-card" data-game-type="checkers">
+                                        <i class="fas fa-circle" aria-hidden="true"></i>
+                                        <span>Checkers</span>
+                                    </button>
+                                    <button class="game-type-card" data-game-type="words">
+                                        <i class="fas fa-font" aria-hidden="true"></i>
+                                        <span>Words</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="gameStake">Stake Amount (CORE)</label>
+                                <input type="number" id="gameStake" class="form-control" 
+                                       min="0.01" max="100" step="0.01" value="0.1"
+                                       aria-describedby="stakeHelp">
+                                <small id="stakeHelp">Minimum: 0.01 CORE, Maximum: 100 CORE</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="timeControl">Time Control</label>
+                                <select id="timeControl" class="form-control">
+                                    <option value="blitz">Blitz (5 min)</option>
+                                    <option value="rapid" selected>Rapid (10 min)</option>
+                                    <option value="standard">Standard (30 min)</option>
+                                </select>
+                            </div>
+                            
+                            <button class="btn btn-lg btn-primary" id="createGameBtn" disabled>
+                                <i class="fas fa-plus" aria-hidden="true"></i> Create Game
+                            </button>
+                        </div>
+                    </section>
+                    
+                    <!-- Games Section -->
+                    <section class="content-section" id="gamesSection" aria-label="Active games">
+                        <div class="section-header">
+                            <h2><i class="fas fa-gamepad" aria-hidden="true"></i> Active Games</h2>
+                        </div>
+                        
+                        <div class="games-container" id="activeGamesContainer">
+                            <!-- Active game windows will be displayed here -->
+                        </div>
+                    </section>
+                    
+                    <!-- Tournaments Section -->
+                    <section class="content-section" id="tournamentsSection" aria-label="Tournaments">
+                        <div class="section-header">
+                            <h2><i class="fas fa-trophy" aria-hidden="true"></i> Tournaments</h2>
+                        </div>
+                        
+                        <div class="tournaments-placeholder">
+                            <i class="fas fa-trophy fa-3x" aria-hidden="true"></i>
+                            <h3>Tournaments Coming Soon!</h3>
+                            <p>Tournament functionality will be available in the next update.</p>
+                        </div>
+                    </section>
+                    
+                    <!-- Profile Section -->
+                    <section class="content-section" id="profileSection" aria-label="Player profile">
+                        <div class="section-header">
+                            <h2><i class="fas fa-user" aria-hidden="true"></i> Player Profile</h2>
+                        </div>
+                        
+                        <div class="profile-content" id="profileContent">
+                            <!-- Profile content will be dynamically loaded -->
+                        </div>
+                    </section>
+                    
+                    <!-- Settings Section -->
+                    <section class="content-section" id="settingsSection" aria-label="Settings">
+                        <div class="section-header">
+                            <h2><i class="fas fa-cog" aria-hidden="true"></i> Settings</h2>
+                        </div>
+                        
+                        <div class="settings-content" id="settingsContent">
+                            <!-- Settings will be dynamically loaded -->
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="main-footer" id="mainFooter" style="display: none;">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4><i class="fas fa-dice-d20" aria-hidden="true"></i> CrossRealm</h4>
+                    <p>Premier blockchain gaming platform on Core Network.</p>
+                    <div class="social-links">
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter" aria-hidden="true"></i></a>
+                        <a href="#" aria-label="Discord"><i class="fab fa-discord" aria-hidden="true"></i></a>
+                        <a href="#" aria-label="GitHub"><i class="fab fa-github" aria-hidden="true"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Games</h4>
+                    <ul>
+                        <li><a href="#" data-section="games">Chess Masters</a></li>
+                        <li><a href="#" data-section="games">Checkers Pro</a></li>
+                        <li><a href="#" data-section="games">Word Battle</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="https://scan.coredao.org" target="_blank" rel="noopener">Core Explorer</a></li>
+                        <li><a href="#" data-action="show-contract">Smart Contract</a></li>
+                        <li><a href="#" data-action="show-help">Help Center</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 CrossRealm Gaming. All rights reserved. | 18+ Only</p>
+                <p>Contract: <code>0x7af2cB8f93D0a75E0ba39E974B4e968EAe49028A</code></p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript Modules -->
+    <script>
+    /* ===========================
+       CROSSREALM GAMING PLATFORM
+       CORE JAVASCRIPT ARCHITECTURE
+       =========================== */
+    
+    'use strict';
+    
+    // Namespace for the entire platform
+    window.CrossRealmPlatform = (function() {
+        
+        // ===========================
+        // CONFIGURATION MODULE
+        // ===========================
+        const Config = {
+            // Environment settings
+            ENV: {
+                MODE: 'production', // 'development' | 'production'
+                DEBUG: false,
+                BYPASS_VERIFICATION: false
+            },
+            
+            // Blockchain settings
+            BLOCKCHAIN: {
+                CHAIN_ID: '0x45c',
+                RPC_URL: 'https://rpc.coredao.org',
+                EXPLORER_URL: 'https://scan.coredao.org',
+                CONTRACT_ADDRESS: '0x7af2cB8f93D0a75E0ba39E974B4e968EAe49028A',
+                GAS_LIMIT_BUFFER: 1.2 // 20% buffer
+            },
+            
+            // API settings (for testing with JSONBin)
+            API: {
+                BASE_URL: 'https://api.jsonbin.io/v3',
+                BIN_ID: '686ea4c0c264cf03d2e83902',
+                API_KEY: '$2a$10$Ppx.2Z91xbnEF57ad1FmZOIkkmy.0QJbB8b1.IP561Z.px8smIRBe'
+            },
+            
+            // Game settings
+            GAME: {
+                MIN_STAKE: 0.01,
+                MAX_STAKE: 100,
+                PLATFORM_FEE: 0.03, // 3%
+                TIME_CONTROLS: {
+                    blitz: 300000,    // 5 minutes
+                    rapid: 600000,    // 10 minutes
+                    standard: 1800000 // 30 minutes
+                }
+            },
+            
+            // Rate limiting
+            RATE_LIMITS: {
+                API_REQUESTS_PER_MIN: 30,
+                GAME_CREATION_PER_HOUR: 10,
+                TRANSACTIONS_PER_MIN: 5
+            },
+            
+            // Session settings
+            SESSION: {
+                TIMEOUT: 1800000, // 30 minutes
+                HEARTBEAT_INTERVAL: 60000 // 1 minute
+            }
+        };
+        
+        // ===========================
+        // STATE MANAGEMENT MODULE
+        // ===========================
+        const StateManager = (function() {
+            const state = new Map();
+            const listeners = new Map();
+            
+            // Default state
+            const defaultState = {
+                // User state
+                userAccount: null,
+                userBalance: 0,
+                isWalletConnected: false,
+                walletProvider: null,
+                
+                // Platform state
+                currentSection: 'lobby',
+                isLoading: false,
+                isPlatformInitialized: false,
+                isAgeVerified: false,
+                isAntiBotVerified: false,
+                
+                // Game state
+                activeGames: new Map(),
+                myGames: new Map(),
+                selectedGameType: null,
+                
+                // Settings
+                settings: {
+                    soundEnabled: true,
+                    animationsEnabled: true,
+                    autoJoin: false,
+                    hideBalance: false,
+                    defaultStake: 0.1
+                },
+                
+                // Statistics
+                stats: {
+                    gamesPlayed: 0,
+                    gamesWon: 0,
+                    totalEarned: 0,
+                    winRate: 0
+                },
+                
+                // Skill ratings
+                skillRatings: {
+                    chess: 100,
+                    checkers: 100,
+                    words: 100
+                }
+            };
+            
+            // Initialize default state
+            Object.entries(defaultState).forEach(([key, value]) => {
+                state.set(key, value);
+            });
+            
+            return {
+                get(key) {
+                    return state.get(key);
+                },
+                
+                set(key, value) {
+                    const oldValue = state.get(key);
+                    state.set(key, value);
+                    
+                    // Notify listeners
+                    if (listeners.has(key)) {
+                        listeners.get(key).forEach(callback => {
+                            try {
+                                callback(value, oldValue);
+                            } catch (error) {
+                                console.error('State listener error:', error);
+                            }
+                        });
+                    }
+                    
+                    // Auto-save certain state
+                    if (['settings', 'stats', 'skillRatings'].includes(key)) {
+                        this.saveToStorage(key, value);
+                    }
+                },
+                
+                update(key, updater) {
+                    const currentValue = this.get(key);
+                    const newValue = updater(currentValue);
+                    this.set(key, newValue);
+                },
+                
+                subscribe(key, callback) {
+                    if (!listeners.has(key)) {
+                        listeners.set(key, new Set());
+                    }
+                    listeners.get(key).add(callback);
+                    
+                    // Return unsubscribe function
+                    return () => {
+                        if (listeners.has(key)) {
+                            listeners.get(key).delete(callback);
+                        }
+                    };
+                },
+                
+                saveToStorage(key, value) {
+                    try {
+                        const userAccount = this.get('userAccount');
+                        if (userAccount) {
+                            const storageKey = `crossrealm_${key}_${userAccount}`;
+                            localStorage.setItem(storageKey, JSON.stringify(value));
+                        }
+                    } catch (error) {
+                        console.warn('Failed to save to storage:', error);
+                    }
+                },
+                
+                loadFromStorage(key) {
+                    try {
+                        const userAccount = this.get('userAccount');
+                        if (userAccount) {
+                            const storageKey = `crossrealm_${key}_${userAccount}`;
+                            const stored = localStorage.getItem(storageKey);
+                            if (stored) {
+                                return JSON.parse(stored);
+                            }
+                        }
+                    } catch (error) {
+                        console.warn('Failed to load from storage:', error);
+                    }
+                    return null;
+                },
+                
+                reset() {
+                    state.clear();
+                    Object.entries(defaultState).forEach(([key, value]) => {
+                        state.set(key, value);
+                    });
+                }
+            };
+        })();
+        
+        // ===========================
+        // ERROR HANDLING MODULE
+        // ===========================
+        const ErrorManager = (function() {
+            const errorLog = [];
+            const maxErrors = 50;
+            
+            class GameError extends Error {
+                constructor(message, code = 'GAME_ERROR', details = {}) {
+                    super(message);
+                    this.name = 'GameError';
+                    this.code = code;
+                    this.details = details;
+                    this.timestamp = new Date().toISOString();
+                }
+            }
+            
+            return {
+                GameError,
+                
+                logError(error, context = 'Unknown') {
+                    const errorEntry = {
+                        id: Date.now() + Math.random(),
+                        error: error,
+                        context: context,
+                        timestamp: new Date().toISOString(),
+                        userAgent: navigator.userAgent,
+                        url: window.location.href
+                    };
+                    
+                    errorLog.push(errorEntry);
+                    
+                    // Keep only recent errors
+                    if (errorLog.length > maxErrors) {
+                        errorLog.shift();
+                    }
+                    
+                    if (Config.ENV.DEBUG) {
+                        console.error('Game Error:', errorEntry);
+                    }
+                    
+                    // Show user-friendly notification for critical errors
+                    if (error.code === 'BLOCKCHAIN_ERROR' || error.code === 'CRITICAL_ERROR') {
+                        NotificationManager.show(
+                            'System Error',
+                            'Something went wrong. Please try again.',
+                            'error'
+                        );
+                    }
+                },
+                
+                getRecentErrors(count = 10) {
+                    return errorLog.slice(-count);
+                },
+                
+                clearErrors() {
+                    errorLog.length = 0;
+                }
+            };
+        })();
+        
+        // ===========================
+        // SECURITY MODULE
+        // ===========================
+        const SecurityManager = (function() {
+            const requestCounts = new Map();
+            
+            return {
+                checkRateLimit(action, limit = null, window = 60000) {
+                    const now = Date.now();
+                    const key = action;
+                    
+                    if (!requestCounts.has(key)) {
+                        requestCounts.set(key, []);
+                    }
+                    
+                    const requests = requestCounts.get(key);
+                    const validRequests = requests.filter(time => now - time < window);
+                    
+                    // Use configured limits
+                    if (!limit) {
+                        const limits = {
+                            'api_request': Config.RATE_LIMITS.API_REQUESTS_PER_MIN,
+                            'game_creation': Config.RATE_LIMITS.GAME_CREATION_PER_HOUR / 60,
+                            'transaction': Config.RATE_LIMITS.TRANSACTIONS_PER_MIN
+                        };
+                        limit = limits[action] || 10;
+                    }
+                    
+                    if (validRequests.length >= limit) {
+                        return false;
+                    }
+                    
+                    validRequests.push(now);
+                    requestCounts.set(key, validRequests);
+                    
+                    return true;
+                },
+                
+                validateInput(input, type, options = {}) {
+                    switch (type) {
+                        case 'stake_amount':
+                            return this.validateStakeAmount(input);
+                        case 'game_type':
+                            return this.validateGameType(input);
+                        case 'wallet_address':
+                            return this.validateWalletAddress(input);
+                        case 'string':
+                            return this.validateString(input, options);
+                        case 'number':
+                            return this.validateNumber(input, options);
+                        default:
+                            return { valid: false, error: 'Unknown validation type' };
+                    }
+                },
+                
+                validateStakeAmount(amount) {
+                    const numAmount = parseFloat(amount);
+                    
+                    if (isNaN(numAmount)) {
+                        return { valid: false, error: 'Invalid number' };
+                    }
+                    
+                    if (numAmount < Config.GAME.MIN_STAKE) {
+                        return { valid: false, error: `Minimum stake is ${Config.GAME.MIN_STAKE} CORE` };
+                    }
+                    
+                    if (numAmount > Config.GAME.MAX_STAKE) {
+                        return { valid: false, error: `Maximum stake is ${Config.GAME.MAX_STAKE} CORE` };
+                    }
+                    
+                    return { valid: true, sanitized: numAmount };
+                },
+                
+                validateGameType(gameType) {
+                    const validTypes = ['chess', 'checkers', 'words'];
+                    
+                    if (!validTypes.includes(gameType)) {
+                        return { valid: false, error: 'Invalid game type' };
+                    }
+                    
+                    return { valid: true, sanitized: gameType };
+                },
+                
+                validateWalletAddress(address) {
+                    if (typeof address !== 'string') {
+                        return { valid: false, error: 'Address must be a string' };
+                    }
+                    
+                    if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
+                        return { valid: false, error: 'Invalid wallet address format' };
+                    }
+                    
+                    return { valid: true, sanitized: address.toLowerCase() };
+                },
+                
+                validateString(input, options = {}) {
+                    const {
+                        minLength = 0,
+                        maxLength = 1000,
+                        allowHTML = false
+                    } = options;
+                    
+                    if (typeof input !== 'string') {
+                        return { valid: false, error: 'Input must be a string' };
+                    }
+                    
+                    if (input.length < minLength) {
+                        return { valid: false, error: `Minimum length is ${minLength}` };
+                    }
+                    
+                    if (input.length > maxLength) {
+                        return { valid: false, error: `Maximum length is ${maxLength}` };
+                    }
+                    
+                    let sanitized = input;
+                    
+                    if (!allowHTML) {
+                        sanitized = sanitized.replace(/[<>]/g, '');
+                    }
+                    
+                    return { valid: true, sanitized: sanitized.trim() };
+                },
+                
+                validateNumber(input, options = {}) {
+                    const {
+                        min = -Infinity,
+                        max = Infinity,
+                        integer = false
+                    } = options;
+                    
+                    const num = Number(input);
+                    
+                    if (isNaN(num)) {
+                        return { valid: false, error: 'Invalid number' };
+                    }
+                    
+                    if (integer && !Number.isInteger(num)) {
+                        return { valid: false, error: 'Must be an integer' };
+                    }
+                    
+                    if (num < min) {
+                        return { valid: false, error: `Minimum value is ${min}` };
+                    }
+                    
+                    if (num > max) {
+                        return { valid: false, error: `Maximum value is ${max}` };
+                    }
+                    
+                    return { valid: true, sanitized: num };
+                },
+                
+                cleanupRateLimits() {
+                    const now = Date.now();
+                    const window = 3600000; // 1 hour
+                    
+                    requestCounts.forEach((requests, key) => {
+                        const validRequests = requests.filter(time => now - time < window);
+                        if (validRequests.length === 0) {
+                            requestCounts.delete(key);
+                        } else {
+                            requestCounts.set(key, validRequests);
+                        }
+                    });
+                }
+            };
+        })();
+        
+        // Export public API
+        return {
+            Config,
+            StateManager,
+            ErrorManager,
+            SecurityManager
+        };
+    })();
+    
+    // Make platform available globally
+    window.CrossRealmPlatform = CrossRealmPlatform;
+    </script>
+    <script>
+    /* ===========================
+       UI COMPONENTS & MANAGERS
+       =========================== */
+    
+    (function(Platform) {
+        'use strict';
+        
+        const { Config, StateManager, ErrorManager, SecurityManager } = Platform;
+        
+        // ===========================
+        // NOTIFICATION MANAGER
+        // ===========================
+        const NotificationManager = (function() {
+            const notifications = new Map();
+            let container = null;
+            const maxNotifications = 5;
+            
+            function initialize() {
+                container = document.getElementById('notificationContainer');
+                if (!container) {
+                    console.warn('Notification container not found');
+                }
+            }
+            
+            function show(title, message, type = 'info', duration = 5000, actions = null) {
+                if (!container) {
+                    console.log(`Notification: ${title} - ${message}`);
+                    return null;
+                }
+                
+                const id = Date.now() + Math.random();
+                const notification = createNotificationElement(id, title, message, type, actions);
+                
+                // Limit number of notifications
+                if (notifications.size >= maxNotifications) {
+                    const oldestId = notifications.keys().next().value;
+                    remove(oldestId);
+                }
+                
+                notifications.set(id, notification);
+                container.appendChild(notification);
+                
+                // Trigger animation
+                requestAnimationFrame(() => {
+                    notification.classList.add('show');
+                });
+                
+                // Auto-remove after duration
+                if (duration > 0) {
+                    setTimeout(() => {
+                        remove(id);
+                    }, duration);
+                }
+                
+                return id;
+            }
+            
+            function createNotificationElement(id, title, message, type, actions) {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.id = `notification-${id}`;
+                notification.setAttribute('role', 'alert');
+                
+                const iconMap = {
+                    info: 'fas fa-info-circle',
+                    success: 'fas fa-check-circle',
+                    warning: 'fas fa-exclamation-triangle',
+                    error: 'fas fa-times-circle'
+                };
+                
+                const content = `
+                    <div class="notification-header">
+                        <div class="notification-title">
+                            <i class="${iconMap[type]}" aria-hidden="true"></i>
+                            ${escapeHtml(title)}
+                        </div>
+                        <button class="notification-close" aria-label="Close notification">
+                            <i class="fas fa-times" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div class="notification-message">
+                        ${escapeHtml(message)}
+                    </div>
+                    ${actions ? `<div class="notification-actions">${actions}</div>` : ''}
+                `;
+                
+                notification.innerHTML = content;
+                
+                // Add event listener for close button
+                const closeBtn = notification.querySelector('.notification-close');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => remove(id));
+                }
+                
+                return notification;
+            }
+            
+            function remove(id) {
+                const notification = notifications.get(id);
+                if (notification && notification.parentNode) {
+                    notification.classList.add('hide');
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                        notifications.delete(id);
+                    }, 300);
+                }
+            }
+            
+            function clear() {
+                notifications.forEach((notification, id) => {
+                    remove(id);
+                });
+            }
+            
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+            
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initialize);
+            } else {
+                initialize();
+            }
+            
+            return {
+                show,
+                remove,
+                clear
+            };
+        })();
+        
+        // ===========================
+        // NAVIGATION MANAGER
+        // ===========================
+        const NavigationManager = (function() {
+            let currentSection = 'lobby';
+            const sectionHandlers = new Map();
+            
+            function initialize() {
+                setupEventListeners();
+                registerSectionHandlers();
+            }
+            
+            function setupEventListeners() {
+                // Navigation items
+                document.querySelectorAll('[data-section]').forEach(element => {
+                    element.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const section = element.dataset.section;
+                        if (section) {
+                            showSection(section);
+                        }
+                    });
+                });
+                
+                // Footer links
+                document.querySelectorAll('[data-action]').forEach(element => {
+                    element.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        handleAction(element.dataset.action);
+                    });
+                });
+            }
+            
+            function registerSectionHandlers() {
+                sectionHandlers.set('lobby', loadLobbySection);
+                sectionHandlers.set('create', loadCreateSection);
+                sectionHandlers.set('games', loadGamesSection);
+                sectionHandlers.set('tournaments', loadTournamentsSection);
+                sectionHandlers.set('profile', loadProfileSection);
+                sectionHandlers.set('settings', loadSettingsSection);
+            }
+            
+            function showSection(sectionName) {
+                if (sectionName === currentSection) return;
+                
+                // Hide all sections
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                // Update navigation
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                    if (item.dataset.section === sectionName) {
+                        item.classList.add('active');
+                        item.setAttribute('aria-current', 'page');
+                    } else {
+                        item.removeAttribute('aria-current');
+                    }
+                });
+                
+                // Show target section
+                const targetSection = document.getElementById(`${sectionName}Section`);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                    
+                    // Load section content
+                    const handler = sectionHandlers.get(sectionName);
+                    if (handler) {
+                        handler();
+                    }
+                }
+                
+                currentSection = sectionName;
+                StateManager.set('currentSection', sectionName);
+            }
+            
+            function loadLobbySection() {
+                LobbyManager.loadGames();
+            }
+            
+            function loadCreateSection() {
+                // Create section is static, no dynamic loading needed
+            }
+            
+            function loadGamesSection() {
+                GameManager.loadActiveGames();
+            }
+            
+            function loadTournamentsSection() {
+                // Tournaments placeholder
+            }
+            
+            function loadProfileSection() {
+                ProfileManager.loadProfile();
+            }
+            
+            function loadSettingsSection() {
+                SettingsManager.loadSettings();
+            }
+            
+            function handleAction(action) {
+                switch (action) {
+                    case 'show-contract':
+                        window.open(`${Config.BLOCKCHAIN.EXPLORER_URL}/address/${Config.BLOCKCHAIN.CONTRACT_ADDRESS}`, '_blank');
+                        break;
+                        
+                    case 'show-help':
+                        NotificationManager.show('Help Center', 'Help documentation coming soon!', 'info');
+                        break;
+                        
+                    case 'show-terms':
+                        NotificationManager.show('Terms of Service', 'Terms of Service coming soon.', 'info');
+                        break;
+                        
+                    default:
+                        console.warn('Unknown action:', action);
+                }
+            }
+            
+            return {
+                initialize,
+                showSection,
+                getCurrentSection: () => currentSection
+            };
+        })();
+        
+        // ===========================
+        // LOBBY MANAGER
+        // ===========================
+        const LobbyManager = (function() {
+            const games = new Map();
+            let filters = {
+                gameType: 'all',
+                skillLevel: 'all'
+            };
+            
+            function initialize() {
+                setupEventListeners();
+            }
+            
+            function setupEventListeners() {
+                const refreshBtn = document.getElementById('refreshLobbyBtn');
+                if (refreshBtn) {
+                    refreshBtn.addEventListener('click', () => loadGames());
+                }
+                
+                const applyFiltersBtn = document.getElementById('applyFiltersBtn');
+                if (applyFiltersBtn) {
+                    applyFiltersBtn.addEventListener('click', applyFilters);
+                }
+            }
+            
+            async function loadGames() {
+                try {
+                    const container = document.getElementById('lobbyGames');
+                    if (!container) return;
+                    
+                    // Show loading state
+                    container.innerHTML = `
+                        <div class="loading-placeholder">
+                            <i class="fas fa-spinner fa-spin fa-2x"></i>
+                            <p>Loading games...</p>
+                        </div>
+                    `;
+                    
+                    // Fetch games from API
+                    const response = await APIManager.getGames();
+                    
+                    // Update games map
+                    games.clear();
+                    if (response.games) {
+                        response.games.forEach(game => {
+                            games.set(game.id, game);
+                        });
+                    }
+                    
+                    // Render games
+                    renderGames();
+                    
+                    // Update stats
+                    updateStats();
+                    
+                } catch (error) {
+                    ErrorManager.logError(error, 'Loading lobby games');
+                    showLoadingError();
+                }
+            }
+            
+            function renderGames() {
+                const container = document.getElementById('lobbyGames');
+                if (!container) return;
+                
+                const filteredGames = getFilteredGames();
+                
+                if (filteredGames.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-games">
+                            <i class="fas fa-search fa-3x"></i>
+                            <h3>No Games Found</h3>
+                            <p>No games match your filters. Try adjusting them or create a new game!</p>
+                            <button class="btn btn-primary" onclick="CrossRealmPlatform.NavigationManager.showSection('create')">
+                                <i class="fas fa-plus"></i> Create Game
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const gamesHTML = filteredGames.map(game => createGameCard(game)).join('');
+                container.innerHTML = gamesHTML;
+                
+                // Add event listeners to join buttons
+                container.querySelectorAll('[data-action="join-game"]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const gameId = e.currentTarget.dataset.gameId;
+                        joinGame(gameId);
+                    });
+                });
+            }
+            
+            function createGameCard(game) {
+                const gameTypeIcons = {
+                    chess: 'fas fa-chess',
+                    checkers: 'fas fa-circle',
+                    words: 'fas fa-font'
+                };
+                
+                const skillColors = {
+                    bronze: '#CD7F32',
+                    silver: '#C0C0C0',
+                    gold: '#FFD700',
+                    diamond: '#B9F2FF'
+                };
+                
+                const canJoin = checkCanJoinGame(game);
+                const buttonText = getJoinButtonText(game);
+                
+                return `
+                    <div class="game-card" data-game-id="${game.id}">
+                        <div class="game-card-header">
+                            <div class="game-type">
+                                <i class="${gameTypeIcons[game.gameType] || 'fas fa-gamepad'}"></i>
+                                <span>${game.gameType.charAt(0).toUpperCase() + game.gameType.slice(1)}</span>
+                            </div>
+                            <div class="game-skill" style="color: ${skillColors[game.skillLevel] || '#888'}">
+                                ${game.skillLevel ? game.skillLevel.toUpperCase() : 'CASUAL'}
+                            </div>
+                        </div>
+                        
+                        <div class="game-card-body">
+                            <div class="game-stake">
+                                <span class="stake-amount">${game.stake}</span>
+                                <span class="stake-label">CORE</span>
+                            </div>
+                            
+                            <div class="game-info">
+                                <div class="info-row">
+                                    <span class="info-label">Creator:</span>
+                                    <span class="info-value">${formatAddress(game.creator)}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Time:</span>
+                                    <span class="info-value">${game.timeControl || 'Rapid'}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Created:</span>
+                                    <span class="info-value">${formatTimeAgo(game.createdAt)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="game-card-footer">
+                            <button class="btn btn-accent btn-block" 
+                                    data-action="join-game"
+                                    data-game-id="${game.id}"
+                                    ${canJoin ? '' : 'disabled'}>
+                                <i class="fas fa-play"></i> ${buttonText}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            function checkCanJoinGame(game) {
+                const userAccount = StateManager.get('userAccount');
+                const userBalance = StateManager.get('userBalance');
+                
+                if (!userAccount) return false;
+                if (game.creator.toLowerCase() === userAccount.toLowerCase()) return false;
+                if (userBalance < game.stake) return false;
+                
+                return true;
+            }
+            
+            function getJoinButtonText(game) {
+                const userAccount = StateManager.get('userAccount');
+                const userBalance = StateManager.get('userBalance');
+                
+                if (!userAccount) return 'Connect Wallet';
+                if (game.creator.toLowerCase() === userAccount.toLowerCase()) return 'Your Game';
+                if (userBalance < game.stake) return 'Insufficient Balance';
+                
+                return 'Join Game';
+            }
+            
+            async function joinGame(gameId) {
+                try {
+                    const game = games.get(gameId);
+                    if (!game) {
+                        throw new ErrorManager.GameError('Game not found', 'GAME_NOT_FOUND');
+                    }
+                    
+                    if (!checkCanJoinGame(game)) {
+                        throw new ErrorManager.GameError('Cannot join this game', 'JOIN_NOT_ALLOWED');
+                    }
+                    
+                    // Check rate limiting
+                    if (!SecurityManager.checkRateLimit('game_join')) {
+                        throw new ErrorManager.GameError('Too many join attempts', 'RATE_LIMIT');
+                    }
+                    
+                    NotificationManager.show('Joining Game', 'Processing your request...', 'info');
+                    
+                    // Join game on blockchain
+                    await BlockchainManager.joinGame(gameId, game.stake);
+                    
+                    // Create local game instance
+                    await GameManager.createGame(game.gameType, game.stake, [game.creator, StateManager.get('userAccount')]);
+                    
+                    // Navigate to games section
+                    NavigationManager.showSection('games');
+                    
+                    NotificationManager.show('Game Joined!', 'Good luck!', 'success');
+                    
+                } catch (error) {
+                    ErrorManager.logError(error, 'Joining game');
+                    NotificationManager.show('Join Failed', error.message, 'error');
+                }
+            }
+            
+            function applyFilters() {
+                const gameTypeFilter = document.getElementById('gameTypeFilter');
+                const skillFilter = document.getElementById('skillFilter');
+                
+                if (gameTypeFilter) {
+                    filters.gameType = gameTypeFilter.value;
+                }
+                
+                if (skillFilter) {
+                    filters.skillLevel = skillFilter.value;
+                }
+                
+                renderGames();
+            }
+            
+            function getFilteredGames() {
+                let filtered = Array.from(games.values());
+                
+                if (filters.gameType !== 'all') {
+                    filtered = filtered.filter(game => game.gameType === filters.gameType);
+                }
+                
+                if (filters.skillLevel !== 'all') {
+                    filtered = filtered.filter(game => game.skillLevel === filters.skillLevel);
+                }
+                
+                // Sort by creation time (newest first)
+                filtered.sort((a, b) => b.createdAt - a.createdAt);
+                
+                return filtered;
+            }
+            
+            function updateStats() {
+                const onlineElement = document.getElementById('onlinePlayers');
+                if (onlineElement) {
+                    onlineElement.textContent = Math.floor(Math.random() * 50) + 10;
+                }
+                
+                const activeElement = document.getElementById('activeGames');
+                if (activeElement) {
+                    activeElement.textContent = games.size;
+                }
+                
+                const volumeElement = document.getElementById('totalVolume');
+                if (volumeElement) {
+                    const totalStake = Array.from(games.values())
+                        .reduce((sum, game) => sum + game.stake, 0);
+                    volumeElement.textContent = totalStake.toFixed(2);
+                }
+            }
+            
+            function showLoadingError() {
+                const container = document.getElementById('lobbyGames');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="loading-error">
+                            <i class="fas fa-exclamation-triangle fa-3x"></i>
+                            <h3>Failed to Load Games</h3>
+                            <p>Unable to connect to game servers. Please try again.</p>
+                            <button class="btn btn-primary" onclick="CrossRealmPlatform.LobbyManager.loadGames()">
+                                <i class="fas fa-sync-alt"></i> Retry
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+            
+            function formatAddress(address) {
+                if (!address) return 'Unknown';
+                return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+            }
+            
+            function formatTimeAgo(timestamp) {
+                const seconds = Math.floor((Date.now() - timestamp) / 1000);
+                
+                if (seconds < 60) return `${seconds}s ago`;
+                if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+                if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+                return `${Math.floor(seconds / 86400)}d ago`;
+            }
+            
+            return {
+                initialize,
+                loadGames,
+                joinGame
+            };
+        })();
+        
+        // Export managers to platform
+        Platform.NotificationManager = NotificationManager;
+        Platform.NavigationManager = NavigationManager;
+        Platform.LobbyManager = LobbyManager;
+        
+    })(window.CrossRealmPlatform);
+    </script>
+    <script>
+    /* ===========================
+       BLOCKCHAIN & GAME LOGIC
+       =========================== */
+    
+    (function(Platform) {
+        'use strict';
+        
+        const { Config, StateManager, ErrorManager, SecurityManager, NotificationManager } = Platform;
+        
+        // ===========================
+        // BLOCKCHAIN MANAGER
+        // ===========================
+        const BlockchainManager = (function() {
+            let provider = null;
+            let signer = null;
+            let contract = null;
+            let network = null;
+            let isDemoMode = false;
+            
+            const contractABI = [
+                "function createGame(string memory gameType, uint256 timeLimit) external payable returns (uint256)",
+                "function joinGame(uint256 gameId) external payable",
+                "function submitMove(uint256 gameId, bytes memory moveData) external",
+                "function finalizeGame(uint256 gameId, address winner) external",
+                "function claimWinnings(uint256 gameId) external",
+                "function getGame(uint256 gameId) external view returns (address player1, address player2, uint256 stake, uint256 status, string memory gameType)",
+                "function getTotalGames() external view returns (uint256)",
+                "function getPlayerGames(address player) external view returns (uint256[] memory)",
+                "event GameCreated(uint256 indexed gameId, address indexed creator, uint256 stake, string gameType)",
+                "event GameJoined(uint256 indexed gameId, address indexed player)",
+                "event GameFinalized(uint256 indexed gameId, address indexed winner, uint256 payout)"
+            ];
+            
+            async function initialize() {
+                try {
+                    // Check if Web3 provider is available
+                    if (typeof window.ethereum === 'undefined') {
+                        console.log('No Web3 provider detected - running in demo mode');
+                        initializeDemoMode();
+                        return true;
+                    }
+                    
+                    // Initialize Web3 provider
+                    provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+                    
+                    // Get network information
+                    network = await provider.getNetwork();
+                    console.log('Network detected:', network);
+                    
+                    // Validate network
+                    if (network.chainId !== parseInt(Config.BLOCKCHAIN.CHAIN_ID, 16)) {
+                        console.warn('Wrong network detected, continuing in demo mode');
+                        initializeDemoMode();
+                        return true;
+                    }
+                    
+                    // Initialize contract (read-only initially)
+                    contract = new ethers.Contract(
+                        Config.BLOCKCHAIN.CONTRACT_ADDRESS,
+                        contractABI,
+                        provider
+                    );
+                    
+                    // Verify contract exists
+                    try {
+                        await contract.getTotalGames();
+                        console.log('Smart contract verified');
+                    } catch (error) {
+                        console.warn('Contract verification failed, using demo mode');
+                        initializeDemoMode();
+                        return true;
+                    }
+                    
+                    updateContractStatus('connected', 'Connected to Core Network');
+                    return true;
+                    
+                } catch (error) {
+                    ErrorManager.logError(error, 'Blockchain initialization');
+                    initializeDemoMode();
+                    return false;
+                }
+            }
+            
+            function initializeDemoMode() {
+                isDemoMode = true;
+                updateContractStatus('demo', 'Demo Mode - No Real Transactions');
+            }
+            
+            async function connectWallet() {
+                try {
+                    if (isDemoMode) {
+                        return connectDemoWallet();
+                    }
+                    
+                    if (!window.ethereum) {
+                        throw new ErrorManager.GameError('No Web3 provider found', 'NO_PROVIDER');
+                    }
+                    
+                    // Request account access
+                    const accounts = await window.ethereum.request({
+                        method: 'eth_requestAccounts'
+                    });
+                    
+                    if (!accounts || accounts.length === 0) {
+                        throw new ErrorManager.GameError('No accounts found', 'NO_ACCOUNTS');
+                    }
+                    
+                    const userAccount = accounts[0];
+                    
+                    // Validate wallet address
+                    const addressValidation = SecurityManager.validateInput(userAccount, 'wallet_address');
+                    if (!addressValidation.valid) {
+                        throw new ErrorManager.GameError('Invalid wallet address', 'INVALID_ADDRESS');
+                    }
+                    
+                    // Set up signer
+                    signer = provider.getSigner();
+                    
+                    // Connect contract to signer
+                    if (contract) {
+                        contract = contract.connect(signer);
+                    }
+                    
+                    // Get user balance
+                    const balance = await provider.getBalance(userAccount);
+                    const balanceInCore = parseFloat(ethers.utils.formatEther(balance));
+                    
+                    // Update state
+                    StateManager.set('userAccount', userAccount);
+                    StateManager.set('userBalance', balanceInCore);
+                    StateManager.set('isWalletConnected', true);
+                    StateManager.set('walletProvider', 'metamask');
+                    
+                    // Update UI
+                    updateWalletUI(true, userAccount, balanceInCore);
+                    
+                    // Setup event listeners
+                    setupWalletEventListeners();
+                    
+                    // Save connection state
+                    sessionStorage.setItem('walletConnected', 'true');
+                    
+                    NotificationManager.show(
+                        'Wallet Connected',
+                        `Connected to ${formatAddress(userAccount)}`,
+                        'success'
+                    );
+                    
+                    return true;
+                    
+                } catch (error) {
+                    ErrorManager.logError(error, 'Wallet connection');
+                    
+                    if (error.code === 4001) {
+                        NotificationManager.show('Connection Rejected', 'User rejected connection', 'warning');
+                    } else {
+                        NotificationManager.show('Connection Failed', error.message, 'error');
+                    }
+                    
+                    return false;
+                }
+            }
+            
+            function connectDemoWallet() {
+                const demoAccount = '0x' + Array.from({length: 40}, () => 
+                    Math.floor(Math.random() * 16).toString(16)
+                ).join('');
+                
+                const demoBalance = 10.5432;
+                
+                StateManager.set('userAccount', demoAccount);
+                StateManager.set('userBalance', demoBalance);
+                StateManager.set('isWalletConnected', true);
+                StateManager.set('walletProvider', 'demo');
+                
+                updateWalletUI(true, demoAccount, demoBalance);
+                
+                NotificationManager.show(
+                    'Demo Mode Connected',
+                    `Demo wallet with ${demoBalance} CORE`,
+                    'info'
+                );
+                
+                return true;
+            }
+            
+            async function disconnectWallet() {
+                try {
+                    // Clear state
+                    StateManager.set('userAccount', null);
+                    StateManager.set('userBalance', 0);
+                    StateManager.set('isWalletConnected', false);
+                    StateManager.set('walletProvider', null);
+                    
+                    // Update UI
+                    updateWalletUI(false, null, 0);
+                    
+                    // Clear session storage
+                    sessionStorage.removeItem('walletConnected');
+                    
+                    // Remove event listeners
+                    removeWalletEventListeners();
+                    
+                    NotificationManager.show('Wallet Disconnected', 'Wallet has been disconnected', 'info');
+                    
+                } catch (error) {
+                    ErrorManager.logError(error, 'Wallet disconnection');
+                }
+            }
+            
+            async function createGame(gameType, stakeAmount, timeLimit = 600) {
+                try {
+                    // Validate inputs
+                    const gameTypeValidation = SecurityManager.validateInput(gameType, 'game_type');
+                    if (!gameTypeValidation.valid) {
+                        throw new ErrorManager.GameError(gameTypeValidation.error, 'INVALID_GAME_TYPE');
+                    }
+                    
+                    const stakeValidation = SecurityManager.validateInput(stakeAmount, 'stake_amount');
+                    if (!stakeValidation.valid) {
+                        throw new ErrorManager.GameError(stakeValidation.error, 'INVALID_STAKE');
+                    }
+                    
+                    // Check rate limiting
+                    if (!SecurityManager.checkRateLimit('game_creation', Config.RATE_LIMITS.GAME_CREATION_PER_HOUR / 60, 3600000)) {
+                        throw new ErrorManager.GameError('Rate limit exceeded', 'RATE_LIMIT');
+                    }
+                    
+                    if (isDemoMode) {
+                        return createDemoGame(gameType, stakeAmount, timeLimit);
+                    }
+                    
+                    if (!signer) {
+                        throw new ErrorManager.GameError('Wallet not connected', 'WALLET_NOT_CONNECTED');
+                    }
+                    
+                    const stakeWei = ethers.utils.parseEther(stakeAmount.toString());
+                    
+                    // Estimate gas
+                    const gasEstimate = await contract.estimateGas.createGame(gameType, timeLimit, {
+                        value: stakeWei
+                    });
+                    
+                    const gasLimit = gasEstimate.mul(Math.floor(Config.BLOCKCHAIN.GAS_LIMIT_BUFFER * 100)).div(100);
+                    
+                    console.log('Creating game on blockchain...', {
+                        gameType,
+                        stake: stakeAmount,
+                        gasLimit: gasLimit.toString()
+                    });
+                    
+                    // Create transaction
+                    const tx = await contract.createGame(gameType, timeLimit, {
+                        value: stakeWei,
+                        gasLimit: gasLimit
+                    });
+                    
+                    console.log('Transaction submitted:', tx.hash);
+                    showTransactionStatus('Creating game...', tx.hash);
+                    
+                    // Wait for confirmation
+                    const receipt = await tx.wait();
+                    console.log('Transaction confirmed:', receipt);
+                    
+                    // Extract game ID from events
+                    const gameCreatedEvent = receipt.events?.find(e => e.event === 'GameCreated');
+                    const gameId = gameCreatedEvent?.args?.gameId?.toString();
+                    
+                    if (!gameId) {
+                        throw new ErrorManager.GameError('Failed to extract game ID', 'BLOCKCHAIN_ERROR');
+                    }
+                    
+                    showTransactionStatus('Game created successfully!', tx.hash);
+                    
+                    return {
+                        gameId: parseInt(gameId),
+                        transactionHash: tx.hash,
+                        blockNumber: receipt.blockNumber,
+                        gasUsed: receipt.gasUsed.toString()
+                    };
+                    
+                } catch (error) {
+                    ErrorManager.logError(error, 'Blockchain game creation');
+                    
+                    if (error.code === 'INSUFFICIENT_FUNDS') {
+                        throw new ErrorManager.GameError('Insufficient CORE balance', 'INSUFFICIENT_FUNDS');
+                    } else if (error.code === 'USER_REJECTED' || error.code === 4001) {
+                        throw new ErrorManager.GameError('Transaction rejected by user', 'USER_REJECTED');
+                    }
+                    
+                    throw error;
+                }
+            }
+            
+            async function createDemoGame(gameType, stakeAmount, timeLimit) {
+                // Simulate blockchain delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                const gameId = Date.now();
+                
+                console.log('Demo game created:', { gameId, gameType, stake: stakeAmount });
+                
+                return {
+                    gameId: gameId,
+                    transactionHash: `0x${Array.from({length: 64}, () => 
+                        Math.floor(Math.random() * 16).toString(16)
+                    ).join('')}`,
+                    blockNumber: Math.floor(Math.random() * 1000000),
+                    gasUsed: '21000'
+                };
+            }
+            
+            async function joinGame(gameId, stakeAmount) {
+                try {
+                    if (!SecurityManager.checkRateLimit('game_join')) {
+                        throw new ErrorManager.GameError('Rate limit exceeded', 'RATE_LIMIT');
+                    }
+                    
+                    if (isDemoMode) {
+                        return joinDemoGame(gameId, stakeAmount);
+                    }
+                    
+                    if (!signer) {
+                        throw new ErrorManager.GameError('Wallet not connected', 'WALLET_NOT_CONNECTED');
+                    }
+                    
+                    const stakeWei = ethers.utils.parseEther(stakeAmount.toString());
+                    
+                    // Validate game exists
+                    const gameDetails = await contract.getGame(gameId);
+                    if (!gameDetails || gameDetails.player1 === ethers.constants.AddressZero) {
+                        throw new ErrorManager.GameError('Game not found', 'GAME_NOT_FOUND');
+                    }
+                    
+                    // Create transaction
+                    const tx = await contract.joinGame(gameId, {
+                        value: stakeWei
+                    });
+                    
+                    console.log('Join transaction submitted:', tx.hash);
+                    showTransactionStatus('Joining game...', tx.hash);
+                    
+                    // Wait for confirmation
+                    const receipt = await tx.wait();
+                    console.log('Join transaction confirmed:', receipt);
+                    
+                    showTransactionStatus('Successfully joined game!', tx.hash);
+                    
+                    return {
+                        gameId: gameId,
+                        transactionHash: tx.hash,
+                        blockNumber: receipt.blockNumber,
+                        gasUsed: receipt.gasUsed.toString()
+                    };
+                    
+                } catch (error) {
+                    ErrorManager.logError(error, 'Blockchain game join');
+                    
+                    if (error.code === 'INSUFFICIENT_FUNDS') {
+                        throw new ErrorManager.GameError('Insufficient CORE balance', 'INSUFFICIENT_FUNDS');
+                    } else if (error.code === 'USER_REJECTED' || error.code === 4001) {
+                        throw new ErrorManager.GameError('Transaction rejected by user', 'USER_REJECTED');
+                    }
+                    
+                    throw error;
+                }
+            }
+            
+            async function joinDemoGame(gameId, stakeAmount) {
+                // Simulate blockchain delay
+                await new Promise(resolve => setTimeout(resolve, 800));
+                
+                console.log('Demo game joined:', { gameId });
+                
+                return {
+                    gameId: gameId,
+                    transactionHash: `0x${Array.from({length: 64}, () => 
+                        Math.floor(Math.random() * 16).toString(16)
+                    ).join('')}`,
+                    blockNumber: Math.floor(Math.random() * 1000000),
+                    gasUsed: '21000'
+                };
+            }
+            
+            function updateContractStatus(status, message) {
+                const contractStatus = document.getElementById('contractStatus');
+                if (contractStatus) {
+                    const statusClasses = {
+                        'connected': 'connected',
+                        'demo': 'pending',
+                        'disconnected': 'disconnected'
+                    };
+                    
+                    const statusIndicator = contractStatus.querySelector('.status-indicator');
+                    const statusText = contractStatus.querySelector('.status-text');
+                    
+                    if (statusIndicator) {
+                        statusIndicator.className = `status-indicator ${statusClasses[status]}`;
+                    }
+                    
+                    if (statusText) {
+                        statusText.textContent = message;
+                    }
+                }
+                
+                // Update contract address display
+                const addressElement = document.getElementById('contractAddress');
+                if (addressElement) {
+                    const addressText = addressElement.querySelector('.address-text');
+                    if (addressText) {
+                        addressText.textContent = formatAddress(Config.BLOCKCHAIN.CONTRACT_ADDRESS);
+                    }
+                }
+            }
+            
+            function updateWalletUI(connected, account, balance) {
+                const walletStatus = document.getElementById('walletStatus');
+                const walletBalance = document.getElementById('walletBalance');
+                const connectBtn = document.getElementById('connectWalletBtn');
+                const disconnectBtn = document.getElementById('disconnectWalletBtn');
+                
+                if (walletStatus) {
+                    const statusDot = walletStatus.querySelector('.status-dot');
+                    const statusText = walletStatus.querySelector('.status-text');
+                    
+                    if (connected) {
+                        statusDot.classList.add('connected');
+                        statusText.textContent = 'Connected';
+                    } else {
+                        statusDot.classList.remove('connected');
+                        statusText.textContent = 'Not Connected';
+                    }
+                }
+                
+                if (walletBalance) {
+                    const hideBalance = StateManager.get('settings')?.hideBalance;
+                    if (hideBalance && connected) {
+                        walletBalance.textContent = '••••• CORE';
+                    } else {
+                        walletBalance.textContent = `${balance.toFixed(4)} CORE`;
+                    }
+                }
+                
+                if (connectBtn && disconnectBtn) {
+                    if (connected) {
+                        connectBtn.classList.add('hidden');
+                        disconnectBtn.classList.remove('hidden');
+                    } else {
+                        connectBtn.classList.remove('hidden');
+                        disconnectBtn.classList.add('hidden');
+                    }
+                }
+            }
+            
+            function setupWalletEventListeners() {
+                if (!window.ethereum || isDemoMode) return;
+                
+                window.ethereum.on('accountsChanged', handleAccountsChanged);
+                window.ethereum.on('chainChanged', handleChainChanged);
+            }
+            
+            function removeWalletEventListeners() {
+                if (!window.ethereum || isDemoMode) return;
+                
+                window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+                window.ethereum.removeListener('chainChanged', handleChainChanged);
+            }
+            
+            function handleAccountsChanged(accounts) {
+                if (accounts.length === 0) {
+                    disconnectWallet();
+                } else if (accounts[0] !== StateManager.get('userAccount')) {
+                    connectWallet();
+                }
+            }
+            
+            function handleChainChanged(chainId) {
+                if (chainId !== Config.BLOCKCHAIN.CHAIN_ID) {
+                    NotificationManager.show(
+                        'Wrong Network',
+                        'Please switch to Core Network',
+                        'warning'
+                    );
+                }
+            }
+            
+            function showTransactionStatus(message, hash) {
+                const txStatus = document.getElementById('transactionStatus');
+                const txMessage = document.getElementById('txMessage');
+                const txHash = document.getElementById('txHash');
+                
+                if (txStatus && txMessage && txHash) {
+                    txMessage.textContent = message;
+                    
+                    if (hash) {
+                        const explorerUrl = isDemoMode ? 
+                            '#' : `${Config.BLOCKCHAIN.EXPLORER_URL}/tx/${hash}`;
+                        
+                        txHash.innerHTML = `
+                            <a href="${explorerUrl}" target="_blank" rel="noopener">
+                                ${formatAddress(hash)}
+                            </a>
+                        `;
+                        txHash.style.display = 'block';
+                    } else {
+                        txHash.style.display = 'none';
+                    }
+                    
+                    txStatus.classList.add('show');
+                    
+                    // Auto-hide after 10 seconds
+                    setTimeout(() => {
+                        txStatus.classList.remove('show');
+                    }, 10000);
+                }
+            }
+            
+            function formatAddress(address) {
+                if (!address) return '';
+                return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+            }
+            
+            return {
+                initialize,
+                connectWallet,
+                disconnectWallet,
+                createGame,
+                joinGame,
+                isDemoMode: () => isDemoMode
+            };
+        })();
+        
+        // ===========================
+        // GAME MANAGER
+        // ===========================
+        const GameManager = (function() {
+            const activeGames = new Map();
+            const gameLogic = new Map();
+            
+            // Register game implementations
+            gameLogic.set('chess', new ChessGame());
+            gameLogic.set('checkers', new CheckersGame());
+            gameLogic.set('words', new WordGame());
+            
+            async function createGame(gameType, stakeAmount, players) {
+                try {
+                    // Validate inputs
+                    const gameTypeValidation = SecurityManager.validateInput(gameType, 'game_type');
+                    if (!gameTypeValidation.valid) {
+                        throw new ErrorManager.GameError(gameTypeValidation.error, 'INVALID_GAME_TYPE');
+                    }
+                    
+                    const stakeValidation = SecurityManager.validateInput(stakeAmount, 'stake_amount');
+                    if (!stakeValidation.valid) {
+                        throw new ErrorManager.GameError(stakeValidation.error, 'INVALID_STAKE');
+                    }
+                    
+                    // Create game on blockchain
+                    let blockchainResult = null;
+                    if (StateManager.get('isWalletConnected')) {
+                        blockchainResult = await BlockchainManager.createGame(gameType, stakeAmount);
+                    }
+                    
+                    // Create local game state
+                    const gameId = blockchainResult?.gameId || Date.now();
+                    const game = gameLogic.get(gameType);
+                    
+                    if (!game) {
+                        throw new ErrorManager.GameError('Unknown game type', 'INVALID_GAME_TYPE');
+                    }
+                    
+                    const gameState = game.createNewGame(gameId, players);
+                    
+                    // Store game
+                    activeGames.set(gameId, gameState);
+                    
+                    // Update state
+                    StateManager.update('myGames', games => {
+                        games.set(gameId, gameState);
+                        return games;
+                    });
+                    
+                    NotificationManager.show(
+                        'Game Created',
+                        `${gameType.charAt(0).toUpperCase() + gameType.slice(1)} game created!`,
+                        'success'
+                    );
+                    
+                    return { gameId, gameState, blockchainResult };
+                    
+                } catch (error) {
+                    ErrorManager.logError(error, 'Game creation');
+                    throw error;
+                }
+            }
+            
+            function loadActiveGames() {
+                const container = document.getElementById('activeGamesContainer');
+                if (!container) return;
+                
+                const myGames = StateManager.get('myGames');
+                
+                if (!myGames || myGames.size === 0) {
+                    container.innerHTML = `
+                        <div class="no-games">
+                            <i class="fas fa-ghost fa-3x"></i>
+                            <h3>No Active Games</h3>
+                            <p>You don't have any active games. Create or join a game to start playing!</p>
+                            <button class="btn btn-primary" onclick="CrossRealmPlatform.NavigationManager.showSection('create')">
+                                <i class="fas fa-plus"></i> Create Game
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Render active games
+                container.innerHTML = '';
+                myGames.forEach((gameState, gameId) => {
+                    const gameWindow = createGameWindow(gameState);
+                    container.appendChild(gameWindow);
+                });
+            }
+            
+            function createGameWindow(gameState) {
+                const gameWindow = document.createElement('div');
+                gameWindow.className = 'game-window';
+                gameWindow.dataset.gameId = gameState.gameId;
+                
+                const gameTypeNames = {
+                    chess: 'Chess Masters',
+                    checkers: 'Checkers Pro',
+                    words: 'Word Battle'
+                };
+                
+                gameWindow.innerHTML = `
+                    <div class="game-window-header">
+                        <h3>${gameTypeNames[gameState.gameType] || gameState.gameType}</h3>
+                        <div class="game-window-controls">
+                            <button class="btn btn-sm" onclick="CrossRealmPlatform.GameManager.minimizeGame('${gameState.gameId}')">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="CrossRealmPlatform.GameManager.closeGame('${gameState.gameId}')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="game-window-body" id="game-${gameState.gameId}">
+                        <div class="game-placeholder">
+                            <i class="fas fa-gamepad fa-3x"></i>
+                            <h4>${gameState.gameType.charAt(0).toUpperCase() + gameState.gameType.slice(1)} Game</h4>
+                            <p>Game ID: ${gameState.gameId}</p>
+                            <p>Status: ${gameState.status || 'Active'}</p>
+                            <div class="game-demo-note">
+                                <i class="fas fa-info-circle"></i>
+                                <p>Full game implementation coming soon!</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                return gameWindow;
+            }
+            
+            function minimizeGame(gameId) {
+                const gameWindow = document.querySelector(`[data-game-id="${gameId}"]`);
+                if (gameWindow) {
+                    gameWindow.classList.toggle('minimized');
+                }
+            }
+            
+            function closeGame(gameId) {
+                const gameWindow = document.querySelector(`[data-game-id="${gameId}"]`);
+                if (gameWindow && gameWindow.parentNode) {
+                    gameWindow.parentNode.removeChild(gameWindow);
+                }
+                
+                // Remove from active games
+                activeGames.delete(gameId);
+                
+                // Update state
+                StateManager.update('myGames', games => {
+                    games.delete(gameId);
+                    return games;
+                });
+                
+                NotificationManager.show('Game Closed', 'Game window closed', 'info');
+            }
+            
+            return {
+                createGame,
+                loadActiveGames,
+                minimizeGame,
+                closeGame
+            };
+        })();
+        
+        // ===========================
+        // CHESS GAME IMPLEMENTATION
+        // ===========================
+        class ChessGame {
+            createNewGame(gameId, players) {
+                return {
+                    gameId: gameId,
+                    gameType: 'chess',
+                    players: players,
+                    board: this.createInitialBoard(),
+                    currentPlayer: 0,
+                    moveHistory: [],
+                    status: 'active',
+                    createdAt: Date.now()
+                };
+            }
+            
+            createInitialBoard() {
+                return [
+                    ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+                    ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+                    [null, null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null, null],
+                    ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+                    ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
+                ];
+            }
+        }
+        
+        // ===========================
+        // CHECKERS GAME IMPLEMENTATION
+        // ===========================
+        class CheckersGame {
+            createNewGame(gameId, players) {
+                return {
+                    gameId: gameId,
+                    gameType: 'checkers',
+                    players: players,
+                    board: this.createInitialBoard(),
+                    currentPlayer: 0,
+                    moveHistory: [],
+                    status: 'active',
+                    createdAt: Date.now()
+                };
+            }
+            
+            createInitialBoard() {
+                const board = Array(8).fill(null).map(() => Array(8).fill(null));
+                
+                // Place red pieces
+                for (let row = 0; row < 3; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        if ((row + col) % 2 === 1) {
+                            board[row][col] = { color: 'red', king: false };
+                        }
+                    }
+                }
+                
+                // Place black pieces
+                for (let row = 5; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        if ((row + col) % 2 === 1) {
+                            board[row][col] = { color: 'black', king: false };
+                        }
+                    }
+                }
+                
+                return board;
+            }
+        }
+        
+        // ===========================
+        // WORD GAME IMPLEMENTATION
+        // ===========================
+        class WordGame {
+            createNewGame(gameId, players) {
+                return {
+                    gameId: gameId,
+                    gameType: 'words',
+                    players: players,
+                    currentRound: 1,
+                    totalRounds: 3,
+                    availableLetters: this.generateLetters(),
+                    scores: { 0: 0, 1: 0 },
+                    status: 'active',
+                    createdAt: Date.now()
+                };
+            }
+            
+            generateLetters() {
+                const letterSets = ['BLOCKCHAIN', 'ETHEREUM', 'BITCOIN', 'GAMING', 'TOKENS'];
+                return letterSets[Math.floor(Math.random() * letterSets.length)];
+            }
+        }
+        
+        // Export managers to platform
+        Platform.BlockchainManager = BlockchainManager;
+        Platform.GameManager = GameManager;
+        
+    })(window.CrossRealmPlatform);
+    </script>
+    <script>
+    /* ===========================
+       PLATFORM INTEGRATION & FINAL COMPONENTS
+       =========================== */
+    
+    (function(Platform) {
+        'use strict';
+        
+        const { 
+            Config, 
+            StateManager, 
+            ErrorManager, 
+            SecurityManager, 
+            NotificationManager,
+            NavigationManager,
+            LobbyManager,
+            BlockchainManager,
+            GameManager
+        } = Platform;
+        
+        // ===========================
+        // API MANAGER
+        // ===========================
+        const APIManager = (function() {
+            const isDemoMode = true; // Default to demo mode for testing
+            
+            async function request(endpoint, options = {}) {
+                if (isDemoMode) {
+                    return handleDemoRequest(endpoint, options);
+                }
+                
+                if (!SecurityManager.checkRateLimit('api_request')) {
+                    throw new ErrorManager.GameError('API rate limit exceeded', 'RATE_LIMIT');
+                }
+                
+                const url = `${Config.API.BASE_URL}${endpoint}`;
+                
+                const defaultOptions = {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': Config.API.API_KEY
+                    },
+                    ...options
+                };
+                
+                try {
+                    const response = await fetch(url, defaultOptions);
+                    
+                    if (!response.ok) {
+                        throw new ErrorManager.GameError(
+                            `API request failed: ${response.status}`,
+                            'API_ERROR'
+                        );
+                    }
+                    
+                    return await response.json();
+                    
+                } catch (error) {
+                    ErrorManager.logError(error, `API Request: ${endpoint}`);
+                    throw error;
+                }
+            }
+            
+            async function handleDemoRequest(endpoint, options) {
+                // Simulate network delay
+                await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 300));
+                
+                // Mock responses based on endpoint
+                if (endpoint.includes('/games')) {
+                    return getMockGames();
+                } else if (endpoint.includes('/stats')) {
+                    return getMockStats();
+                }
+                
+                return { success: true, demo: true };
+            }
+            
+            function getMockGames() {
+                const gameTypes = ['chess', 'checkers', 'words'];
+                const stakes = [0.1, 0.25, 0.5, 1.0];
+                const skills = ['bronze', 'silver', 'gold'];
+                
+                const games = [];
+                for (let i = 0; i < Math.floor(Math.random() * 5) + 3; i++) {
+                    games.push({
+                        id: `demo-${Date.now()}-${i}`,
+                        gameType: gameTypes[Math.floor(Math.random() * gameTypes.length)],
+                        stake: stakes[Math.floor(Math.random() * stakes.length)],
+                        skillLevel: skills[Math.floor(Math.random() * skills.length)],
+                        creator: `0x${Array.from({length: 40}, () => 
+                            Math.floor(Math.random() * 16).toString(16)
+                        ).join('')}`,
+                        createdAt: Date.now() - Math.floor(Math.random() * 3600000),
+                        timeControl: 'rapid',
+                        status: 'waiting'
+                    });
+                }
+                
+                return { games, total: games.length };
+            }
+            
+            function getMockStats() {
+                return {
+                    onlinePlayers: Math.floor(Math.random() * 50) + 10,
+                    activeGames: Math.floor(Math.random() * 20) + 5,
+                    totalVolume: (Math.random() * 1000 + 500).toFixed(2),
+                    lastUpdated: Date.now()
+                };
+            }
+            
+            async function getGames() {
+                return request('/b/' + Config.API.BIN_ID + '/latest');
+            }
+            
+            async function getServerStats() {
+                return getMockStats(); // Always use mock stats for now
+            }
+            
+            return {
+                getGames,
+                getServerStats
+            };
+        })();
+        
+        // ===========================
+        // PROFILE MANAGER
+        // ===========================
+        const ProfileManager = (function() {
+            function loadProfile() {
+                const container = document.getElementById('profileContent');
+                if (!container) return;
+                
+                const userAccount = StateManager.get('userAccount');
+                const stats = StateManager.get('stats');
+                const skillRatings = StateManager.get('skillRatings');
+                
+                container.innerHTML = `
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <div class="avatar-placeholder">
+                                ${userAccount ? userAccount.substring(0, 2).toUpperCase() : '??'}
+                            </div>
+                        </div>
+                        <div class="profile-info">
+                            <h3>${userAccount ? formatAddress(userAccount) : 'Not Connected'}</h3>
+                            <div class="profile-badges">
+                                ${userAccount ? '<span class="badge verified">✅ Verified</span>' : ''}
+                                ${StateManager.get('isWalletConnected') ? '<span class="badge blockchain">⛓️ On-Chain</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-section">
+                        <h3>Gaming Statistics</h3>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">${stats.gamesPlayed}</div>
+                                <div class="stat-label">Games Played</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${stats.gamesWon}</div>
+                                <div class="stat-label">Games Won</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${stats.winRate.toFixed(1)}%</div>
+                                <div class="stat-label">Win Rate</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${stats.totalEarned.toFixed(4)}</div>
+                                <div class="stat-label">CORE Earned</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="skills-section">
+                        <h3>Skill Ratings</h3>
+                        <div class="skill-list">
+                            <div class="skill-item">
+                                <span class="skill-name">♟️ Chess</span>
+                                <span class="skill-value">${skillRatings.chess}</span>
+                                <span class="skill-rank">${getSkillRank(skillRatings.chess)}</span>
+                            </div>
+                            <div class="skill-item">
+                                <span class="skill-name">⚫ Checkers</span>
+                                <span class="skill-value">${skillRatings.checkers}</span>
+                                <span class="skill-rank">${getSkillRank(skillRatings.checkers)}</span>
+                            </div>
+                            <div class="skill-item">
+                                <span class="skill-name">📝 Words</span>
+                                <span class="skill-value">${skillRatings.words}</span>
+                                <span class="skill-rank">${getSkillRank(skillRatings.words)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            function getSkillRank(rating) {
+                if (rating < 100) return 'Bronze';
+                if (rating < 300) return 'Silver';
+                if (rating < 600) return 'Gold';
+                return 'Diamond';
+            }
+            
+            function formatAddress(address) {
+                if (!address) return '';
+                return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+            }
+            
+            return {
+                loadProfile
+            };
+        })();
+        
+        // ===========================
+        // SETTINGS MANAGER
+        // ===========================
+        const SettingsManager = (function() {
+            function loadSettings() {
+                const container = document.getElementById('settingsContent');
+                if (!container) return;
+                
+                const settings = StateManager.get('settings');
+                
+                container.innerHTML = `
+                    <div class="settings-category">
+                        <h3>Game Settings</h3>
+                        <div class="settings-list">
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" ${settings.soundEnabled ? 'checked' : ''} 
+                                           onchange="CrossRealmPlatform.SettingsManager.updateSetting('soundEnabled', this.checked)">
+                                    Enable Sound Effects
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" ${settings.animationsEnabled ? 'checked' : ''} 
+                                           onchange="CrossRealmPlatform.SettingsManager.updateSetting('animationsEnabled', this.checked)">
+                                    Enable Animations
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" ${settings.autoJoin ? 'checked' : ''} 
+                                           onchange="CrossRealmPlatform.SettingsManager.updateSetting('autoJoin', this.checked)">
+                                    Auto-Join Games
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-category">
+                        <h3>Privacy Settings</h3>
+                        <div class="settings-list">
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" ${settings.hideBalance ? 'checked' : ''} 
+                                           onchange="CrossRealmPlatform.SettingsManager.updateSetting('hideBalance', this.checked)">
+                                    Hide Balance Display
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-actions">
+                        <button class="btn btn-primary" onclick="CrossRealmPlatform.SettingsManager.saveSettings()">
+                            <i class="fas fa-save"></i> Save Settings
+                        </button>
+                        <button class="btn btn-secondary" onclick="CrossRealmPlatform.SettingsManager.resetSettings()">
+                            <i class="fas fa-undo"></i> Reset to Defaults
+                        </button>
+                    </div>
+                `;
+            }
+            
+            function updateSetting(key, value) {
+                StateManager.update('settings', settings => {
+                    settings[key] = value;
+                    return settings;
+                });
+                
+                // Apply setting immediately
+                applySetting(key, value);
+            }
+            
+            function applySetting(key, value) {
+                switch (key) {
+                    case 'animationsEnabled':
+                        document.body.classList.toggle('no-animations', !value);
+                        break;
+                        
+                    case 'hideBalance':
+                        const balance = StateManager.get('userBalance');
+                        const account = StateManager.get('userAccount');
+                        BlockchainManager.updateWalletUI(
+                            StateManager.get('isWalletConnected'),
+                            account,
+                            balance
+                        );
+                        break;
+                }
+            }
+            
+            function saveSettings() {
+                StateManager.saveToStorage('settings', StateManager.get('settings'));
+                NotificationManager.show('Settings Saved', 'Your settings have been saved.', 'success');
+            }
+            
+            function resetSettings() {
+                const defaultSettings = {
+                    soundEnabled: true,
+                    animationsEnabled: true,
+                    autoJoin: false,
+                    hideBalance: false,
+                    defaultStake: 0.1
+                };
+                
+                StateManager.set('settings', defaultSettings);
+                loadSettings();
+                NotificationManager.show('Settings Reset', 'Settings have been reset to defaults.', 'info');
+            }
+            
+            return {
+                loadSettings,
+                updateSetting,
+                saveSettings,
+                resetSettings
+            };
+        })();
+        
+        // ===========================
+        // GAME CREATOR
+        // ===========================
+        const GameCreator = (function() {
+            let selectedGameType = null;
+            
+            function initialize() {
+                setupEventListeners();
+            }
+            
+            function setupEventListeners() {
+                // Game type selection
+                document.addEventListener('click', (e) => {
+                    if (e.target.closest('.game-type-card')) {
+                        selectGameType(e.target.closest('.game-type-card'));
+                    }
+                });
+                
+                // Create game button
+                const createBtn = document.getElementById('createGameBtn');
+                if (createBtn) {
+                    createBtn.addEventListener('click', createGame);
+                }
+                
+                // Stake input validation
+                const stakeInput = document.getElementById('gameStake');
+                if (stakeInput) {
+                    stakeInput.addEventListener('input', validateForm);
+                }
+            }
+            
+            function selectGameType(card) {
+                // Remove previous selection
+                document.querySelectorAll('.game-type-card').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                
+                // Select new type
+                card.classList.add('selected');
+                selectedGameType = card.dataset.gameType;
+                
+                validateForm();
+            }
+            
+            function validateForm() {
+                const createBtn = document.getElementById('createGameBtn');
+                const stakeInput = document.getElementById('gameStake');
+                
+                if (!createBtn || !stakeInput) return;
+                
+                const stakeAmount = parseFloat(stakeInput.value);
+                const isValid = selectedGameType && 
+                               stakeAmount >= Config.GAME.MIN_STAKE && 
+                               stakeAmount <= Config.GAME.MAX_STAKE &&
+                               StateManager.get('isWalletConnected');
+                
+                createBtn.disabled = !isValid;
+            }
+            
+            async function createGame() {
+                try {
+                    const stakeInput = document.getElementById('gameStake');
+                    const timeControl = document.getElementById('timeControl');
+                    
+                    if (!selectedGameType || !stakeInput) {
+                        throw new ErrorManager.GameError('Invalid form data', 'INVALID_FORM');
+                    }
+                    
+                    const stakeAmount = parseFloat(stakeInput.value);
+                    const userAccount = StateManager.get('userAccount');
+                    
+                    NotificationManager.show('Creating Game', 'Setting up your game...', 'info');
+                    
+                    // Create game
+                    await GameManager.createGame(selectedGameType, stakeAmount, [userAccount]);
+                    
+                    // Reset form
+                    document.querySelectorAll('.game-type-card').forEach(c => {
+                        c.classList.remove('selected');
+                    });
+                    selectedGameType = null;
+                    stakeInput.value = '0.1';
+                    validateForm();
+                    
+                    // Navigate to lobby
+                    NavigationManager.showSection('lobby');
+                    
+                    // Refresh lobby
+                    setTimeout(() => {
+                        LobbyManager.loadGames();
+                    }, 1000);
+                    
+                } catch (error) {
+                    ErrorManager.logError(error, 'Game creation');
+                    NotificationManager.show('Creation Failed', error.message, 'error');
+                }
+            }
+            
+            return {
+                initialize
+            };
+        })();
+        
+        // ===========================
+        // PLATFORM INITIALIZER
+        // ===========================
+        const PlatformInitializer = (function() {
+            let initializationSteps = [];
+            let currentStep = 0;
+            
+            async function initialize() {
+                try {
+                    console.log('🚀 Starting CrossRealm Platform...');
+                    
+                    // Define initialization steps
+                    initializationSteps = [
+                        { name: 'Security Setup', handler: initializeSecurity, weight: 10 },
+                        { name: 'Age Verification', handler: handleAgeVerification, weight: 15 },
+                        { name: 'Anti-Bot Challenge', handler: handleAntiBotChallenge, weight: 15 },
+                        { name: 'Blockchain Connection', handler: initializeBlockchain, weight: 20 },
+                        { name: 'UI Components', handler: initializeUI, weight: 20 },
+                        { name: 'Final Setup', handler: finalizeInitialization, weight: 20 }
+                    ];
+                    
+                    const totalWeight = initializationSteps.reduce((sum, step) => sum + step.weight, 0);
+                    let currentProgress = 0;
+                    
+                    // Execute initialization steps
+                    for (const step of initializationSteps) {
+                        updateLoadingStatus(step.name);
+                        console.log(`📋 ${step.name}...`);
+                        
+                        try {
+                            await step.handler();
+                            currentProgress += step.weight;
+                            updateLoadingProgress((currentProgress / totalWeight) * 100);
+                            await new Promise(resolve => setTimeout(resolve, 200));
+                        } catch (error) {
+                            console.error(`Step failed: ${step.name}`, error);
+                            if (step.critical) throw error;
+                        }
+                    }
+                    
+                    // Hide loading screen
+                    hideLoadingScreen();
+                    
+                    console.log('✅ CrossRealm Platform initialized successfully!');
+                    
+                } catch (error) {
+                    ErrorManager.logError(error, 'Platform initialization');
+                    handleInitializationError(error);
+                }
+            }
+            
+            async function initializeSecurity() {
+                // Security is already set up in core modules
+                return true;
+            }
+            
+            async function handleAgeVerification() {
+                return new Promise((resolve) => {
+                    // Check if already verified
+                    if (Config.ENV.BYPASS_VERIFICATION || sessionStorage.getItem('ageVerified') === 'true') {
+                        StateManager.set('isAgeVerified', true);
+                        resolve();
+                        return;
+                    }
+                    
+                    const modal = document.getElementById('ageVerificationModal');
+                    if (!modal) {
+                        StateManager.set('isAgeVerified', true);
+                        resolve();
+                        return;
+                    }
+                    
+                    modal.style.display = 'flex';
+                    
+                    const handleClick = (event) => {
+                        if (event.target.dataset.action === 'verify-age') {
+                            const isVerified = event.target.dataset.value === 'true';
+                            
+                            if (isVerified) {
+                                sessionStorage.setItem('ageVerified', 'true');
+                                StateManager.set('isAgeVerified', true);
+                                modal.style.display = 'none';
+                                modal.removeEventListener('click', handleClick);
+                                resolve();
+                            } else {
+                                alert('You must be 18 years or older to access this platform.');
+                                window.location.href = 'about:blank';
+                            }
+                        }
+                    };
+                    
+                    modal.addEventListener('click', handleClick);
+                });
+            }
+            
+            async function handleAntiBotChallenge() {
+                return new Promise((resolve) => {
+                    // Check if already verified
+                    if (Config.ENV.BYPASS_VERIFICATION || sessionStorage.getItem('antiBotVerified') === 'true') {
+                        StateManager.set('isAntiBotVerified', true);
+                        resolve();
+                        return;
+                    }
+                    
+                    const modal = document.getElementById('antiBotModal');
+                    if (!modal) {
+                        StateManager.set('isAntiBotVerified', true);
+                        resolve();
+                        return;
+                    }
+                    
+                    // Generate captcha
+                    generateCaptcha();
+                    modal.style.display = 'flex';
+                    
+                    const verifyBtn = document.getElementById('verifyCaptchaBtn');
+                    const refreshBtn = document.getElementById('refreshCaptchaBtn');
+                    
+                    const handleVerify = () => {
+                        if (verifyCaptcha()) {
+                            sessionStorage.setItem('antiBotVerified', 'true');
+                            StateManager.set('isAntiBotVerified', true);
+                            modal.style.display = 'none';
+                            
+                            verifyBtn.removeEventListener('click', handleVerify);
+                            refreshBtn.removeEventListener('click', handleRefresh);
+                            
+                            resolve();
+                        } else {
+                            NotificationManager.show('Verification Failed', 'Please try again.', 'error');
+                            generateCaptcha();
+                        }
+                    };
+                    
+                    const handleRefresh = () => {
+                        generateCaptcha();
+                    };
+                    
+                    verifyBtn.addEventListener('click', handleVerify);
+                    refreshBtn.addEventListener('click', handleRefresh);
+                });
+            }
+            
+            async function initializeBlockchain() {
+                await BlockchainManager.initialize();
+            }
+            
+            async function initializeUI() {
+                // Initialize managers
+                NavigationManager.initialize();
+                LobbyManager.initialize();
+                GameCreator.initialize();
+                
+                // Setup event listeners
+                setupGlobalEventListeners();
+                
+                // Show main UI
+                document.getElementById('mainHeader').style.display = 'block';
+                document.getElementById('mainContainer').style.display = 'block';
+                document.getElementById('mainFooter').style.display = 'block';
+            }
+            
+            async function finalizeInitialization() {
+                // Set platform as initialized
+                StateManager.set('isPlatformInitialized', true);
+                
+                // Try auto-connect wallet
+                setTimeout(async () => {
+                    const wasConnected = sessionStorage.getItem('walletConnected') === 'true';
+                    if (wasConnected) {
+                        try {
+                            await BlockchainManager.connectWallet();
+                        } catch (error) {
+                            console.warn('Auto-connect failed:', error);
+                        }
+                    }
+                }, 500);
+                
+                // Load initial data
+                setTimeout(() => {
+                    LobbyManager.loadGames();
+                    updateServerStats();
+                }, 1000);
+                
+                // Start periodic updates
+                startPeriodicUpdates();
+                
+                // Show welcome notification
+                setTimeout(() => {
+                    NotificationManager.show(
+                        'Welcome to CrossRealm!',
+                        'Platform initialized successfully. Ready to play!',
+                        'success'
+                    );
+                }, 1500);
+            }
+            
+            function generateCaptcha() {
+                const grid = document.getElementById('captchaGrid');
+                if (!grid) return;
+                
+                const pieces = ['♔', '♕', '♖', '♗', '♘', '♙'];
+                const decoys = ['🎮', '🎯', '🎲', '🎪', '🎨', '🎭'];
+                
+                grid.innerHTML = '';
+                window.captchaAnswer = new Set();
+                
+                for (let i = 0; i < 9; i++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'captcha-tile';
+                    tile.dataset.index = i;
+                    
+                    const useChessPiece = Math.random() > 0.5 && window.captchaAnswer.size < 5;
+                    
+                    if (useChessPiece) {
+                        tile.textContent = pieces[Math.floor(Math.random() * pieces.length)];
+                        window.captchaAnswer.add(i);
+                    } else {
+                        tile.textContent = decoys[Math.floor(Math.random() * decoys.length)];
+                    }
+                    
+                    tile.addEventListener('click', () => {
+                        tile.classList.toggle('selected');
+                        updateCaptchaButton();
+                    });
+                    
+                    grid.appendChild(tile);
+                }
+                
+                updateCaptchaButton();
+            }
+            
+            function verifyCaptcha() {
+                const selected = new Set();
+                document.querySelectorAll('.captcha-tile.selected').forEach(tile => {
+                    selected.add(parseInt(tile.dataset.index));
+                });
+                
+                if (selected.size !== window.captchaAnswer.size) return false;
+                
+                for (const index of selected) {
+                    if (!window.captchaAnswer.has(index)) return false;
+                }
+                
+                return true;
+            }
+            
+            function updateCaptchaButton() {
+                const btn = document.getElementById('verifyCaptchaBtn');
+                const selected = document.querySelectorAll('.captcha-tile.selected');
+                if (btn) {
+                    btn.disabled = selected.length === 0;
+                }
+            }
+            
+            function setupGlobalEventListeners() {
+                // Connect wallet button
+                const connectBtn = document.getElementById('connectWalletBtn');
+                if (connectBtn) {
+                    connectBtn.addEventListener('click', () => BlockchainManager.connectWallet());
+                }
+                
+                // Disconnect wallet button
+                const disconnectBtn = document.getElementById('disconnectWalletBtn');
+                if (disconnectBtn) {
+                    disconnectBtn.addEventListener('click', () => BlockchainManager.disconnectWallet());
+                }
+                
+                // Transaction status close
+                const txClose = document.getElementById('txClose');
+                if (txClose) {
+                    txClose.addEventListener('click', () => {
+                        const txStatus = document.getElementById('transactionStatus');
+                        if (txStatus) {
+                            txStatus.classList.remove('show');
+                        }
+                    });
+                }
+                
+                // Copy buttons
+                document.querySelectorAll('[data-copy]').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const target = e.currentTarget.dataset.copy;
+                        let textToCopy = '';
+                        
+                        if (target === 'contract-address') {
+                            textToCopy = Config.BLOCKCHAIN.CONTRACT_ADDRESS;
+                        }
+                        
+                        if (textToCopy) {
+                            try {
+                                await navigator.clipboard.writeText(textToCopy);
+                                NotificationManager.show('Copied!', 'Address copied to clipboard', 'success', 2000);
+                            } catch (error) {
+                                NotificationManager.show('Copy Failed', 'Failed to copy to clipboard', 'error');
+                            }
+                        }
+                    });
+                });
+            }
+            
+            function startPeriodicUpdates() {
+                // Update server stats every 15 seconds
+                setInterval(updateServerStats, 15000);
+                
+                // Clean up rate limits every minute
+                setInterval(() => {
+                    SecurityManager.cleanupRateLimits();
+                }, 60000);
+            }
+            
+            async function updateServerStats() {
+                try {
+                    const stats = await APIManager.getServerStats();
+                    
+                    const latencyStart = Date.now();
+                    // Simulate server ping
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    const latency = Date.now() - latencyStart;
+                    
+                    // Update UI
+                    const latencyEl = document.getElementById('serverLatency');
+                    if (latencyEl) {
+                        latencyEl.textContent = `${latency}ms`;
+                    }
+                    
+                    // Update activity feed
+                    const feed = document.getElementById('activityFeed');
+                    if (feed && Math.random() > 0.7) {
+                        const activities = [
+                            'New chess game created',
+                            'Player joined checkers game',
+                            'Word battle completed',
+                            'Tournament starting soon'
+                        ];
+                        
+                        const activity = activities[Math.floor(Math.random() * activities.length)];
+                        addActivityItem(activity);
+                    }
+                } catch (error) {
+                    console.warn('Failed to update server stats:', error);
+                }
+            }
+            
+            function addActivityItem(message) {
+                const feed = document.getElementById('activityFeed');
+                if (!feed) return;
+                
+                const item = document.createElement('div');
+                item.className = 'activity-item';
+                item.innerHTML = `
+                    <i class="fas fa-circle"></i>
+                    <span>${message}</span>
+                `;
+                
+                feed.insertBefore(item, feed.firstChild);
+                
+                // Keep only last 5 items
+                while (feed.children.length > 5) {
+                    feed.removeChild(feed.lastChild);
+                }
+            }
+            
+            function updateLoadingStatus(status) {
+                const statusEl = document.getElementById('loadingStatus');
+                if (statusEl) {
+                    statusEl.textContent = status + '...';
+                }
+            }
+            
+            function updateLoadingProgress(percentage) {
+                const progressEl = document.getElementById('loadingProgress');
+                if (progressEl) {
+                    progressEl.style.width = `${percentage}%`;
+                }
+            }
+            
+            function hideLoadingScreen() {
+                const loadingScreen = document.getElementById('loadingScreen');
+                if (loadingScreen) {
+                    loadingScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                    }, 500);
+                }
+            }
+            
+            function handleInitializationError(error) {
+                console.error('Platform initialization failed:', error);
+                
+                updateLoadingStatus('Initialization failed');
+                
+                // Show emergency bypass
+                const bypassBtn = document.getElementById('emergencyBypass');
+                if (bypassBtn) {
+                    bypassBtn.style.display = 'block';
+                }
+            }
+            
+            return {
+                initialize
+            };
+        })();
+        
+        // ===========================
+        // EMERGENCY FUNCTIONS
+        // ===========================
+        Platform.emergencyStart = function() {
+            console.log('🚨 Emergency start activated');
+            
+            // Set all flags
+            sessionStorage.setItem('ageVerified', 'true');
+            sessionStorage.setItem('antiBotVerified', 'true');
+            StateManager.set('isAgeVerified', true);
+            StateManager.set('isAntiBotVerified', true);
+            StateManager.set('isPlatformInitialized', true);
+            
+            // Hide loading screen
+            const loadingScreen = document.getElementById('loadingScreen');
+            if (loadingScreen) {
+                loadingScreen.style.display = 'none';
+            }
+            
+            // Hide modals
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.style.display = 'none';
+            });
+            
+            // Show main UI
+            document.getElementById('mainHeader').style.display = 'block';
+            document.getElementById('mainContainer').style.display = 'block';
+            document.getElementById('mainFooter').style.display = 'block';
+            
+            // Initialize navigation
+            NavigationManager.showSection('lobby');
+            
+            alert('Emergency start completed!');
+        };
+        
+        // Export additional managers
+        Platform.APIManager = APIManager;
+        Platform.ProfileManager = ProfileManager;
+        Platform.SettingsManager = SettingsManager;
+        Platform.GameCreator = GameCreator;
+        Platform.PlatformInitializer = PlatformInitializer;
+        
+    })(window.CrossRealmPlatform);
+    
+    // ===========================
+    // PLATFORM STARTUP
+    // ===========================
+    document.addEventListener('DOMContentLoaded', async () => {
+        console.log('🎮 CrossRealm Gaming Platform starting...');
+        
+        // Setup loading timer
+        let timerCount = 0;
+        const timerInterval = setInterval(() => {
+            timerCount++;
+            const timerEl = document.getElementById('timerCount');
+            if (timerEl) {
+                timerEl.textContent = timerCount;
+            }
+            
+            // Auto-bypass after 30 seconds
+            if (timerCount >= 30) {
+                clearInterval(timerInterval);
+                console.warn('Auto-triggering emergency bypass');
+                CrossRealmPlatform.emergencyStart();
+            }
+        }, 1000);
+        
+        // Start platform initialization
+        await CrossRealmPlatform.PlatformInitializer.initialize();
+        
+        // Clear timer
+        clearInterval(timerInterval);
+    });
+    
+    console.log('✅ CrossRealm Gaming Platform loaded successfully!');
+    </script>
+    
+    <!-- Additional styles for new components -->
+    <style>
+        /* Main layout styles */
+        .main-header {
+            position: sticky;
+            top: 0;
+            z-index: var(--z-sticky);
+            background: rgba(26, 28, 44, 0.95);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border-primary);
+            padding: var(--spacing-md);
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .logo-text {
+            font-size: 1.5rem;
+            background: linear-gradient(45deg, var(--color-primary), var(--color-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+        
+        .main-nav {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .nav-item {
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: var(--bg-surface);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+        
+        .nav-item:hover {
+            background: rgba(78, 205, 196, 0.1);
+            border-color: var(--color-accent);
+            transform: translateY(-2px);
+        }
+        
+        .nav-item.active {
+            background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+            border-color: var(--color-accent);
+            color: white;
+        }
+        
+        .network-status {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            background: var(--bg-surface);
+            border-radius: var(--radius-pill);
+            font-size: 0.85rem;
+        }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--color-success);
+            animation: pulse 2s infinite;
+        }
+        
+        .wallet-section {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+        
+        .wallet-info {
+            text-align: right;
+        }
+        
+        .wallet-status {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            font-size: 0.85rem;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--color-danger);
+        }
+        
+        .status-dot.connected {
+            background: var(--color-success);
+            animation: pulse 2s infinite;
+        }
+        
+        .wallet-balance {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--color-accent);
+            font-family: 'Courier New', monospace;
+        }
+        
+        /* Content layout */
+        .main-container {
+            min-height: calc(100vh - 160px);
+        }
+        
+        .content-layout {
+            display: flex;
+            gap: var(--spacing-lg);
+            margin-top: var(--spacing-lg);
+        }
+        
+        .sidebar {
+            width: 320px;
+            flex-shrink: 0;
+        }
+        
+        .content-area {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .content-section {
+            display: none;
+            animation: fade-in var(--transition-normal) ease-out;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        /* Widget styles */
+        .widget {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-md);
+            overflow: hidden;
+            transition: all var(--transition-fast);
+        }
+        
+        .widget:hover {
+            border-color: var(--border-accent);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .widget-header {
+            padding: var(--spacing-md);
+            background: rgba(78, 205, 196, 0.05);
+            border-bottom: 1px solid var(--border-primary);
+        }
+        
+        .widget-header h3 {
+            margin: 0;
+            font-size: 1rem;
+            color: var(--color-accent);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .widget-content {
+            padding: var(--spacing-md);
+        }
+        
+        /* Game card styles */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: var(--spacing-lg);
+            margin-top: var(--spacing-lg);
+        }
+        
+        .game-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: all var(--transition-fast);
+        }
+        
+        .game-card:hover {
+            border-color: var(--color-accent);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .game-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md);
+            background: rgba(78, 205, 196, 0.05);
+            border-bottom: 1px solid var(--border-primary);
+        }
+        
+        .game-type {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            font-weight: 600;
+            color: var(--color-accent);
+        }
+        
+        .game-skill {
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        
+        .game-card-body {
+            padding: var(--spacing-md);
+        }
+        
+        .game-stake {
+            text-align: center;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .stake-amount {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            font-family: 'Courier New', monospace;
+        }
+        
+        .stake-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        
+        .game-info {
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-xs) 0;
+            font-size: 0.9rem;
+        }
+        
+        .info-label {
+            color: var(--text-muted);
+        }
+        
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        .game-card-footer {
+            padding: var(--spacing-md);
+            padding-top: 0;
+        }
+        
+        /* Form styles */
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-sm);
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: var(--bg-surface);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all var(--transition-fast);
+        }
+        
+        .form-control:focus {
+            border-color: var(--color-accent);
+            background: rgba(78, 205, 196, 0.05);
+        }
+        
+        /* Game type selector */
+        .game-type-selector {
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .game-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-md);
+        }
+        
+        .game-type-card {
+            background: var(--bg-surface);
+            border: 2px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .game-type-card:hover {
+            background: rgba(78, 205, 196, 0.05);
+            border-color: var(--border-accent);
+            transform: translateY(-2px);
+        }
+        
+        .game-type-card.selected {
+            background: rgba(78, 205, 196, 0.1);
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-glow);
+        }
+        
+        .game-type-card i {
+            font-size: 2rem;
+            color: var(--color-accent);
+        }
+        
+        /* Notification styles */
+        .notification-container {
+            position: fixed;
+            top: 80px;
+            right: var(--spacing-md);
+            z-index: var(--z-notification);
+            max-width: 380px;
+            pointer-events: none;
+        }
+        
+        .notification {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(26, 28, 44, 0.95));
+            backdrop-filter: blur(15px);
+            border: 2px solid var(--color-accent);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+            pointer-events: auto;
+            cursor: pointer;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+            transform: translateX(120%);
+            transition: transform var(--transition-normal);
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.hide {
+            transform: translateX(120%);
+        }
+        
+        .notification::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--color-accent);
+        }
+        
+        .notification.success {
+            border-color: var(--color-success);
+        }
+        
+        .notification.success::before {
+            background: var(--color-success);
+        }
+        
+        .notification.warning {
+            border-color: var(--color-warning);
+        }
+        
+        .notification.warning::before {
+            background: var(--color-warning);
+        }
+        
+        .notification.error {
+            border-color: var(--color-danger);
+        }
+        
+        .notification.error::before {
+            background: var(--color-danger);
+        }
+        
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .notification-title {
+            font-weight: 600;
+            color: var(--color-accent);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color var(--transition-fast);
+        }
+        
+        .notification-close:hover {
+            color: var(--text-primary);
+        }
+        
+        .notification-message {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+        
+        /* Transaction status */
+        .transaction-status {
+            position: fixed;
+            bottom: var(--spacing-md);
+            right: var(--spacing-md);
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--color-accent);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+            min-width: 300px;
+            max-width: 400px;
+            z-index: var(--z-notification);
+            transform: translateY(120%);
+            transition: transform var(--transition-normal);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .transaction-status.show {
+            transform: translateY(0);
+        }
+        
+        .tx-content {
+            padding-right: var(--spacing-xl);
+        }
+        
+        .tx-message {
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-sm);
+            font-weight: 500;
+        }
+        
+        .tx-hash {
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            margin-bottom: var(--spacing-sm);
+        }
+      .tx-hash a {
+            color: var(--color-accent);
+            text-decoration: none;
+        }
+        
+        .tx-hash a:hover {
+            text-decoration: underline;
+        }
+        
+        .tx-close {
+            position: absolute;
+            top: var(--spacing-sm);
+            right: var(--spacing-sm);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color var(--transition-fast);
+        }
+        
+        .tx-close:hover {
+            color: var(--text-primary);
+        }
+        
+        /* Footer styles */
+        .main-footer {
+            background: var(--bg-primary);
+            border-top: 1px solid var(--border-primary);
+            padding: var(--spacing-xxl) var(--spacing-md) var(--spacing-xl);
+            margin-top: var(--spacing-xxl);
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .footer-section h4 {
+            color: var(--color-accent);
+            margin-bottom: var(--spacing-md);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .footer-section p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .footer-section ul {
+            list-style: none;
+        }
+        
+        .footer-section ul li {
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .footer-section a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+        
+        .footer-section a:hover {
+            color: var(--color-accent);
+        }
+        
+        .social-links {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-md);
+        }
+        
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-surface);
+            border-radius: 50%;
+            color: var(--color-accent);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+        
+        .social-link:hover {
+            background: var(--color-accent);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: var(--spacing-xl);
+            border-top: 1px solid var(--border-primary);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .footer-bottom code {
+            background: var(--bg-surface);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-sm);
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+        
+        /* Specific component styles */
+        .contract-info {
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .contract-address {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            background: var(--bg-primary);
+            border-radius: var(--radius-sm);
+            padding: var(--spacing-sm);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .address-text {
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            flex: 1;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-md);
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            display: block;
+            line-height: 1;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: var(--spacing-xs);
+            line-height: 1.2;
+        }
+        
+        .activity-feed {
+            max-height: 150px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(78, 205, 196, 0.3) transparent;
+        }
+        
+        .activity-feed::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .activity-feed::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        
+        .activity-feed::-webkit-scrollbar-thumb {
+            background: rgba(78, 205, 196, 0.3);
+            border-radius: 2px;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-xs) 0;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-item i {
+            color: var(--color-accent);
+            width: 16px;
+            flex-shrink: 0;
+            font-size: 0.5rem;
+        }
+        
+        /* Section header styles */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--border-primary);
+        }
+        
+        .section-header h2 {
+            color: var(--color-accent);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin: 0;
+        }
+        
+        .section-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+        
+        /* Lobby filters */
+        .lobby-filters {
+            display: flex;
+            gap: var(--spacing-md);
+            align-items: flex-end;
+            margin-bottom: var(--spacing-lg);
+            padding: var(--spacing-md);
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .filter-group label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Placeholder styles */
+        .loading-placeholder,
+        .no-games,
+        .loading-error,
+        .tournaments-placeholder {
+            text-align: center;
+            padding: var(--spacing-xxl);
+            color: var(--text-muted);
+        }
+        
+        .loading-placeholder i,
+        .no-games i,
+        .loading-error i,
+        .tournaments-placeholder i {
+            margin-bottom: var(--spacing-md);
+            opacity: 0.5;
+        }
+        
+        .loading-placeholder h3,
+        .no-games h3,
+        .loading-error h3,
+        .tournaments-placeholder h3 {
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .loading-placeholder p,
+        .no-games p,
+        .loading-error p,
+        .tournaments-placeholder p {
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        /* Profile styles */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+            padding: var(--spacing-lg);
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+        }
+        
+        .profile-avatar {
+            flex-shrink: 0;
+        }
+        
+        .avatar-placeholder {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .profile-info h3 {
+            margin: 0 0 var(--spacing-sm);
+            font-size: 1.5rem;
+        }
+        
+        .profile-badges {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+        }
+        
+        .badge {
+            padding: var(--spacing-xs) var(--spacing-sm);
+            background: var(--bg-primary);
+            border-radius: var(--radius-pill);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge.verified {
+            background: rgba(46, 204, 113, 0.2);
+            color: var(--color-success);
+        }
+        
+        .badge.blockchain {
+            background: rgba(78, 205, 196, 0.2);
+            color: var(--color-accent);
+        }
+        
+        .stats-section,
+        .skills-section {
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .stats-section h3,
+        .skills-section h3 {
+            color: var(--color-accent);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .stat-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            text-align: center;
+            transition: all var(--transition-fast);
+        }
+        
+        .stat-card:hover {
+            border-color: var(--border-accent);
+            transform: translateY(-2px);
+        }
+        
+        .skill-list {
+            display: grid;
+            gap: var(--spacing-md);
+        }
+        
+        .skill-item {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: var(--spacing-md);
+            background: var(--bg-surface);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-primary);
+        }
+        
+        .skill-name {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .skill-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--color-accent);
+        }
+        
+        .skill-rank {
+            padding: var(--spacing-xs) var(--spacing-sm);
+            background: var(--bg-primary);
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        
+        /* Settings styles */
+        .settings-category {
+            margin-bottom: var(--spacing-xl);
+            padding: var(--spacing-lg);
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+        }
+        
+        .settings-category h3 {
+            color: var(--color-accent);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .settings-list {
+            display: grid;
+            gap: var(--spacing-md);
+        }
+        
+        .setting-item {
+            padding: var(--spacing-sm);
+        }
+        
+        .setting-item label {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+        
+        .setting-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .settings-actions {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            margin-top: var(--spacing-xl);
+        }
+        
+        /* Game window styles */
+        .game-window {
+            background: var(--bg-surface);
+            border: 2px solid var(--color-accent);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-lg);
+            overflow: hidden;
+            transition: all var(--transition-fast);
+        }
+        
+        .game-window.minimized {
+            height: 60px;
+        }
+        
+        .game-window.minimized .game-window-body {
+            display: none;
+        }
+        
+        .game-window-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md);
+            background: rgba(78, 205, 196, 0.1);
+            border-bottom: 1px solid var(--border-primary);
+        }
+        
+        .game-window-header h3 {
+            margin: 0;
+            color: var(--color-accent);
+            font-size: 1.1rem;
+        }
+        
+        .game-window-controls {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+        
+        .game-window-body {
+            padding: var(--spacing-lg);
+        }
+        
+        .game-placeholder {
+            text-align: center;
+            padding: var(--spacing-xl);
+        }
+        
+        .game-placeholder i {
+            color: var(--color-accent);
+            margin-bottom: var(--spacing-md);
+            opacity: 0.5;
+        }
+        
+        .game-placeholder h4 {
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .game-placeholder p {
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .game-demo-note {
+            margin-top: var(--spacing-lg);
+            padding: var(--spacing-md);
+            background: rgba(241, 196, 15, 0.1);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            color: var(--color-warning);
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 1024px) {
+            .content-layout {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                order: 2;
+            }
+            
+            .content-area {
+                order: 1;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .main-nav {
+                justify-content: center;
+                overflow-x: auto;
+                padding: var(--spacing-sm) 0;
+            }
+            
+            .wallet-section {
+                flex-direction: column;
+                gap: var(--spacing-sm);
+            }
+            
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .game-types {
+                grid-template-columns: 1fr;
+            }
+            
+            .lobby-filters {
+                flex-direction: column;
+            }
+            
+            .filter-group {
+                width: 100%;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .social-links {
+                justify-content: center;
+            }
+        }
+        
+        /* No animations mode */
+        .no-animations * {
+            animation: none !important;
+            transition: none !important;
+        }
+    </style>
+</body>
+</html>

@@ -1695,7 +1695,7 @@
                     </div>
                     <div style="text-align: center; padding: 0.5rem; background: rgba(0, 255, 136, 0.1); border-radius: 5px;">
                         <div style="color: #00ff88; font-weight: bold;">Active</div>
-                            <div style="font-size: 0.8rem; color: #aaa;">Validation</div>
+                        <div style="font-size: 0.8rem; color: #aaa;">Validation</div>
                     </div>
                     <div style="text-align: center; padding: 0.5rem; background: rgba(0, 255, 136, 0.1); border-radius: 5px;">
                         <div style="color: #00ff88; font-weight: bold;">99.9%</div>
@@ -2143,7 +2143,6 @@
                     </div>
                     
                     <!-- Chat Rules -->
-                    <div style="margin-top: 1rem; padding: 1rem; background: rgba(255, 193, 7, 0.1); border-radius: 8px; border: 1px solid rgba
                         <div style="margin-top: 1rem; padding: 1rem; background: rgba(255, 193, 7, 0.1); border-radius: 8px; border: 1px solid rgba(255, 193, 7, 0.3);">
                         <h5 style="color: #f39c12; margin-bottom: 0.5rem;">Chat Rules</h5>
                         <p style="font-size: 0.8rem; color: #aaa;">• Be respectful to all players • No spam or excessive messages • No sharing personal information • English language only • Violations may result in chat restrictions</p>
@@ -2557,7 +2556,7 @@ function updateCreateButton() {
         console.log('Button disabled - neither selected');
     }
 }
-        <script>
+
 // FIXED: Complete createGame function with proper validation
 async function createGame() {
     console.log('=== CREATE GAME CALLED ===');
@@ -2956,7 +2955,6 @@ function updateActiveGamesDisplay() {
     
     if (!activeGamesList || !noActiveGames) return;
     
-    const userActiveGames = myActiveGames
     const userActiveGames = myActiveGames.filter(game => 
         game.creator === userAccount || game.player2 === userAccount
     );
@@ -3682,7 +3680,7 @@ function skipRound() {
         lettersEl.textContent = generateWordLetters();
     }
 }
-
+        
 // Utility and Helper Functions
 function shouldShowGame(game) {
     if (currentSkillFilter === 'any') return true;

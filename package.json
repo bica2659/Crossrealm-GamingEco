@@ -1,13 +1,32 @@
 {
-  "name": "crypticus-live-gaming",
+  "name": "crossrealm-live-gaming",
   "version": "1.0.0",
-  "description": "LIVE blockchain gaming platform on Core Chain",
-  "main": "index.html",
+  "description": "CrossRealm - LIVE blockchain gaming platform on Core Chain with real multiplayer",
+  "main": "server.js",
   "scripts": {
-    "start": "python3 -m http.server 8000",
-    "dev": "python3 -m http.server 3000"
+    "start": "node server.js",
+    "dev": "node server.js",
+    "frontend": "python3 -m http.server 8000",
+    "frontend-dev": "python3 -m http.server 3000"
   },
-  "keywords": ["blockchain", "gaming", "Core Chain", "LIVE", "cryptocurrency"],
-  "author": "Crypticus Team",
-  "license": "MIT"
+  "keywords": [
+    "blockchain", 
+    "gaming", 
+    "Core Chain", 
+    "LIVE", 
+    "cryptocurrency", 
+    "multiplayer", 
+    "real-time", 
+    "CrossRealm"
+  ],
+  "author": "CrossRealm Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "cors": "^2.8.5"
+  },
+  "engines": {
+    "node": "18.x"
+  }
 }

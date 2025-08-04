@@ -9796,6 +9796,546 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 console.log("🔧 FIXED: Move sync and blockchain integration restored!");
+
+      // CRITICAL FIXES - Copy and paste this entire section to replace the broken parts
+
+// 1. FIX API MANAGER - Add the missing saveGameState function
+class FixedAPIManager extends APIManager {
+    async saveGameState(gameId, gameState) {
+        try {
+            console.log("💾 Saving game state for game:", gameId);
+            
+            // Load current data
+            const currentData = await this.loadGameData() || {};
+            
+            // Initialize gameStates if needed
+            if (!currentData.gameStates) {
+                currentData.gameStates = {};
+            }
+            
+            // Save the specific game state
+            currentData.gameStates[gameId] = {
+                ...gameState,
+                lastUpdated: Date.now(),
+                lastMoveTime: Date.now()
+            };
+            
+            // Save back to API
+            const response = await fetch(`${this.config.BASE_URL}/b/${this.config.BIN_ID}`, {
+                method: 'PUT',
+                headers: this.headers,
+                body: JSON.stringify({
+                    ...currentData,
+                    lastUpdated: Date.now()
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status}`);
+            }
+
+            console.log("✅ Game state saved successfully");
+            return true;
+        } catch (error) {
+            console.error('Failed to save game state:', error);
+            return false;
+        }
+    }
+
+    async loadGameState(gameId) {
+        try {
+            const data = await this.loadGameData();
+            if (data && data.gameStates && data.gameStates[gameId]) {
+                console.log("📥 Loaded game state for game:", gameId);
+                return data.gameStates[gameId];
+            }
+            return null;
+        } catch (error) {
+            console.error('Failed to load game state:', error);
+            return null;
+        }
+    }
+}
+
+// Replace the API manager
+window.apiManager = new FixedAPIManager();
+
+// 2. FIX CHECKERS BOARD INITIALIZATION
+function initializeCheckersBoard() {
+    window.checkersEngine = new CheckersEngine();
+    const board = document.getElementById('checkersBoard');
+    if (!board) {
+        console.error('Checkers board element not found!');
+        return;
+    }
+
+    board.innerHTML = '';
+    
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            const square = document.createElement('div');
+            square.className = `checkers-square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+            square.dataset.row = row;
+            square.dataset.col = col;
+            
+            // Only dark squares can have pieces
+            if ((row + col) % 2 === 1) {
+                const piece = window.checkersEngine.board[row][col];
+                if (piece) {
+                    const pieceElement = document.createElement('div');
+                    pieceElement.className = `checker-piece ${piece.color}-piece`;
+                    if (piece.type === 'king') {
+                        pieceElement.classList.add('king');
+                    }
+                    square.appendChild(pieceElement);
+                }
+            }
+            
+            square.addEventListener('click', () => handleCheckersSquareClick(row, col));
+            board.appendChild(square);
+        }
+    }
+    
+    updateCheckersBoard();
+    console.log("✅ Checkers board initialized successfully");
+}
+
+// 3. FIX WORD GAME INITIALIZATION
+function initializeWordGame() {
+    window.wordEngine = new WordGameEngine();
+    const engine = window.wordEngine;
+    
+    // Update UI elements
+    const lettersEl = document.getElementById('wordLetters');
+    const inputEl = document.getElementById('wordInput');
+    
+    if (lettersEl) {
+        lettersEl.textContent = engine.availableLetters;
+    }
+    
+    if (inputEl) {
+        inputEl.value = '';
+        inputEl.focus();
+        
+        // Add real-time validation
+        inputEl.addEventListener('input', validateWordInput);
+        inputEl.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                submitWord();
+            }
+        });
+    }
+    
+    updateWordGameUI();
+    startWordGameTimer();
+    console.log("✅ Word game initialized successfully");
+}
+
+// 4. FIX MOVE SYNC WITH PROPER ERROR HANDLING
+class FixedRealTimeMoveSync {
+    constructor() {
+        this.currentGameId = null;
+        this.isMyTurn = false;
+        this.gameState = null;
+        this.opponentAddress = null;
+        this.moveHistory = [];
+        this.syncInterval = null;
+        this.lastSyncTime = 0;
+        this.gameType = null;
+    }
+
+    startGameSync(gameId, gameType, isCreator = false) {
+        this.currentGameId = gameId;
+        this.gameType = gameType;
+        this.isMyTurn = isCreator;
+        this.gameState = { 
+            gameId, 
+            gameType, 
+            moves: [], 
+            currentPlayer: isCreator ? userAccount : 'waiting'
+        };
+        
+        console.log(`🎮 Starting game sync for ${gameType} - Your turn: ${this.isMyTurn}`);
+        
+        // Save initial state
+        this.saveGameStateToAPI();
+        
+        // Start sync every 2 seconds
+        this.syncInterval = setInterval(async () => {
+            await this.syncMovesFromAPI();
+        }, 2000);
+        
+        this.updateTurnDisplay();
+        showTransactionStatus(`🎮 Game started! ${isCreator ? 'You go first!' : 'Opponent goes first!'}`, '');
+    }
+
+    async syncMovesFromAPI() {
+        if (!this.currentGameId || !window.apiManager) return;
+
+        try {
+            const serverGameState = await window.apiManager.loadGameState(this.currentGameId);
+            
+            if (serverGameState && serverGameState.lastMoveTime > this.lastSyncTime) {
+                console.log("📥 New move detected from server");
+                
+                const serverMoves = serverGameState.moves || [];
+                const lastMove = serverMoves[serverMoves.length - 1];
+                
+                if (lastMove && lastMove.player !== userAccount) {
+                    console.log("🎯 Applying opponent move:", lastMove);
+                    
+                    await this.applyOpponentMove(lastMove);
+                    
+                    this.isMyTurn = true;
+                    this.lastSyncTime = serverGameState.lastMoveTime;
+                    this.moveHistory = serverMoves;
+                    
+                    this.updateTurnDisplay();
+                    showTransactionStatus('📥 Opponent moved! Your turn now.', '');
+                }
+            }
+        } catch (error) {
+            console.error('Sync failed:', error);
+        }
+    }
+
+    async makeMove(moveData) {
+        if (!this.isMyTurn) {
+            showTransactionStatus('❌ Not your turn! Wait for opponent.', '');
+            return false;
+        }
+
+        try {
+            const move = {
+                player: userAccount,
+                timestamp: Date.now(),
+                moveData: moveData,
+                gameType: this.gameType
+            };
+
+            this.moveHistory.push(move);
+            this.gameState.moves = this.moveHistory;
+            this.gameState.lastMoveTime = Date.now();
+
+            const saved = await this.saveGameStateToAPI();
+            
+            if (saved) {
+                this.isMyTurn = false;
+                this.updateTurnDisplay();
+                showTransactionStatus('✅ Move sent!', '');
+                return true;
+            } else {
+                showTransactionStatus('❌ Failed to send move. Try again.', '');
+                return false;
+            }
+        } catch (error) {
+            console.error('Failed to make move:', error);
+            showTransactionStatus('❌ Move failed: ' + error.message, '');
+            return false;
+        }
+    }
+
+    async applyOpponentMove(move) {
+        try {
+            switch (move.gameType) {
+                case 'chess':
+                    if (window.chessEngine && move.moveData) {
+                        const success = window.chessEngine.makeMove(
+                            move.moveData.fromRow, 
+                            move.moveData.fromCol,
+                            move.moveData.toRow, 
+                            move.moveData.toCol
+                        );
+                        if (success) {
+                            updateChessBoard();
+                        }
+                    }
+                    break;
+
+                case 'checkers':
+                    if (window.checkersEngine && move.moveData) {
+                        const success = window.checkersEngine.makeMove(
+                            move.moveData.fromRow, 
+                            move.moveData.fromCol,
+                            move.moveData.toRow, 
+                            move.moveData.toCol
+                        );
+                        if (success) {
+                            updateCheckersBoard();
+                        }
+                    }
+                    break;
+
+                case 'words':
+                    if (window.wordEngine && move.moveData) {
+                        window.wordEngine.opponentScore += move.moveData.score;
+                        const opponentScoreEl = document.getElementById('opponentWordScore');
+                        if (opponentScoreEl) {
+                            opponentScoreEl.textContent = window.wordEngine.opponentScore;
+                        }
+                    }
+                    break;
+            }
+        } catch (error) {
+            console.error('Failed to apply opponent move:', error);
+        }
+    }
+
+    async saveGameStateToAPI() {
+        if (!this.currentGameId || !this.gameState || !window.apiManager) return false;
+        
+        try {
+            return await window.apiManager.saveGameState(this.currentGameId, this.gameState);
+        } catch (error) {
+            console.error('Failed to save game state:', error);
+            return false;
+        }
+    }
+
+    updateTurnDisplay() {
+        const gameTypes = ['chess', 'checkers', 'words'];
+        
+        gameTypes.forEach(gameType => {
+            const statusEl = document.getElementById(gameType + 'Status');
+            if (statusEl && this.gameType === gameType) {
+                if (this.isMyTurn) {
+                    statusEl.textContent = '🟢 Your Turn';
+                    statusEl.style.color = '#2ecc71';
+                } else {
+                    statusEl.textContent = '🔴 Opponent\'s Turn';
+                    statusEl.style.color = '#e74c3c';
+                }
+            }
+        });
+
+        this.toggleGameControls(this.isMyTurn);
+    }
+
+    toggleGameControls(enabled) {
+        // Chess board
+        document.querySelectorAll('.chess-square').forEach(square => {
+            square.style.pointerEvents = enabled ? 'auto' : 'none';
+            square.style.opacity = enabled ? '1' : '0.7';
+        });
+
+        // Checkers board
+        document.querySelectorAll('.checkers-square').forEach(square => {
+            square.style.pointerEvents = enabled ? 'auto' : 'none';
+            square.style.opacity = enabled ? '1' : '0.7';
+        });
+
+        // Word input
+        const wordInput = document.getElementById('wordInput');
+        if (wordInput) {
+            wordInput.disabled = !enabled;
+            wordInput.style.opacity = enabled ? '1' : '0.7';
+        }
+    }
+
+    stopSync() {
+        if (this.syncInterval) {
+            clearInterval(this.syncInterval);
+            this.syncInterval = null;
+        }
+        this.currentGameId = null;
+        this.isMyTurn = false;
+        console.log("🛑 Game sync stopped");
+    }
+}
+
+// Replace the move sync system
+window.moveSync = new FixedRealTimeMoveSync();
+
+// 5. FIX GAME HANDLERS WITH SYNC
+function handleCheckersSquareClick(row, col) {
+    if (!window.checkersEngine || !window.moveSync) return;
+    
+    if (!window.moveSync.isMyTurn) {
+        showTransactionStatus('❌ Wait for your turn!', '');
+        return;
+    }
+    
+    const engine = window.checkersEngine;
+    
+    if (engine.selectedSquare) {
+        const [selectedRow, selectedCol] = engine.selectedSquare;
+        
+        if (engine.makeMove(selectedRow, selectedCol, row, col)) {
+            // Send move to opponent
+            const moveData = {
+                fromRow: selectedRow,
+                fromCol: selectedCol,
+                toRow: row,
+                toCol: col,
+                gameType: 'checkers'
+            };
+            
+            window.moveSync.makeMove(moveData);
+            updateCheckersBoard();
+            clearCheckersSelection();
+            
+            if (engine.gameState !== 'playing') {
+                handleGameEnd(engine.gameState);
+            }
+        } else {
+            clearCheckersSelection();
+            selectCheckersPiece(row, col);
+        }
+    } else {
+        selectCheckersPiece(row, col);
+    }
+}
+
+function selectCheckersPiece(row, col) {
+    const engine = window.checkersEngine;
+    const piece = engine.board[row][col];
+    
+    if (piece && piece.color === engine.currentPlayer) {
+        engine.selectedSquare = [row, col];
+        engine.legalMoves = engine.getPossibleMoves(row, col);
+        
+        const square = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+        square.classList.add('selected');
+        
+        engine.legalMoves.forEach(move => {
+            const moveSquare = document.querySelector(`[data-row="${move.row}"][data-col="${move.col}"]`);
+            if (moveSquare) {
+                moveSquare.classList.add('legal-move');
+            }
+        });
+    }
+}
+
+function clearCheckersSelection() {
+    if (window.checkersEngine) {
+        window.checkersEngine.selectedSquare = null;
+        window.checkersEngine.legalMoves = [];
+    }
+    
+    document.querySelectorAll('.checkers-square').forEach(square => {
+        square.classList.remove('selected', 'legal-move');
+    });
+}
+
+// Enhanced word submission with sync
+async function submitWord() {
+    if (!window.wordEngine || !window.moveSync) return;
+    
+    if (!window.moveSync.isMyTurn) {
+        showTransactionStatus('❌ Wait for your turn!', '');
+        return;
+    }
+    
+    const inputEl = document.getElementById('wordInput');
+    if (!inputEl) return;
+    
+    const word = inputEl.value.trim();
+    if (word.length < 3) return;
+    
+    try {
+        const result = await window.wordEngine.submitWord(word);
+        
+        if (result.valid) {
+            // Send move to opponent
+            const moveData = {
+                word: word.toUpperCase(),
+                score: result.score,
+                gameType: 'words'
+            };
+            
+            await window.moveSync.makeMove(moveData);
+            
+            // Update UI
+            const wordsListEl = document.getElementById('submittedWordsList');
+            if (wordsListEl) {
+                const wordChip = document.createElement('div');
+                wordChip.className = 'word-chip';
+                wordChip.textContent = `${word.toUpperCase()} (${result.score})`;
+                wordsListEl.appendChild(wordChip);
+            }
+            
+            const playerScoreEl = document.getElementById('playerWordScore');
+            if (playerScoreEl) {
+                playerScoreEl.textContent = result.totalScore;
+            }
+            
+            inputEl.value = '';
+            showTransactionStatus(`+${result.score} points! Opponent's turn...`, '');
+            
+        } else {
+            showTransactionStatus('❌ Invalid word', '');
+        }
+        
+    } catch (error) {
+        console.error('Word submission error:', error);
+        showTransactionStatus('❌ Word validation failed', '');
+    }
+}
+
+// 6. FIX GAME WINDOW OPENING
+function openGameWindowWithSync(gameType, gameData) {
+    const windowId = gameType + 'GameWindow';
+    const gameWindow = document.getElementById(windowId);
+    
+    if (!gameWindow) {
+        console.error('Game window not found:', windowId);
+        return;
+    }
+
+    gameWindow.classList.remove('hidden');
+    isGameActive = true;
+    activeGameType = gameType;
+    
+    updateGameWindowInfo(gameType, gameData);
+    
+    // Initialize the correct game board
+    switch (gameType) {
+        case 'chess':
+            initializeChessBoard();
+            break;
+        case 'checkers':
+            initializeCheckersBoard();
+            break;
+        case 'words':
+            initializeWordGame();
+            break;
+    }
+    
+    // Start move synchronization
+    const isCreator = gameData.creator === userAccount;
+    if (window.moveSync) {
+        window.moveSync.startGameSync(gameData.id, gameType, isCreator);
+        window.moveSync.opponentAddress = isCreator ? gameData.player2 : gameData.creator;
+    }
+    
+    showTransactionStatus(`🎮 ${getGameName(gameType)} opened!`, '');
+}
+
+// Replace the original functions
+window.openGameWindow = openGameWindowWithSync;
+window.handleCheckersSquareClick = handleCheckersSquareClick;
+window.submitWord = submitWord;
+
+// 7. ADD DEBUG FUNCTION
+window.debugGameState = function() {
+    console.log("🔍 GAME DEBUG INFO:");
+    console.log("Current Game ID:", window.moveSync?.currentGameId);
+    console.log("Is My Turn:", window.moveSync?.isMyTurn);
+    console.log("Game Type:", window.moveSync?.gameType);
+    console.log("Chess Engine:", !!window.chessEngine);
+    console.log("Checkers Engine:", !!window.checkersEngine);
+    console.log("Word Engine:", !!window.wordEngine);
+    console.log("API Manager:", !!window.apiManager);
+    console.log("Move Sync:", !!window.moveSync);
+};
+
+console.log("🔧 CRITICAL FIXES APPLIED:");
+console.log("✅ API Manager saveGameState function added");
+console.log("✅ Checkers board initialization fixed");
+console.log("✅ Word game initialization fixed");
+console.log("✅ Move sync with proper error handling");
+console.log("✅ Game handlers with turn validation");
+console.log("📝 Use window.debugGameState() to check status");
     
 </script>
 </body>

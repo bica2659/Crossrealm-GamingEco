@@ -9252,6 +9252,550 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 console.log('🎯 Complete Turn-based Multiplayer System Initialized!');
+
+// CRITICAL FIX: Real Move Synchronization & Blockchain Restoration
+
+// Enhanced API Manager with improved game state sync
+class ImprovedAPIManager extends APIManager {
+    async saveGameState(gameId, gameState) {
+        try {
+            console.log("💾 Saving game state for game:", gameId);
+            
+            // Load current data
+            const currentData = await this.loadGameData() || {};
+            
+            // Initialize gameStates if needed
+            if (!currentData.gameStates) {
+                currentData.gameStates = {};
+            }
+            
+            // Save the specific game state
+            currentData.gameStates[gameId] = {
+                ...gameState,
+                lastUpdated: Date.now(),
+                lastMoveTime: Date.now()
+            };
+            
+            // Save back to API
+            const response = await fetch(`${this.config.BASE_URL}/b/${this.config.BIN_ID}`, {
+                method: 'PUT',
+                headers: this.headers,
+                body: JSON.stringify({
+                    ...currentData,
+                    lastUpdated: Date.now()
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status}`);
+            }
+
+            console.log("✅ Game state saved successfully");
+            return true;
+        } catch (error) {
+            console.error('Failed to save game state:', error);
+            return false;
+        }
+    }
+
+    async loadGameState(gameId) {
+        try {
+            const data = await this.loadGameData();
+            if (data && data.gameStates && data.gameStates[gameId]) {
+                console.log("📥 Loaded game state for game:", gameId);
+                return data.gameStates[gameId];
+            }
+            return null;
+        } catch (error) {
+            console.error('Failed to load game state:', error);
+            return null;
+        }
+    }
+}
+
+// Replace API manager with improved version
+window.apiManager = new ImprovedAPIManager();
+
+// Fixed Real-time Move Sync with proper API integration
+class FixedRealTimeMoveSync {
+    constructor() {
+        this.currentGameId = null;
+        this.isMyTurn = false;
+        this.gameState = null;
+        this.opponentAddress = null;
+        this.moveHistory = [];
+        this.syncInterval = null;
+        this.lastSyncTime = 0;
+        this.gameType = null;
+    }
+
+    startGameSync(gameId, gameType, isCreator = false) {
+        this.currentGameId = gameId;
+        this.gameType = gameType;
+        this.isMyTurn = isCreator; // Creator goes first
+        this.gameState = { 
+            gameId, 
+            gameType, 
+            moves: [], 
+            currentPlayer: isCreator ? userAccount : 'waiting',
+            players: {
+                creator: isCreator ? userAccount : 'opponent',
+                joiner: isCreator ? 'opponent' : userAccount
+            }
+        };
+        
+        console.log(`🎮 Starting FIXED game sync for ${gameType}`);
+        console.log(`🎯 Your turn: ${this.isMyTurn} | Game ID: ${gameId}`);
+        
+        // Save initial state
+        this.saveGameStateToAPI();
+        
+        // Start aggressive sync for real-time play (every 1 second)
+        this.syncInterval = setInterval(async () => {
+            await this.syncMovesFromAPI();
+        }, 1000);
+        
+        // Update UI
+        this.updateTurnDisplay();
+        
+        showTransactionStatus(`🎮 Game sync started! ${isCreator ? 'You go first!' : 'Opponent goes first!'}`, '');
+    }
+
+    async syncMovesFromAPI() {
+        if (!this.currentGameId) return;
+
+        try {
+            // Load latest game state from API
+            const serverGameState = await window.apiManager.loadGameState(this.currentGameId);
+            
+            if (serverGameState && serverGameState.lastMoveTime > this.lastSyncTime) {
+                console.log("📥 NEW MOVE DETECTED from API!");
+                console.log("Server state:", serverGameState);
+                
+                // Get the latest move
+                const serverMoves = serverGameState.moves || [];
+                const lastMove = serverMoves[serverMoves.length - 1];
+                
+                if (lastMove && lastMove.player !== userAccount) {
+                    console.log("🎯 Applying opponent move:", lastMove);
+                    
+                    // Apply the opponent's move
+                    await this.applyOpponentMoveToBoard(lastMove);
+                    
+                    // Update local state
+                    this.isMyTurn = true;
+                    this.lastSyncTime = serverGameState.lastMoveTime;
+                    this.moveHistory = serverMoves;
+                    
+                    // Update UI
+                    this.updateTurnDisplay();
+                    
+                    // Show notification
+                    showTransactionStatus('📥 Opponent moved! Your turn now.', '');
+                }
+            }
+        } catch (error) {
+            console.error('Sync failed:', error);
+        }
+    }
+
+    async makeMove(moveData) {
+        if (!this.isMyTurn) {
+            showTransactionStatus('❌ Not your turn! Wait for opponent.', '');
+            return false;
+        }
+
+        console.log("📤 Making move:", moveData);
+
+        try {
+            // Create move object
+            const move = {
+                player: userAccount,
+                timestamp: Date.now(),
+                moveData: moveData,
+                gameType: this.gameType,
+                moveIndex: this.moveHistory.length
+            };
+
+            // Add to move history
+            this.moveHistory.push(move);
+            
+            // Update game state
+            this.gameState.moves = this.moveHistory;
+            this.gameState.currentPlayer = this.opponentAddress;
+            this.gameState.lastMoveTime = Date.now();
+
+            // Save to API immediately
+            const saved = await this.saveGameStateToAPI();
+            
+            if (saved) {
+                // Switch turns
+                this.isMyTurn = false;
+                this.updateTurnDisplay();
+                
+                console.log("✅ Move saved to API successfully!");
+                showTransactionStatus('✅ Move sent to opponent!', '');
+                
+                return true;
+            } else {
+                showTransactionStatus('❌ Failed to send move. Try again.', '');
+                return false;
+            }
+        } catch (error) {
+            console.error('Failed to make move:', error);
+            showTransactionStatus('❌ Move failed: ' + error.message, '');
+            return false;
+        }
+    }
+
+    async applyOpponentMoveToBoard(move) {
+        console.log("🎯 Applying move to board:", move);
+
+        try {
+            // Apply move based on game type
+            switch (move.gameType) {
+                case 'chess':
+                    if (window.chessEngine && move.moveData) {
+                        const success = window.chessEngine.makeMove(
+                            move.moveData.fromRow, 
+                            move.moveData.fromCol,
+                            move.moveData.toRow, 
+                            move.moveData.toCol
+                        );
+                        if (success) {
+                            updateChessBoard();
+                            console.log("✅ Chess move applied successfully");
+                        }
+                    }
+                    break;
+
+                case 'checkers':
+                    if (window.checkersEngine && move.moveData) {
+                        const success = window.checkersEngine.makeMove(
+                            move.moveData.fromRow, 
+                            move.moveData.fromCol,
+                            move.moveData.toRow, 
+                            move.moveData.toCol
+                        );
+                        if (success) {
+                            updateCheckersBoard();
+                            console.log("✅ Checkers move applied successfully");
+                        }
+                    }
+                    break;
+
+                case 'words':
+                    if (window.wordEngine && move.moveData) {
+                        // Update opponent score
+                        window.wordEngine.opponentScore += move.moveData.score;
+                        const opponentScoreEl = document.getElementById('opponentWordScore');
+                        if (opponentScoreEl) {
+                            opponentScoreEl.textContent = window.wordEngine.opponentScore;
+                        }
+                        console.log("✅ Word move applied successfully");
+                    }
+                    break;
+            }
+        } catch (error) {
+            console.error('Failed to apply opponent move:', error);
+        }
+    }
+
+    async saveGameStateToAPI() {
+        if (!this.currentGameId || !this.gameState) return false;
+        
+        return await window.apiManager.saveGameState(this.currentGameId, this.gameState);
+    }
+
+    updateTurnDisplay() {
+        const gameTypes = ['chess', 'checkers', 'words'];
+        
+        gameTypes.forEach(gameType => {
+            const statusEl = document.getElementById(gameType + 'Status');
+            if (statusEl && this.gameType === gameType) {
+                if (this.isMyTurn) {
+                    statusEl.textContent = '🟢 Your Turn - Make a move!';
+                    statusEl.style.color = '#2ecc71';
+                } else {
+                    statusEl.textContent = '🔴 Opponent\'s Turn - Please wait...';
+                    statusEl.style.color = '#e74c3c';
+                }
+            }
+        });
+
+        // Enable/disable controls
+        this.toggleGameControls(this.isMyTurn);
+    }
+
+    toggleGameControls(enabled) {
+        // Chess board
+        document.querySelectorAll('.chess-square').forEach(square => {
+            square.style.pointerEvents = enabled ? 'auto' : 'none';
+            square.style.opacity = enabled ? '1' : '0.7';
+        });
+
+        // Checkers board
+        document.querySelectorAll('.checkers-square').forEach(square => {
+            square.style.pointerEvents = enabled ? 'auto' : 'none';
+            square.style.opacity = enabled ? '1' : '0.7';
+        });
+
+        // Word input
+        const wordInput = document.getElementById('wordInput');
+        if (wordInput) {
+            wordInput.disabled = !enabled;
+            wordInput.style.opacity = enabled ? '1' : '0.7';
+        }
+    }
+
+    stopSync() {
+        if (this.syncInterval) {
+            clearInterval(this.syncInterval);
+            this.syncInterval = null;
+        }
+        this.currentGameId = null;
+        this.isMyTurn = false;
+        console.log("🛑 Game sync stopped");
+    }
+}
+
+// Replace move sync with fixed version
+window.moveSync = new FixedRealTimeMoveSync();
+
+// RESTORE BLOCKCHAIN FUNCTIONALITY
+async function createGameWithBlockchain() {
+    const stakeInput = document.getElementById('gameStake');
+    if (!stakeInput) {
+        showTransactionStatus('❌ Stake input not found', '');
+        return;
+    }
+    
+    const stakeAmount = parseFloat(stakeInput.value) || 0;
+    
+    if (!userAccount) {
+        showTransactionStatus('❌ Please connect your wallet first', '');
+        return;
+    }
+    
+    if (!selectedGameType) {
+        showTransactionStatus('❌ Please select a game type first', '');
+        return;
+    }
+    
+    if (stakeAmount < 0.01) {
+        showTransactionStatus('❌ Please enter a valid stake amount (minimum 0.01 CORE)', '');
+        return;
+    }
+    
+    if (stakeAmount > currentBalance) {
+        showTransactionStatus('❌ Insufficient CORE balance', '');
+        return;
+    }
+
+    try {
+        showTransactionStatus('🔄 Creating blockchain game...', '');
+        
+        // Try blockchain first
+        let blockchainSuccess = false;
+        let txHash = '';
+        
+        if (window.blockchainManager && window.blockchainManager.contract) {
+            try {
+                const timeLimit = selectedGameType === 'chess' ? 600 : selectedGameType === 'checkers' ? 300 : 120;
+                const stakeWei = ethers.utils.parseEther(stakeAmount.toString());
+                
+                showTransactionStatus('⏳ Submitting blockchain transaction...', '');
+                
+                const tx = await window.blockchainManager.contract.createGame(selectedGameType, timeLimit, {
+                    value: stakeWei,
+                    gasLimit: 300000
+                });
+                
+                txHash = tx.hash;
+                showTransactionStatus('⏳ Transaction submitted! Waiting for confirmation...', txHash);
+                
+                const receipt = await tx.wait();
+                showTransactionStatus('✅ Blockchain game created successfully!', txHash);
+                
+                blockchainSuccess = true;
+                
+                // Update balance immediately
+                currentBalance -= stakeAmount;
+                updateBalanceDisplay();
+                
+            } catch (blockchainError) {
+                console.error('Blockchain creation failed:', blockchainError);
+                showTransactionStatus('⚠️ Blockchain failed, creating demo game...', '');
+            }
+        }
+        
+        // Create game object
+        const newGame = {
+            id: Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9),
+            type: selectedGameType,
+            creator: userAccount,
+            creatorName: userAccount.substring(0, 8) + '...',
+            stake: stakeAmount,
+            status: 'waiting',
+            createdAt: Date.now(),
+            isDemo: !blockchainSuccess,
+            txHash: txHash,
+            blockchainGame: blockchainSuccess
+        };
+
+        // Add to global games and sync
+        globalGamesList.push(newGame);
+        await window.gameSync.createAndSyncGame(newGame);
+        
+        if (!blockchainSuccess) {
+            currentBalance -= stakeAmount;
+            updateBalanceDisplay();
+        }
+        
+        // Award XP
+        window.playerProgression.awardXP(blockchainSuccess ? 100 : 50, blockchainSuccess ? 'Blockchain Game Created' : 'Demo Game Created');
+        
+        // Reset form
+        stakeInput.value = '';
+        selectedGameType = null;
+        document.querySelectorAll('.game-type-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        updateCreateButton();
+
+        updateGamesDisplay();
+        showSection('lobby');
+        
+        showTransactionStatus(`✅ Game created! ${blockchainSuccess ? 'Blockchain secured!' : 'Demo mode active.'}`, txHash);
+
+    } catch (error) {
+        console.error('Failed to create game:', error);
+        showTransactionStatus('❌ Failed to create game: ' + error.message, '');
+    }
+}
+
+// RESTORE BLOCKCHAIN JOIN GAME
+async function joinGameWithBlockchain(gameId, stakeAmount) {
+    if (!userAccount) {
+        showTransactionStatus('❌ Please connect your wallet first', '');
+        return;
+    }
+    
+    if (currentBalance < stakeAmount) {
+        showTransactionStatus('❌ Insufficient CORE balance', '');
+        return;
+    }
+
+    const game = globalGamesList.find(g => g.id === gameId);
+    if (!game) {
+        showTransactionStatus('❌ Game not found', '');
+        return;
+    }
+
+    showTransactionStatus('🎮 Joining game...', '');
+    
+    try {
+        let blockchainSuccess = false;
+        let txHash = '';
+        
+        // Try blockchain join if it's a blockchain game
+        if (game.blockchainGame && window.blockchainManager && window.blockchainManager.contract) {
+            try {
+                const stakeWei = ethers.utils.parseEther(stakeAmount.toString());
+                
+                showTransactionStatus('⏳ Submitting blockchain join...', '');
+                
+                const tx = await window.blockchainManager.contract.joinGame(game.blockchainGameId || 1, {
+                    value: stakeWei,
+                    gasLimit: 250000
+                });
+                
+                txHash = tx.hash;
+                showTransactionStatus('⏳ Join transaction submitted!', txHash);
+                
+                const receipt = await tx.wait();
+                showTransactionStatus('✅ Blockchain join successful!', txHash);
+                
+                blockchainSuccess = true;
+                
+            } catch (blockchainError) {
+                console.error('Blockchain join failed:', blockchainError);
+                showTransactionStatus('⚠️ Blockchain join failed, using demo mode...', '');
+            }
+        }
+        
+        // Update game state
+        game.player2 = userAccount;
+        game.status = 'playing';
+        game.startedAt = Date.now();
+        game.joinTxHash = txHash;
+        
+        // Move to active games
+        myActiveGames.push(game);
+        globalGamesList = globalGamesList.filter(g => g.id !== gameId);
+        
+        currentBalance -= stakeAmount;
+        updateBalanceDisplay();
+        
+        // Save state
+        await window.gameSync.createAndSyncGame(game);
+        
+        updateGamesDisplay();
+        updateActiveGamesDisplay();
+        
+        // Award XP
+        window.playerProgression.awardXP(blockchainSuccess ? 50 : 25, blockchainSuccess ? 'Blockchain Game Joined' : 'Demo Game Joined');
+        
+        showTransactionStatus(`✅ Game joined! ${blockchainSuccess ? 'Blockchain secured!' : 'Demo mode.'} Opening game...`, txHash);
+        
+        setTimeout(() => {
+            openGameWindowWithSync(game.type, game);
+        }, 1000);
+        
+    } catch (error) {
+        console.error('Failed to join game:', error);
+        showTransactionStatus('❌ Failed to join game: ' + error.message, '');
+    }
+}
+
+// Replace the original functions
+window.createGame = createGameWithBlockchain;
+window.joinGame = joinGameWithBlockchain;
+
+// Debug function to check sync status
+window.checkSyncStatus = function() {
+    console.log("🔍 SYNC STATUS DEBUG:");
+    console.log("Current Game ID:", window.moveSync.currentGameId);
+    console.log("Is My Turn:", window.moveSync.isMyTurn);
+    console.log("Game Type:", window.moveSync.gameType);
+    console.log("Move History:", window.moveSync.moveHistory);
+    console.log("Sync Interval Active:", !!window.moveSync.syncInterval);
+};
+
+// Add sync status checker to UI
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        const header = document.querySelector('.header');
+        if (header) {
+            const debugBtn = document.createElement('button');
+            debugBtn.textContent = '🔍 Debug';
+            debugBtn.style.cssText = `
+                background: #e74c3c;
+                border: none;
+                padding: 0.5rem 1rem;
+                border-radius: 5px;
+                color: white;
+                cursor: pointer;
+                margin-left: 0.5rem;
+                font-size: 0.8rem;
+            `;
+            debugBtn.onclick = window.checkSyncStatus;
+            header.appendChild(debugBtn);
+        }
+    }, 3000);
+});
+
+console.log("🔧 FIXED: Move sync and blockchain integration restored!");
     
 </script>
 </body>

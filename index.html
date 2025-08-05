@@ -8513,6 +8513,624 @@ async function joinGameWithSync(gameId, stakeAmount) {
 
 // Override join game function
 window.joinGame = joinGameWithSync;
+
+        // Enhanced Turn Indicator UI and Game Status Management
+
+// Add visual turn indicators to the CSS
+const turnIndicatorStyles = `
+<style>
+.turn-indicator {
+    position: fixed;
+    top: 120px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid #4ecdc4;
+    border-radius: 15px;
+    padding: 1rem;
+    z-index: 8000;
+    min-width: 250px;
+    backdrop-filter: blur(10px);
+    animation: slideIn 0.5s ease;
+}
+
+.turn-indicator.my-turn {
+    border-color: #2ecc71;
+    background: rgba(46, 204, 113, 0.1);
+}
+
+.turn-indicator.opponent-turn {
+    border-color: #e74c3c;
+    background: rgba(231, 76, 60, 0.1);
+}
+
+.turn-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.turn-timer {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #aaa;
+}
+
+.game-status-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid #4ecdc4;
+    border-radius: 25px;
+    padding: 0.8rem 1.5rem;
+    z-index: 8000;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 300px;
+    justify-content: center;
+}
+
+.move-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+.move-indicator.active {
+    background: #2ecc71;
+}
+
+.move-indicator.waiting {
+    background: #e74c3c;
+}
+
+.game-controls-overlay {
+    position: fixed;
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 15px;
+    padding: 1rem;
+    z-index: 7000;
+    backdrop-filter: blur(10px);
+}
+
+.disabled-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(231, 76, 60, 0.2);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+    backdrop-filter: blur(2px);
+}
+
+@media (max-width: 768px) {
+    .turn-indicator {
+        top: 80px;
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+    }
+    
+    .game-status-bar {
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        transform: none;
+        min-width: auto;
+    }
+    
+    .game-controls-overlay {
+        left: 10px;
+        right: 10px;
+        top: auto;
+        bottom: 80px;
+        transform: none;
+    }
+}
+</style>
+`;
+
+// Inject the turn indicator styles
+document.head.insertAdjacentHTML('beforeend', turnIndicatorStyles);
+
+// Enhanced Turn Management UI
+class TurnIndicatorUI {
+    constructor() {
+        this.turnIndicator = null;
+        this.gameStatusBar = null;
+        this.gameControlsOverlay = null;
+        this.turnTimer = null;
+        this.turnStartTime = 0;
+        this.maxTurnTime = 300; // 5 minutes per turn
+    }
+
+    createTurnIndicator() {
+        // Remove existing indicator
+        this.removeTurnIndicator();
+
+        // Create turn indicator
+        this.turnIndicator = document.createElement('div');
+        this.turnIndicator.className = 'turn-indicator';
+        this.turnIndicator.innerHTML = `
+            <div class="turn-status">
+                <div class="move-indicator"></div>
+                <span class="status-text">Initializing...</span>
+            </div>
+            <div class="turn-timer">
+                <span class="timer-text">Time: --:--</span>
+            </div>
+        `;
+        document.body.appendChild(this.turnIndicator);
+
+        // Create game status bar
+        this.gameStatusBar = document.createElement('div');
+        this.gameStatusBar.className = 'game-status-bar';
+        this.gameStatusBar.innerHTML = `
+            <span class="game-info">Waiting for game...</span>
+        `;
+        document.body.appendChild(this.gameStatusBar);
+    }
+
+    updateTurnStatus(isMyTurn, gameType = '', opponentName = '') {
+        if (!this.turnIndicator) this.createTurnIndicator();
+
+        const indicator = this.turnIndicator.querySelector('.move-indicator');
+        const statusText = this.turnIndicator.querySelector('.status-text');
+        const gameInfo = this.gameStatusBar.querySelector('.game-info');
+
+        if (isMyTurn) {
+            this.turnIndicator.className = 'turn-indicator my-turn';
+            indicator.className = 'move-indicator active';
+            statusText.textContent = '🟢 Your Turn!';
+            gameInfo.textContent = `${gameType.toUpperCase()}: Make your move`;
+            this.startTurnTimer();
+        } else {
+            this.turnIndicator.className = 'turn-indicator opponent-turn';
+            indicator.className = 'move-indicator waiting';
+            statusText.textContent = '🔴 Opponent\'s Turn';
+            gameInfo.textContent = `${gameType.toUpperCase()}: Waiting for ${opponentName || 'opponent'}`;
+            this.stopTurnTimer();
+        }
+
+        // Add game controls overlay for disabled state
+        this.updateGameControlsState(isMyTurn);
+    }
+
+    updateGameControlsState(enabled) {
+        // Remove existing overlay
+        const existingOverlay = document.querySelector('.disabled-overlay');
+        if (existingOverlay) {
+            existingOverlay.remove();
+        }
+
+        if (!enabled) {
+            // Add disabled overlay to game boards
+            const gameBoards = [
+                document.getElementById('chessBoard'),
+                document.getElementById('checkersBoard'),
+                document.querySelector('.word-game')
+            ];
+
+            gameBoards.forEach(board => {
+                if (board && board.closest('.game-window:not(.hidden)')) {
+                    const overlay = document.createElement('div');
+                    overlay.className = 'disabled-overlay';
+                    overlay.innerHTML = '⏳ Waiting for opponent...';
+                    board.style.position = 'relative';
+                    board.appendChild(overlay);
+                }
+            });
+        }
+    }
+
+    startTurnTimer() {
+        this.turnStartTime = Date.now();
+        this.turnTimer = setInterval(() => {
+            const elapsed = Math.floor((Date.now() - this.turnStartTime) / 1000);
+            const remaining = Math.max(0, this.maxTurnTime - elapsed);
+            
+            const minutes = Math.floor(remaining / 60);
+            const seconds = remaining % 60;
+            
+            const timerText = this.turnIndicator.querySelector('.timer-text');
+            if (timerText) {
+                timerText.textContent = `Time: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Change color as time runs out
+                if (remaining < 30) {
+                    timerText.style.color = '#e74c3c';
+                } else if (remaining < 60) {
+                    timerText.style.color = '#f39c12';
+                } else {
+                    timerText.style.color = '#2ecc71';
+                }
+            }
+
+            // Auto-forfeit if time runs out
+            if (remaining === 0) {
+                this.handleTimeOut();
+            }
+        }, 1000);
+    }
+
+    stopTurnTimer() {
+        if (this.turnTimer) {
+            clearInterval(this.turnTimer);
+            this.turnTimer = null;
+        }
+        
+        const timerText = this.turnIndicator.querySelector('.timer-text');
+        if (timerText) {
+            timerText.textContent = 'Time: Opponent\'s turn';
+            timerText.style.color = '#aaa';
+        }
+    }
+
+    handleTimeOut() {
+        this.stopTurnTimer();
+        showTransactionStatus('⏰ Time\'s up! You forfeit this turn.', '');
+        
+        // Auto-forfeit or pass turn
+        if (window.moveSync) {
+            window.moveSync.isMyTurn = false;
+            window.moveSync.updateTurnDisplay();
+        }
+    }
+
+    showMoveNotification(moveData, isOpponent = false) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 200px;
+            right: 20px;
+            background: ${isOpponent ? 'rgba(231, 76, 60, 0.9)' : 'rgba(46, 204, 113, 0.9)'};
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            z-index: 9000;
+            max-width: 300px;
+            animation: slideIn 0.5s ease;
+        `;
+        
+        const moveDescription = this.getMoveDescription(moveData);
+        notification.innerHTML = `
+            <div style="font-weight: bold;">${isOpponent ? '🔴 Opponent Move' : '🟢 Your Move'}</div>
+            <div style="font-size: 0.9rem; margin-top: 0.5rem;">${moveDescription}</div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 4000);
+    }
+
+    getMoveDescription(moveData) {
+        switch (moveData.gameType) {
+            case 'chess':
+                const fromSquare = String.fromCharCode(97 + moveData.fromCol) + (8 - moveData.fromRow);
+                const toSquare = String.fromCharCode(97 + moveData.toCol) + (8 - moveData.toRow);
+                return `♟️ ${fromSquare} → ${toSquare}`;
+            
+            case 'checkers':
+                return `⚫ ${moveData.fromRow},${moveData.fromCol} → ${moveData.toRow},${moveData.toCol}`;
+            
+            case 'words':
+                return `📝 "${moveData.word}" (+${moveData.score} points)`;
+            
+            default:
+                return 'Move made';
+        }
+    }
+
+    removeTurnIndicator() {
+        if (this.turnIndicator) {
+            this.turnIndicator.remove();
+            this.turnIndicator = null;
+        }
+        
+        if (this.gameStatusBar) {
+            this.gameStatusBar.remove();
+            this.gameStatusBar = null;
+        }
+        
+        this.stopTurnTimer();
+        
+        // Remove disabled overlays
+        document.querySelectorAll('.disabled-overlay').forEach(overlay => {
+            overlay.remove();
+        });
+    }
+
+    showGameEndNotification(result) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            z-index: 10000;
+            text-align: center;
+            border: 3px solid ${result.isWinner ? '#2ecc71' : '#e74c3c'};
+            backdrop-filter: blur(15px);
+            animation: bounce 0.6s ease;
+        `;
+        
+        notification.innerHTML = `
+            <div style="font-size: 3rem; margin-bottom: 1rem;">
+                ${result.isWinner ? '🎉' : '😔'}
+            </div>
+            <h2 style="margin-bottom: 1rem; color: ${result.isWinner ? '#2ecc71' : '#e74c3c'};">
+                ${result.isWinner ? 'You Won!' : 'You Lost!'}
+            </h2>
+            <p style="font-size: 1.1rem; margin-bottom: 1rem;">
+                ${result.isWinner ? `+${result.winnings} CORE earned!` : 'Better luck next time!'}
+            </p>
+            <button onclick="this.parentElement.remove()" style="
+                background: #4ecdc4;
+                border: none;
+                padding: 0.8rem 2rem;
+                border-radius: 25px;
+                color: white;
+                font-weight: bold;
+                cursor: pointer;
+                font-size: 1rem;
+            ">Continue</button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 10 seconds
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 10000);
+    }
+}
+
+// Initialize the turn UI system
+window.turnUI = new TurnIndicatorUI();
+
+// Enhanced Real-time Move Sync with UI Integration
+class EnhancedMoveSync extends RealTimeMoveSync {
+    constructor() {
+        super();
+        this.ui = window.turnUI;
+    }
+
+    startGameSync(gameId, gameType, isCreator = false) {
+        super.startGameSync(gameId, gameType, isCreator);
+        
+        // Initialize UI
+        this.ui.createTurnIndicator();
+        this.ui.updateTurnStatus(this.isMyTurn, gameType, 'Opponent');
+        
+        console.log(`🎮 Enhanced game sync started - Turn UI active`);
+    }
+
+    async makeMove(moveData) {
+        const success = await super.makeMove(moveData);
+        
+        if (success) {
+            // Show move notification
+            this.ui.showMoveNotification(moveData, false);
+            
+            // Update UI for opponent's turn
+            this.ui.updateTurnStatus(false, moveData.gameType, 'Opponent');
+        }
+        
+        return success;
+    }
+
+    async applyOpponentMove(move) {
+        await super.applyOpponentMove(move);
+        
+        // Show opponent move notification
+        this.ui.showMoveNotification(move.moveData, true);
+        
+        // Update UI for player's turn
+        this.ui.updateTurnStatus(true, move.gameType, 'You');
+    }
+
+    async endGame(winner) {
+        await super.endGame(winner);
+        
+        // Show game end notification
+        const isWinner = this.isUserWinner(winner);
+        const currentGame = myActiveGames.find(g => g.id === this.currentGameId);
+        const winnings = isWinner && currentGame ? currentGame.stake * 1.94 : 0; // 97% after 3% fee
+        
+        this.ui.showGameEndNotification({
+            isWinner,
+            winnings,
+            result: winner
+        });
+        
+        // Clean up UI
+        setTimeout(() => {
+            this.ui.removeTurnIndicator();
+        }, 5000);
+    }
+
+    stopSync() {
+        super.stopSync();
+        this.ui.removeTurnIndicator();
+    }
+}
+
+// Replace the move sync system with enhanced version
+window.moveSync = new EnhancedMoveSync();
+
+// Enhanced Game Status Updates
+function updateGameStatusWithTurn(gameType, status) {
+    // Update the game window status
+    const statusEl = document.getElementById(gameType + 'Status');
+    if (statusEl) {
+        statusEl.textContent = status;
+    }
+    
+    // Update turn indicator if active
+    if (window.turnUI && window.turnUI.turnIndicator) {
+        const gameInfo = window.turnUI.gameStatusBar.querySelector('.game-info');
+        if (gameInfo) {
+            gameInfo.textContent = `${gameType.toUpperCase()}: ${status}`;
+        }
+    }
+}
+
+// Connection Quality Indicator
+class ConnectionQualityIndicator {
+    constructor() {
+        this.lastPingTime = 0;
+        this.pingInterval = null;
+        this.indicator = null;
+    }
+
+    startMonitoring() {
+        this.createIndicator();
+        this.pingInterval = setInterval(() => {
+            this.measureConnection();
+        }, 10000); // Check every 10 seconds
+    }
+
+    createIndicator() {
+        this.indicator = document.createElement('div');
+        this.indicator.style.cssText = `
+            position: fixed;
+            top: 180px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 0.5rem;
+            border-radius: 8px;
+            z-index: 7500;
+            font-size: 0.8rem;
+            backdrop-filter: blur(5px);
+        `;
+        this.indicator.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div class="connection-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #2ecc71;"></div>
+                <span>Connection: Good</span>
+            </div>
+        `;
+        document.body.appendChild(this.indicator);
+    }
+
+    async measureConnection() {
+        const startTime = Date.now();
+        
+        try {
+            // Simple ping test using API
+            await window.apiManager.loadGameData();
+            const pingTime = Date.now() - startTime;
+            this.updateIndicator(pingTime);
+        } catch (error) {
+            this.updateIndicator(-1); // Connection failed
+        }
+    }
+
+    updateIndicator(pingTime) {
+        if (!this.indicator) return;
+
+        const dot = this.indicator.querySelector('.connection-dot');
+        const text = this.indicator.querySelector('span');
+
+        if (pingTime === -1) {
+            dot.style.background = '#e74c3c';
+            text.textContent = 'Connection: Poor';
+        } else if (pingTime < 1000) {
+            dot.style.background = '#2ecc71';
+            text.textContent = `Connection: Good (${pingTime}ms)`;
+        } else if (pingTime < 3000) {
+            dot.style.background = '#f39c12';
+            text.textContent = `Connection: Fair (${pingTime}ms)`;
+        } else {
+            dot.style.background = '#e74c3c';
+            text.textContent = `Connection: Poor (${pingTime}ms)`;
+        }
+    }
+
+    remove() {
+        if (this.indicator) {
+            this.indicator.remove();
+            this.indicator = null;
+        }
+        
+        if (this.pingInterval) {
+            clearInterval(this.pingInterval);
+            this.pingInterval = null;
+        }
+    }
+}
+
+// Initialize connection quality monitoring
+window.connectionMonitor = new ConnectionQualityIndicator();
+
+// Auto-start monitoring when game starts
+const originalOpenGameWindow = window.openGameWindow;
+window.openGameWindow = function(gameType, gameData) {
+    originalOpenGameWindow(gameType, gameData);
+    
+    // Start connection monitoring
+    if (window.connectionMonitor) {
+        window.connectionMonitor.startMonitoring();
+    }
+};
+
+// Clean up when game closes
+const originalCloseGame = window.closeGame;
+window.closeGame = function(gameType) {
+    originalCloseGame(gameType);
+    
+    // Stop monitoring and clean up UI
+    if (window.connectionMonitor) {
+        window.connectionMonitor.remove();
+    }
+    
+    if (window.turnUI) {
+        window.turnUI.removeTurnIndicator();
+    }
+    
+    if (window.moveSync) {
+        window.moveSync.stopSync();
+    }
+};
+
+// Enhanced move synchronization message
+function showEnhancedMoveSync() {
+    showTransactionStatus('🔄 Real-time move sync active - opponent will see your moves instantly!', '');
+}
+
+// Initialize enhanced features when document loads
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🎮 Enhanced Turn-based Gaming System Loaded!');
+    console.log('✅ Real-time move synchronization active');
+    console.log('✅ Turn validation enabled');
+    console.log('✅ Visual turn indicators ready');
+    console.log('✅ Connection quality monitoring ready');
+});
+
+console.log('🎯 Complete Turn-based Multiplayer System Initialized!');
 </script>
 </body>
 </html>

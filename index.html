@@ -10142,3 +10142,358 @@ class AnalyticsSystem {
             name: eventName,
             properties: properties,
             userId: userId || this
+// Complete the missing wallet connection and core functionality
+
+// Complete the analytics trackEvent method
+getCurrentUserId() || 'anonymous';
+            
+            this.trackEvent('session_start', {
+                sessionId: sessionId,
+                platform: session.platform,
+                language: session.language
+            });
+        }
+        
+        // Complete wallet connection functionality
+        async function connectWallet() {
+            try {
+                showLoadingOverlay('Connecting Wallet', 'Initializing blockchain connection...');
+                
+                // Check if MetaMask is available
+                if (typeof window.ethereum === 'undefined') {
+                    hideLoadingOverlay();
+                    showTransactionStatus('❌ MetaMask Required', 'Please install MetaMask to connect your wallet');
+                    return false;
+                }
+                
+                // Request account access
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+                
+                if (accounts.length === 0) {
+                    hideLoadingOverlay();
+                    showTransactionStatus('❌ Connection Failed', 'No accounts found in MetaMask');
+                    return false;
+                }
+                
+                userAccount = accounts[0];
+                
+                // Switch to Core network if needed
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: CORE_CHAIN_ID }],
+                    });
+                } catch (switchError) {
+                    // Network not added, try to add it
+                    if (switchError.code === 4902) {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: CORE_CHAIN_ID,
+                                chainName: 'Core Blockchain Mainnet',
+                                nativeCurrency: {
+                                    name: 'Core',
+                                    symbol: 'CORE',
+                                    decimals: 18
+                                },
+                                rpcUrls: [CORE_RPC_URL],
+                                blockExplorerUrls: [CORE_EXPLORER]
+                            }]
+                        });
+                    }
+                }
+                
+                // Initialize Web3 provider
+                web3Provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = web3Provider.getSigner();
+                
+                // Get balance
+                const balance = await web3Provider.getBalance(userAccount);
+                currentBalance = parseFloat(ethers.utils.formatEther(balance));
+                
+                // Initialize contract
+                gameContract = new ethers.Contract(GAME_CONTRACT_ADDRESS, GAME_CONTRACT_ABI, signer);
+                
+                // Update UI
+                updateConnectionStatus('connected');
+                updateWalletDisplay();
+                hideLoadingOverlay();
+                
+                showTransactionStatus('✅ Wallet Connected!', `Connected to ${userAccount.substring(0, 6)}...${userAccount.substring(38)}`);
+                
+                console.log('✅ Wallet connected successfully');
+                return true;
+                
+            } catch (error) {
+                console.error('❌ Wallet connection failed:', error);
+                hideLoadingOverlay();
+                showTransactionStatus('❌ Connection Failed', error.message || 'Failed to connect wallet');
+                return false;
+            }
+        }
+        
+        // Initialize the platform
+        async function initializePlatform() {
+            try {
+                console.log('🚀 Initializing CrossRealm Gaming Platform...');
+                
+                // Initialize core systems
+                await initializeFirebase();
+                await initializeBlockchain();
+                
+                // Set up UI
+                setupNavigation();
+                loadInitialData();
+                
+                // Start periodic updates
+                startPeriodicUpdates();
+                
+                console.log('✅ Platform initialization complete');
+                
+            } catch (error) {
+                console.error('❌ Platform initialization failed:', error);
+                showTransactionStatus('❌ Initialization Failed', 'Platform failed to initialize properly');
+            }
+        }
+        
+        // Initialize Firebase
+        async function initializeFirebase() {
+            // Mock Firebase initialization for demo
+            console.log('🔥 Firebase initialized (demo mode)');
+            return true;
+        }
+        
+        // Initialize Blockchain
+        async function initializeBlockchain() {
+            if (typeof window.ethereum !== 'undefined') {
+                web3Provider = new ethers.providers.Web3Provider(window.ethereum);
+                console.log('⛓️ Blockchain provider initialized');
+            } else {
+                console.log('⛓️ No blockchain provider detected - running in demo mode');
+            }
+            return true;
+        }
+        
+        // Update connection status
+        function updateConnectionStatus(status) {
+            const statusElement = document.getElementById('connectionStatus');
+            const indicator = statusElement.querySelector('.connection-indicator');
+            
+            switch (status) {
+                case 'connected':
+                    statusElement.innerHTML = '<span class="connection-indicator connected"></span>Connected';
+                    break;
+                case 'connecting':
+                    statusElement.innerHTML = '<span class="connection-indicator pending"></span>Connecting...';
+                    break;
+                case 'disconnected':
+                default:
+                    statusElement.innerHTML = '<span class="connection-indicator disconnected"></span>Not Connected';
+                    break;
+            }
+        }
+        
+        // Update wallet display
+        function updateWalletDisplay() {
+            const balanceDisplay = document.getElementById('balanceDisplay');
+            const connectBtn = document.getElementById('connectBtn');
+            const disconnectBtn = document.getElementById('disconnectBtn');
+            
+            if (userAccount) {
+                balanceDisplay.textContent = `${currentBalance.toFixed(4)} CORE`;
+                connectBtn.classList.add('hidden');
+                disconnectBtn.classList.remove('hidden');
+            } else {
+                balanceDisplay.textContent = '0.0000 CORE';
+                connectBtn.classList.remove('hidden');
+                disconnectBtn.classList.add('hidden');
+            }
+        }
+        
+        // Disconnect wallet
+        function disconnectWallet() {
+            userAccount = null;
+            currentBalance = 0;
+            web3Provider = null;
+            gameContract = null;
+            
+            updateConnectionStatus('disconnected');
+            updateWalletDisplay();
+            
+            showTransactionStatus('👋 Wallet Disconnected', 'Wallet has been disconnected');
+        }
+        
+        // Show loading overlay
+        function showLoadingOverlay(title, message) {
+            const overlay = document.getElementById('loadingOverlay');
+            const titleElement = document.getElementById('loadingMessage');
+            const messageElement = document.getElementById('loadingSubtext');
+            
+            if (titleElement) titleElement.textContent = title;
+            if (messageElement) messageElement.textContent = message;
+            if (overlay) overlay.classList.remove('hidden');
+        }
+        
+        // Hide loading overlay
+        function hideLoadingOverlay() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.classList.add('hidden');
+        }
+        
+        // Show transaction status
+        function showTransactionStatus(title, message) {
+            const statusElement = document.getElementById('transactionStatus');
+            const titleElement = document.getElementById('txStatusTitle');
+            const messageElement = document.getElementById('txStatusMessage');
+            
+            if (titleElement) titleElement.textContent = title;
+            if (messageElement) messageElement.textContent = message;
+            
+            if (statusElement) {
+                statusElement.classList.add('show');
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    statusElement.classList.remove('show');
+                }, 5000);
+            }
+        }
+        
+        // Hide transaction status
+        function hideTransactionStatus() {
+            const statusElement = document.getElementById('transactionStatus');
+            if (statusElement) {
+                statusElement.classList.remove('show');
+            }
+        }
+        
+        // Setup navigation
+        function setupNavigation() {
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            navItems.forEach((item, index) => {
+                item.addEventListener('click', () => {
+                    const sections = ['lobby', 'active', 'create', 'games', 'tournaments', 'leaderboard', 'profile', 'settings'];
+                    if (sections[index]) {
+                        showSection(sections[index]);
+                    }
+                });
+            });
+        }
+        
+        // Load initial data
+        function loadInitialData() {
+            // Load sample games for demo
+            populateSampleGames();
+            
+            // Update stats
+            updateLiveStats();
+        }
+        
+        // Populate sample games
+        function populateSampleGames() {
+            const gamesList = document.getElementById('gamesList');
+            if (!gamesList) return;
+            
+            const sampleGames = [
+                {
+                    id: 'game_001',
+                    type: 'Chess',
+                    stake: '0.1 CORE',
+                    player: 'ChessMaster',
+                    status: 'waiting'
+                },
+                {
+                    id: 'game_002',
+                    type: 'Checkers',
+                    stake: '0.05 CORE',
+                    player: 'CheckersKing',
+                    status: 'waiting'
+                }
+            ];
+            
+            gamesList.innerHTML = sampleGames.map(game => `
+                <div class="game-item">
+                    <div class="game-header">
+                        <div class="game-type">${game.type}</div>
+                        <div class="game-stake">${game.stake}</div>
+                    </div>
+                    <div class="game-info">
+                        Created by ${game.player} • Waiting for opponent
+                    </div>
+                    <div class="game-actions">
+                        <button class="game-btn primary" onclick="joinGame('${game.id}')">
+                            <i class="fas fa-play"></i> Join Game
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Update live stats
+        function updateLiveStats() {
+            // Update sample stats
+            document.getElementById('totalPlayers').textContent = '247';
+            document.getElementById('totalGames').textContent = '89';
+            document.getElementById('totalVolume').textContent = '156.7';
+            document.getElementById('totalTournaments').textContent = '3';
+        }
+        
+        // Start periodic updates
+        function startPeriodicUpdates() {
+            setInterval(() => {
+                if (userAccount && web3Provider) {
+                    updateBalance();
+                }
+                updateLiveStats();
+            }, 30000); // Update every 30 seconds
+        }
+        
+        // Update balance
+        async function updateBalance() {
+            try {
+                const balance = await web3Provider.getBalance(userAccount);
+                currentBalance = parseFloat(ethers.utils.formatEther(balance));
+                updateWalletDisplay();
+            } catch (error) {
+                console.error('Failed to update balance:', error);
+            }
+        }
+        
+        // Refresh lobby
+        function refreshLobby() {
+            showTransactionStatus('🔄 Refreshing...', 'Loading latest games');
+            
+            setTimeout(() => {
+                populateSampleGames();
+                updateLiveStats();
+                showTransactionStatus('✅ Refreshed', 'Game lobby updated');
+            }, 1000);
+        }
+        
+        // Join game (demo)
+        function joinGame(gameId) {
+            if (!userAccount) {
+                showTransactionStatus('⚠️ Wallet Required', 'Please connect your wallet first');
+                return;
+            }
+            
+            showTransactionStatus('🎮 Joining Game...', 'Setting up game session');
+            
+            setTimeout(() => {
+                showTransactionStatus('✅ Game Joined!', 'Starting match...');
+            }, 2000);
+        }
+        
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check age verification first
+            if (checkAgeVerification()) {
+                initializePlatform();
+            }
+        });
+        
+        console.log('🎮 CrossRealm Gaming Platform loaded successfully');
+        

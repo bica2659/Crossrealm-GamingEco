@@ -1,32 +1,31 @@
 {
-  "name": "crossrealm-live-gaming",
+  "name": "crossrealm-gaming-backend",
   "version": "1.0.0",
-  "description": "CrossRealm - LIVE blockchain gaming platform on Core Chain with real multiplayer",
+  "description": "CrossRealm Gaming Platform Backend",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js",
-    "frontend": "python3 -m http.server 8000",
-    "frontend-dev": "python3 -m http.server 3000"
+    "dev": "nodemon server.js",
+    "deploy": "docker-compose up -d",
+    "migrate": "node scripts/migrate.js",
+    "seed": "node scripts/seed.js"
   },
-  "keywords": [
-    "blockchain", 
-    "gaming", 
-    "Core Chain", 
-    "LIVE", 
-    "cryptocurrency", 
-    "multiplayer", 
-    "real-time", 
-    "CrossRealm"
-  ],
-  "author": "CrossRealm Team",
-  "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",
     "socket.io": "^4.7.2",
-    "cors": "^2.8.5"
+    "mongoose": "^7.5.0",
+    "redis": "^4.6.7",
+    "ethers": "^5.7.2",
+    "jsonwebtoken": "^9.0.1",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "express-rate-limit": "^6.8.1",
+    "dotenv": "^16.3.1",
+    "winston": "^3.10.0",
+    "compression": "^1.7.4"
   },
-  "engines": {
-    "node": "18.x"
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }

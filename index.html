@@ -1219,18 +1219,23 @@
 
     <!-- JavaScript -->
     <script>
+        // ================================
+        // NETLIFY BACKEND CONFIGURATION
+        // ================================
         const CONFIG = {
-    // Replace 'your-netlify-site' with your actual Netlify site name
-    WEBSOCKET_URL: 'wss://your-netlify-site.netlify.app/.netlify/functions/websocket',
-    API_BASE_URL: 'https://your-netlify-site.netlify.app/.netlify/functions',
-    
-    GAME_SERVER: {
-        RECONNECT_ATTEMPTS: 5,
-        HEARTBEAT_INTERVAL: 30000,
-        GAME_TIMEOUT: 300000,
-        MOVE_TIMEOUT: 60000
-    }
-};
+            // Your Netlify URLs
+            WEBSOCKET_URL: 'wss://crossrealm.netlify.app/.netlify/functions/websocket',
+            API_BASE_URL: 'https://crossrealm.netlify.app/.netlify/functions',
+            
+            // Game Server Configuration
+            GAME_SERVER: {
+                RECONNECT_ATTEMPTS: 5,
+                HEARTBEAT_INTERVAL: 30000,
+                GAME_TIMEOUT: 300000,
+                MOVE_TIMEOUT: 60000
+            }
+        };
+
         // Global Variables
         let web3 = null;
         let account = null;
@@ -1240,6 +1245,256 @@
         let selectedSquare = null;
         let gameState = {};
         let isPlayerTurn = false;
+        let gameBackend = null;
+
+        // ================================
+        // BACKEND INTEGRATION CLASS
+        // ================================
+        class GameBackend {
+            constructor() {
+                this.isConnected = false;
+                this.reconnectAttempts = 0;
+                
+                // Try to connect to Netlify functions
+                this.initializeConnection();
+            }
+
+            async initializeConnection() {
+                try {
+                    console.log('🔌 Testing connection to Netlify functions...');
+                    
+                    // Test connection to your Netlify functions
+                    const response = await fetch(`${CONFIG.API_BASE_URL}/health`);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.isConnected = true;
+                        console.log('✅ Connected to Netlify functions:', data);
+                        showNotification('Connected to game server!', 'success');
+                    } else {
+                        throw new Error(`Health check failed: ${response.status}`);
+                    }
+                } catch (error) {
+                    console.error('❌ Failed to connect to Netlify functions:', error);
+                    this.isConnected = false;
+                    showNotification('Backend connection failed - using demo mode', 'error');
+                }
+            }
+
+            // Create a new game via Netlify function
+            async createGame(gameData) {
+                if (!this.isConnected) {
+                    throw new Error('Backend not connected');
+                }
+
+                try {
+                    console.log('🎮 Creating game via Netlify:', gameData);
+                    
+                    const response = await fetch(`${CONFIG.API_BASE_URL}/create-game`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(gameData)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Failed to create game');
+                    }
+
+                    const result = await response.json();
+                    console.log('✅ Game created successfully:', result);
+                    return result;
+                } catch (error) {
+                    console.error('❌ Error creating game:', error);
+                    throw error;
+                }
+            }
+
+            // Get active games from Netlify function
+            async getActiveGames(filters = {}) {
+                try {
+                    console.log('📋 Fetching active games...');
+                    
+                    const response = await fetch(`${CONFIG.API_BASE_URL}/active-games`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(filters)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch games');
+                    }
+
+                    const result = await response.json();
+                    console.log('✅ Games fetched successfully:', result);
+                    return result.data || [];
+                } catch (error) {
+                    console.error('❌ Error fetching games:', error);
+                    return [];
+                }
+            }
+        }
+
+        // ================================
+        // UPDATED GAME FUNCTIONS
+        // ================================
+
+        // Initialize Socket Connection - Updated
+        function initializeSocket() {
+            console.log('🔌 Initializing backend connection...');
+            
+            // Initialize connection to Netlify serverless functions
+            gameBackend = new GameBackend();
+        }
+
+        // Updated createGame function
+        async function createGame(e) {
+            e.preventDefault();
+
+            if (!account) {
+                showNotification('Please connect your wallet first', 'error');
+                return;
+            }
+
+            const gameData = {
+                type: document.getElementById('gameType').value,
+                stake: document.getElementById('stakeAmount').value,
+                timeControl: document.getElementById('timeControl').value,
+                privacy: document.getElementById('gamePrivacy').value,
+                description: document.getElementById('gameDescription').value,
+                creator: account
+            };
+
+            // Validate form data
+            if (!gameData.type || !gameData.stake || !gameData.timeControl) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                showNotification('Creating game...', 'info');
+
+                // Try to create game via Netlify functions first
+                if (gameBackend && gameBackend.isConnected) {
+                    console.log('🎮 Using Netlify backend to create game');
+                    const result = await gameBackend.createGame(gameData);
+                    
+                    if (result.success) {
+                        console.log('✅ Game created via backend:', result.data);
+                        
+                        // Add the new game to the UI
+                        if (result.data) {
+                            addGameToList(result.data);
+                        }
+                        
+                        showNotification('Game created successfully!', 'success');
+                        switchSection('lobby');
+                        e.target.reset();
+                        
+                        // Reload games to show all active games
+                        loadGames();
+                        return;
+                    }
+                }
+
+                // Fallback to demo mode if backend fails
+                console.log('⚠️ Using demo mode fallback');
+                const newGame = {
+                    id: Date.now(),
+                    type: gameData.type,
+                    stake: gameData.stake,
+                    creator: gameData.creator,
+                    timeControl: gameData.timeControl,
+                    privacy: gameData.privacy,
+                    description: gameData.description,
+                    status: 'waiting',
+                    players: [gameData.creator],
+                    maxPlayers: 2,
+                    createdAt: new Date().toISOString()
+                };
+
+                addGameToList(newGame);
+                showNotification('Game created in demo mode!', 'success');
+                switchSection('lobby');
+                e.target.reset();
+
+            } catch (error) {
+                console.error('❌ Error creating game:', error);
+                showNotification(error.message || 'Failed to create game', 'error');
+            }
+        }
+
+        // Updated loadGames function
+        async function loadGames() {
+            try {
+                if (gameBackend && gameBackend.isConnected) {
+                    console.log('📋 Loading games from Netlify backend...');
+                    
+                    // Load games from Netlify functions
+                    const games = await gameBackend.getActiveGames();
+                    
+                    const gamesGrid = document.getElementById('gamesGrid');
+                    gamesGrid.innerHTML = '';
+                    
+                    if (games && games.length > 0) {
+                        console.log('✅ Loaded games from backend:', games.length);
+                        games.forEach(game => addGameToList(game));
+                        return;
+                    } else {
+                        console.log('⚠️ No games found from backend, loading demo games');
+                    }
+                }
+                
+                // Fallback to demo games if backend not available
+                console.log('📋 Loading demo games...');
+                loadDemoGames();
+            } catch (error) {
+                console.error('❌ Error loading games:', error);
+                loadDemoGames();
+            }
+        }
+
+        // Keep demo games as fallback
+        function loadDemoGames() {
+            const gamesGrid = document.getElementById('gamesGrid');
+            
+            const demoGames = [
+                {
+                    id: 'demo_1',
+                    type: 'chess',
+                    stake: '0.5',
+                    creator: 'ChessMaster',
+                    timeControl: 'blitz',
+                    privacy: 'public',
+                    description: 'Quick blitz game, all welcome!',
+                    status: 'waiting',
+                    players: ['ChessMaster'],
+                    maxPlayers: 2,
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: 'demo_2',
+                    type: 'checkers',
+                    stake: '1.0',
+                    creator: 'CheckerKing',
+                    timeControl: 'rapid',
+                    privacy: 'public',
+                    description: 'Serious checkers match',
+                    status: 'waiting',
+                    players: ['CheckerKing'],
+                    maxPlayers: 2,
+                    createdAt: new Date().toISOString()
+                }
+            ];
+
+            gamesGrid.innerHTML = '';
+            demoGames.forEach(game => addGameToList(game));
+            console.log('✅ Demo games loaded');
+        }
 
         // Core Network Configuration
         const CORE_NETWORK = {

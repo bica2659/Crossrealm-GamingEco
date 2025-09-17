@@ -1351,150 +1351,208 @@
             gameBackend = new GameBackend();
         }
 
-        // Updated createGame function
-        async function createGame(e) {
-            e.preventDefault();
+        // Mobile-friendly debug version of createGame function
+// Replace your existing createGame function with this
 
-            if (!account) {
-                showNotification('Please connect your wallet first', 'error');
-                return;
+async function createGame(e) {
+    e.preventDefault();
+    
+    // Create debug display element
+    let debugDiv = document.getElementById('debugDisplay');
+    if (!debugDiv) {
+        debugDiv = document.createElement('div');
+        debugDiv.id = 'debugDisplay';
+        debugDiv.style.cssText = `
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 9999;
+            max-height: 200px;
+            overflow-y: auto;
+        `;
+        document.body.appendChild(debugDiv);
+    }
+    
+    function debugLog(message) {
+        console.log(message);
+        debugDiv.innerHTML += '<div>' + message + '</div>';
+        debugDiv.scrollTop = debugDiv.scrollHeight;
+    }
+    
+    debugLog('🎮 Create game function started');
+
+    // Check wallet connection
+    if (!account) {
+        debugLog('❌ No wallet connected: ' + account);
+        showNotification('Please connect your wallet first', 'error');
+        return;
+    }
+    debugLog('✅ Wallet connected: ' + account.slice(0, 10) + '...');
+
+    // Collect form data
+    const gameTypeEl = document.getElementById('gameType');
+    const stakeAmountEl = document.getElementById('stakeAmount');
+    const timeControlEl = document.getElementById('timeControl');
+    const gamePrivacyEl = document.getElementById('gamePrivacy');
+    const gameDescriptionEl = document.getElementById('gameDescription');
+    
+    debugLog('📝 Form elements found: ' + [gameTypeEl, stakeAmountEl, timeControlEl, gamePrivacyEl, gameDescriptionEl].map(el => !!el).join(', '));
+
+    const gameData = {
+        type: gameTypeEl ? gameTypeEl.value : '',
+        stake: stakeAmountEl ? stakeAmountEl.value : '',
+        timeControl: timeControlEl ? timeControlEl.value : '',
+        privacy: gamePrivacyEl ? gamePrivacyEl.value : '',
+        description: gameDescriptionEl ? gameDescriptionEl.value : '',
+        creator: account
+    };
+
+    debugLog('📊 Game data: ' + JSON.stringify(gameData, null, 2));
+
+    // Validate required fields
+    if (!gameData.type || !gameData.stake || !gameData.timeControl) {
+        debugLog('❌ Missing required fields: type=' + gameData.type + ', stake=' + gameData.stake + ', timeControl=' + gameData.timeControl);
+        showNotification('Please fill in all required fields', 'error');
+        return;
+    }
+    debugLog('✅ Form validation passed');
+
+    try {
+        showNotification('Creating game...', 'info');
+        debugLog('🔄 Sending request to backend...');
+
+        // Check if gameBackend exists
+        debugLog('🔍 GameBackend status: connected=' + (gameBackend && gameBackend.isConnected));
+
+        if (gameBackend && gameBackend.isConnected) {
+            debugLog('🌐 Using Netlify backend...');
+            
+            const createUrl = CONFIG.API_BASE_URL + '/create-game';
+            debugLog('📡 POST URL: ' + createUrl);
+            
+            const requestBody = JSON.stringify(gameData);
+            debugLog('📤 Request body: ' + requestBody);
+
+            const response = await fetch(createUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: requestBody
+            });
+
+            debugLog('📥 Response status: ' + response.status + ' ' + response.statusText);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                debugLog('❌ Response error: ' + errorText);
+                throw new Error('Backend error: ' + response.status + ' - ' + errorText);
             }
 
-            const gameData = {
-                type: document.getElementById('gameType').value,
-                stake: document.getElementById('stakeAmount').value,
-                timeControl: document.getElementById('timeControl').value,
-                privacy: document.getElementById('gamePrivacy').value,
-                description: document.getElementById('gameDescription').value,
-                creator: account
-            };
-
-            // Validate form data
-            if (!gameData.type || !gameData.stake || !gameData.timeControl) {
-                showNotification('Please fill in all required fields', 'error');
-                return;
-            }
-
-            try {
-                showNotification('Creating game...', 'info');
-
-                // Try to create game via Netlify functions first
-                if (gameBackend && gameBackend.isConnected) {
-                    console.log('🎮 Using Netlify backend to create game');
-                    const result = await gameBackend.createGame(gameData);
-                    
-                    if (result.success) {
-                        console.log('✅ Game created via backend:', result.data);
-                        
-                        // Add the new game to the UI
-                        if (result.data) {
-                            addGameToList(result.data);
-                        }
-                        
-                        showNotification('Game created successfully!', 'success');
-                        switchSection('lobby');
-                        e.target.reset();
-                        
-                        // Reload games to show all active games
-                        loadGames();
-                        return;
-                    }
-                }
-
-                // Fallback to demo mode if backend fails
-                console.log('⚠️ Using demo mode fallback');
-                const newGame = {
-                    id: Date.now(),
-                    type: gameData.type,
-                    stake: gameData.stake,
-                    creator: gameData.creator,
-                    timeControl: gameData.timeControl,
-                    privacy: gameData.privacy,
-                    description: gameData.description,
-                    status: 'waiting',
-                    players: [gameData.creator],
-                    maxPlayers: 2,
-                    createdAt: new Date().toISOString()
-                };
-
-                addGameToList(newGame);
-                showNotification('Game created in demo mode!', 'success');
-                switchSection('lobby');
-                e.target.reset();
-
-            } catch (error) {
-                console.error('❌ Error creating game:', error);
-                showNotification(error.message || 'Failed to create game', 'error');
-            }
-        }
-
-        // Updated loadGames function
-        async function loadGames() {
-            try {
-                if (gameBackend && gameBackend.isConnected) {
-                    console.log('📋 Loading games from Netlify backend...');
-                    
-                    // Load games from Netlify functions
-                    const games = await gameBackend.getActiveGames();
-                    
-                    const gamesGrid = document.getElementById('gamesGrid');
-                    gamesGrid.innerHTML = '';
-                    
-                    if (games && games.length > 0) {
-                        console.log('✅ Loaded games from backend:', games.length);
-                        games.forEach(game => addGameToList(game));
-                        return;
-                    } else {
-                        console.log('⚠️ No games found from backend, loading demo games');
-                    }
+            const result = await response.json();
+            debugLog('✅ Response data: ' + JSON.stringify(result, null, 2));
+            
+            if (result.success) {
+                debugLog('🎉 Game created successfully!');
+                
+                // Add the new game to the UI
+                if (result.data) {
+                    addGameToList(result.data);
+                    debugLog('✅ Game added to UI');
                 }
                 
-                // Fallback to demo games if backend not available
-                console.log('📋 Loading demo games...');
-                loadDemoGames();
-            } catch (error) {
-                console.error('❌ Error loading games:', error);
-                loadDemoGames();
+                showNotification('Game created successfully!', 'success');
+                switchSection('lobby');
+                e.target.reset();
+                
+                // Reload games to show all active games
+                loadGames();
+                
+                // Remove debug div after success
+                setTimeout(() => {
+                    if (debugDiv.parentNode) {
+                        debugDiv.parentNode.removeChild(debugDiv);
+                    }
+                }, 3000);
+                
+                return;
+            } else {
+                throw new Error('Backend returned success=false');
             }
         }
 
-        // Keep demo games as fallback
-        function loadDemoGames() {
-            const gamesGrid = document.getElementById('gamesGrid');
-            
-            const demoGames = [
-                {
-                    id: 'demo_1',
-                    type: 'chess',
-                    stake: '0.5',
-                    creator: 'ChessMaster',
-                    timeControl: 'blitz',
-                    privacy: 'public',
-                    description: 'Quick blitz game, all welcome!',
-                    status: 'waiting',
-                    players: ['ChessMaster'],
-                    maxPlayers: 2,
-                    createdAt: new Date().toISOString()
-                },
-                {
-                    id: 'demo_2',
-                    type: 'checkers',
-                    stake: '1.0',
-                    creator: 'CheckerKing',
-                    timeControl: 'rapid',
-                    privacy: 'public',
-                    description: 'Serious checkers match',
-                    status: 'waiting',
-                    players: ['CheckerKing'],
-                    maxPlayers: 2,
-                    createdAt: new Date().toISOString()
-                }
-            ];
+        // Fallback to demo mode
+        debugLog('⚠️ Using demo mode fallback');
+        const newGame = {
+            id: 'demo_' + Date.now(),
+            type: gameData.type,
+            stake: gameData.stake,
+            creator: gameData.creator,
+            timeControl: gameData.timeControl,
+            privacy: gameData.privacy,
+            description: gameData.description,
+            status: 'waiting',
+            players: [gameData.creator],
+            maxPlayers: 2,
+            createdAt: new Date().toISOString()
+        };
 
-            gamesGrid.innerHTML = '';
-            demoGames.forEach(game => addGameToList(game));
-            console.log('✅ Demo games loaded');
-        }
+        addGameToList(newGame);
+        showNotification('Game created in demo mode!', 'success');
+        switchSection('lobby');
+        e.target.reset();
+        debugLog('✅ Demo game created');
+
+        // Remove debug div after success
+        setTimeout(() => {
+            if (debugDiv.parentNode) {
+                debugDiv.parentNode.removeChild(debugDiv);
+            }
+        }, 3000);
+
+    } catch (error) {
+        debugLog('💥 ERROR: ' + error.message);
+        debugLog('📊 Error details: ' + JSON.stringify(error, Object.getOwnPropertyNames(error)));
+        showNotification(error.message || 'Failed to create game', 'error');
+        
+        // Keep debug div visible on error
+        debugDiv.innerHTML += '<div style="color: red;">❌ KEEP THIS VISIBLE AND SEND SCREENSHOT</div>';
+    }
+}
+
+// Also add a button to clear debug messages
+function clearDebug() {
+    const debugDiv = document.getElementById('debugDisplay');
+    if (debugDiv) {
+        debugDiv.innerHTML = '';
+    }
+}
+
+// Add clear button to the page
+setTimeout(() => {
+    const clearBtn = document.createElement('button');
+    clearBtn.textContent = 'Clear Debug';
+    clearBtn.onclick = clearDebug;
+    clearBtn.style.cssText = `
+        position: fixed;
+        top: 220px;
+        right: 10px;
+        padding: 8px;
+        background: #666;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 12px;
+        z-index: 10000;
+    `;
+    document.body.appendChild(clearBtn);
+}, 1000);
 
         // Core Network Configuration
         const CORE_NETWORK = {

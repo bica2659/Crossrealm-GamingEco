@@ -1219,6 +1219,18 @@
 
     <!-- JavaScript -->
     <script>
+        const CONFIG = {
+    // Replace 'your-netlify-site' with your actual Netlify site name
+    WEBSOCKET_URL: 'wss://your-netlify-site.netlify.app/.netlify/functions/websocket',
+    API_BASE_URL: 'https://your-netlify-site.netlify.app/.netlify/functions',
+    
+    GAME_SERVER: {
+        RECONNECT_ATTEMPTS: 5,
+        HEARTBEAT_INTERVAL: 30000,
+        GAME_TIMEOUT: 300000,
+        MOVE_TIMEOUT: 60000
+    }
+};
         // Global Variables
         let web3 = null;
         let account = null;

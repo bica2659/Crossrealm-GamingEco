@@ -1281,36 +1281,7 @@
                 }
             }
 
-            // Create a new game via Netlify function
-            async createGame(gameData) {
-                if (!this.isConnected) {
-                    throw new Error('Backend not connected');
-                }
-
-                try {
-                    console.log('🎮 Creating game via Netlify:', gameData);
-                    
-                    const response = await fetch(`${CONFIG.API_BASE_URL}/create-game`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(gameData)
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.message || 'Failed to create game');
-                    }
-
-                    const result = await response.json();
-                    console.log('✅ Game created successfully:', result);
-                    return result;
-                } catch (error) {
-                    console.error('❌ Error creating game:', error);
-                    throw error;
-                }
-            }
+            
 
             // Get active games from Netlify function
             async getActiveGames(filters = {}) {

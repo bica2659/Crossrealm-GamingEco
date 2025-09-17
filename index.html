@@ -1343,16 +1343,12 @@
             document.getElementById('stakeFilter').addEventListener('change', filterGames);
         }
 
-        // Initialize Socket Connection
         function initializeSocket() {
-            // In production, replace with your WebSocket server
-            console.log('🔌 Initializing socket connection...');
-            
-            // Demo socket events
-            setTimeout(() => {
-                addChatMessage('system', 'Connected to game server');
-            }, 1000);
-        }
+    console.log('🔌 Connecting to Netlify functions...');
+    
+    // Initialize connection to Netlify serverless functions
+    gameBackend = new GameBackend();
+}
 
         // Wallet Functions
         async function connectWallet() {

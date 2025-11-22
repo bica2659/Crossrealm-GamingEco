@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrossRealm • On-Chain Gaming</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.12.0/chess.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bitcoin-orange: #f7931a;
+            --burnt-orange: #cc6600;
+            --core-green: #00ff88;
+            --dark-bg: #0f0f0f;
+            --card-bg: #1a1a1a;
+            --border: #2a2a2a;
+            --text: #e0e8f0;
+            --dim: #999;
+        }
+        body {
+            font-family: 'Courier New', monospace;
+            background: var(--dark-bg);
+            color: var(--text);
+            min-height: 100vh;
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(247, 147, 26, 0.03) 2px, rgba(247, 147, 26, 0.03) 4px);
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header {
+            background: var(--card-bg);
+            border: 2px solid var(--bitcoin-orange);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--bitcoin-orange);
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        .tagline {
+            color: var(--dim);
+            font-size: 13px;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .wallet-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .wallet-address { color: var(--bitcoin-orange); font-weight: bold; }
+        .wallet-balance { color: var(--core-green); font-weight: bold; }
+        button {
+            background: linear-gradient(135deg, var(--bitcoin-orange), var(--burnt-orange));
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 12px;
+        }
+        button:hover { transform: translateY(-2px); }
+        button:disabled { background: var(--border); color: var(--dim); opacity: 0.5; }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .card h3 { color: var(--bitcoin-orange); margin-bottom: 20px; font-size: 18px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 968px) { .grid { grid-template-columns: 1fr; } }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--border);
+            color: var(--text);
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+        .board-container {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            max-width: 520px;
+            margin: 20px auto;
+            border: 4px solid var(--bitcoin-orange);
+            border-radius: 4px;
+        }
+        .board-square {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 42px;
+            cursor: pointer;
+        }
+        .board-square.light { background: #f0d9b5; }
+        .board-square.dark { background: #b58863; }
+        .board-square.selected { background: var(--burnt-orange) !important; }
+        .chess-piece { text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000; }
+        .chess-piece.white { color: #ffffff; }
+        .chess-piece.black { color: #1a1a1a; }
+        .checker-piece {
+            width: 75%; height: 75%;
+            border-radius: 50%;
+            border: 4px solid;
+        }
+        .checker-piece.black { background: radial-gradient(circle at 30% 30%, #555, #000); border-color: #000; }
+        .checker-piece.white { background: radial-gradient(circle at 30% 30%, #fff, #ddd); border-color: #999; }
+        .checker-piece.king::after { content: '👑'; font-size: 20px; }
+        .game-list { max-height: 500px; overflow-y: auto; }
+        .game-item {
+            padding: 15px;
+            border: 1px solid var(--border);
+            margin-bottom: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.3);
+        }
+        .game-item:hover { border-color: var(--bitcoin-orange); }
+        .game-id { color: var(--bitcoin-orange); font-weight: bold; }
+        .game-info { color: var(--dim); font-size: 12px; margin-top: 5px; }
+        .alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 4px;
+            z-index: 9999;
+            animation: slideIn 0.3s;
+        }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .alert.success { background: var(--core-green); color: #000; }
+        .alert.error { background: #ff4444; color: white; }
+        .alert.info { background: var(--bitcoin-orange); color: #000; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">⚡ CROSSREALM</div>
+            <div class="tagline">On-Chain Gaming • Built on Core</div>
+            <div class="wallet-bar">
+                <div class="hidden" id="walletInfo">
+                    <span class="wallet-balance" id="walletBalance">0 CORE</span>
+                    <span class="wallet-address" id="walletAddress"></span>
+                </div>
+                <button id="connectBtn" onclick="toggleWallet()">Connect Wallet</button>
+            </div>
+        </header>
+
+        <div class="grid">
+            <div class="card">
+                <h3>➕ Create Game</h3>
+                <select id="gameType">
+                    <option value="chess">♟️ Chess</option>
+                    <option value="checkers">🎯 Checkers</option>
+                </select>
+                <input type="number" id="stakeAmount" placeholder="0.1" min="0.01" step="0.01" value="0.1">
+                <label><input type="checkbox" id="isAI" checked> 🤖 vs AI</label>
+                <button onclick="createGame()" style="width: 100%;">Create Game</button>
+            </div>
+
+            <div class="card">
+                <h3 id="boardTitle">♟️ Board</h3>
+                <div id="boardContainer" class="board-container"></div>
+                <div id="gameInfo" style="text-align:center;color:var(--dim);margin:15px 0;">No game loaded</div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3>🌐 Available Games</h3>
+                <button onclick="loadPendingGames()" style="width:100%;margin-bottom:15px;">🔄 Refresh</button>
+                <div class="game-list" id="gamesList">
+                    <p style="text-align:center;color:var(--dim);">Connect wallet</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📊 My Games</h3>
+                <div class="game-list" id="myGamesList">
+                    <p style="text-align:center;color:var(--dim);">No games</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CORE_MAINNET = {
+            chainId: '0x45c',
+            chainName: 'Core',
+            rpcUrls: ['https://rpc.coredao.org'],
+            nativeCurrency: { name: 'Core', symbol: 'CORE', decimals: 18 },
+            blockExplorerUrls: ['https://scan.coredao.org']
+        };
+
+        const CONTRACTS = {
+            HUB: '0x2D0FA241F72B8d9576876E43643374e7088C677f',
+            CHESS_VERIFIER: '0x252C94b74B52a44b6032c940369e9f50387E2AE1',
+            CHECKERS_VERIFIER: '0x3Af55Fd76cfbFCa1584B4d3dE79Ce152729Dc521'
+        };
+
+        const HUB_ABI = [
+            'function gameCount() view returns (uint)',
+            'function games(uint) view returns (uint id, string gameType, uint stake, address token, address creator, address player2, bool isAI, bool isPrivate, address referral, bool zeroGas, bool active, string fen, address verifier, uint turn)',
+            'function createGame(string gameType, uint stake, address token, bool isPrivate, address referral, bool isAI, bool zeroGas, address verifier) external payable',
+            'function joinGame(uint gameId) external payable',
+            'function makeMove(uint gameId, string move, string newFen, bytes proof) external'
+        ];
+
+        const PIECE_UNICODE = { 'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙', 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟' };
+        
+        let provider, signer, userAddress, hub, currentGameId = null, currentGame = null;
+        let gameEngine = null, selectedSquare = null, checkersBoard = null;
+        let isConnected = false, moveFrom = null, isAIGame = false, isMyTurn = false;
+
+        function showAlert(msg, type = 'success') {
+            const el = document.createElement('div');
+            el.className = `alert ${type}`;
+            el.textContent = msg;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 4000);
+        }
+
+        async function toggleWallet() {
+            if (isConnected) {
+                isConnected = false;
+                document.getElementById('walletInfo').classList.add('hidden');
+                document.getElementById('connectBtn').textContent = 'Connect Wallet';
+                return;
+            }
+            
+            try {
+                if (!window.ethereum) throw new Error('Install MetaMask');
+                
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: CORE_MAINNET.chainId }]
+                }).catch(async (e) => {
+                    if (e.code === 4902) {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [CORE_MAINNET]
+                        });
+                    }
+                });
+
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send('eth_requestAccounts', []);
+                signer = provider.getSigner();
+                userAddress = await signer.getAddress();
+                hub = new ethers.Contract(CONTRACTS.HUB, HUB_ABI, signer);
+
+                isConnected = true;
+                document.getElementById('walletAddress').textContent = userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
+                document.getElementById('walletInfo').classList.remove('hidden');
+                document.getElementById('connectBtn').textContent = 'Disconnect';
+
+                const balance = await provider.getBalance(userAddress);
+                document.getElementById('walletBalance').textContent = parseFloat(ethers.utils.formatEther(balance)).toFixed(4) + ' CORE';
+
+                loadPendingGames();
+                loadMyGames();
+                showAlert('Connected!', 'success');
+                
+                setInterval(() => {
+                    if (hub) {
+                        loadPendingGames();
+                        loadMyGames();
+                        if (currentGameId) loadGame(currentGameId);
+                    }
+                }, 15000);
+            } catch (e) {
+                showAlert('Connection failed: ' + e.message, 'error');
+            }
+        }
+
+        async function createGame() {
+            if (!hub) return showAlert('Connect wallet', 'error');
+            try {
+                const gameType = document.getElementById('gameType').value;
+                const stake = ethers.utils.parseEther(document.getElementById('stakeAmount').value || '0.1');
+                const isAI = document.getElementById('isAI').checked;
+                const verifier = gameType === 'chess' ? CONTRACTS.CHESS_VERIFIER : CONTRACTS.CHECKERS_VERIFIER;
+                const totalPayment = stake.mul(105).div(100);
+
+                const tx = await hub.createGame(gameType, stake, ethers.constants.AddressZero, false, ethers.constants.AddressZero, isAI, false, verifier, { value: totalPayment, gasLimit: 600000 });
+                showAlert('⏳ Creating...', 'info');
+                await tx.wait();
+                showAlert('✅ Created!', 'success');
+                loadPendingGames();
+                loadMyGames();
+            } catch (e) {
+                showAlert('❌ Failed: ' + (e.reason || e.message), 'error');
+            }
+        }
+
+        async function loadPendingGames() {
+            if (!hub) return;
+            const list = document.getElementById('gamesList');
+            try {
+                const count = await hub.gameCount();
+                let html = '';
+                for (let i = count.toNumber(); i >= Math.max(1, count.toNumber() - 20); i--) {
+                    try {
+                        const g = await hub.games(i);
+                        if (g.player2 === ethers.constants.AddressZero && g.active && !g.isPrivate && !g.isAI) {
+                            html += `<div class="game-item" onclick="joinGame(${i})">
+                                <div class="game-id">Game #${i}</div>
+                                <div class="game-info">${g.gameType.toUpperCase()} • ${ethers.utils.formatEther(g.stake)} CORE</div>
+                            </div>`;
+                        }
+                    } catch {}
+                }
+                list.innerHTML = html || '<p style="text-align:center;color:var(--dim);">No games</p>';
+            } catch (e) {}
+        }
+
+        async function loadMyGames() {
+            if (!hub || !userAddress) return;
+            const list = document.getElementById('myGamesList');
+            try {
+                const count = await hub.gameCount();
+                let html = '';
+                for (let i = count.toNumber(); i >= 1; i--) {
+                    try {
+                        const g = await hub.games(i);
+                        if (g.active && (g.creator.toLowerCase() === userAddress.toLowerCase() || g.player2.toLowerCase() === userAddress.toLowerCase())) {
+                            html += `<div class="game-item" onclick="loadGame(${i})">
+                                <div class="game-id">Game #${i}</div>
+                                <div class="game-info">${g.gameType.toUpperCase()} • ${g.isAI ? '🤖 AI' : '👥 P2P'}</div>
+                            </div>`;
+                        }
+                    } catch {}
+                }
+                list.innerHTML = html || '<p style="text-align:center;color:var(--dim);">No games</p>';
+            } catch (e) {}
+        }
+
+        async function joinGame(id) {
+            if (!hub) return;
+            try {
+                const game = await hub.games(id);
+                const totalPayment = game.stake.mul(105).div(100);
+                const tx = await hub.joinGame(id, { value: totalPayment, gasLimit: 500000 });
+                showAlert('⏳ Joining...', 'info');
+                await tx.wait();
+                showAlert('✅ Joined!', 'success');
+                loadGame(id);
+                loadPendingGames();
+                loadMyGames();
+            } catch (e) {
+                showAlert('❌ Failed: ' + (e.reason || e.message), 'error');
+            }
+        }
+
+        async function loadGame(id) {
+            if (!hub) return;
+            try {
+                currentGameId = id;
+                const g = await hub.games(id);
+                currentGame = g;
+                isAIGame = g.isAI;
+
+                let fen = g.fen || (g.gameType === 'chess' ? 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1' : null);
+
+                if (g.gameType === 'chess') {
+                    gameEngine = new Chess(fen);
+                    const amIWhite = g.creator.toLowerCase() === userAddress.toLowerCase();
+                    isMyTurn = (fen.split(' ')[1] === 'w' && amIWhite) || (fen.split(' ')[1] === 'b' && !amIWhite);
+                    renderChessBoard();
+                    document.getElementById('boardTitle').textContent = `♟️ Chess #${id}`;
+                    document.getElementById('gameInfo').textContent = `Game #${id} • CHESS • ${ethers.utils.formatEther(g.stake)} CORE`;
+                } else {
+                    initCheckersBoard(fen);
+                    renderCheckersBoard();
+                    document.getElementById('boardTitle').textContent = `🎯 Checkers #${id}`;
+                    document.getElementById('gameInfo').textContent = `Game #${id} • CHECKERS • ${ethers.utils.formatEther(g.stake)} CORE`;
+                }
+            } catch (e) {
+                showAlert('❌ Load failed', 'error');
+            }
+        }
+
+        function renderChessBoard() {
+            if (!gameEngine) return;
+            const container = document.getElementById('boardContainer');
+            container.innerHTML = '';
+            const board = gameEngine.board();
+
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const square = document.createElement('div');
+                    square.className = `board-square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+                    square.dataset.row = row;
+                    square.dataset.col = col;
+                    if (isMyTurn) square.onclick = () => selectChessSquare(row, col);
+
+                    const piece = board[row][col];
+                    if (piece) {
+                        const unicode = PIECE_UNICODE[piece.color === 'w' ? piece.type.toUpperCase() : piece.type.toLowerCase()];
+                        const pieceEl = document.createElement('span');
+                        pieceEl.className = `chess-piece ${piece.color === 'w' ? 'white' : 'black'}`;
+                        pieceEl.textContent = unicode;
+                        square.appendChild(pieceEl);
+                    }
+                    container.appendChild(square);
+                }
+            }
+        }
+
+        function selectChessSquare(row, col) {
+            if (!gameEngine || !isMyTurn) return;
+            const files = 'abcdefgh';
+            const clickedSquare = files[col] + (8 - row);
+
+            if (!moveFrom) {
+                const piece = gameEngine.get(clickedSquare);
+                if (piece && piece.color === gameEngine.fen().split(' ')[1]) {
+                    moveFrom = clickedSquare;
+                    document.querySelector(`[data-row="${row}"][data-col="${col}"]`).classList.add('selected');
+                }
+            } else {
+                makePlayerMove(clickedSquare);
+            }
+        }
+
+        async function makePlayerMove(toSquare) {
+            if (!moveFrom || !hub) return;
+            try {
+                const move = gameEngine.move({ from: moveFrom, to: toSquare, promotion: 'q' });
+                if (!move) {
+                    moveFrom = null;
+                    renderChessBoard();
+                    return;
+                }
+
+                const newFen = gameEngine.fen();
+                const tx = await hub.makeMove(currentGameId, moveFrom + toSquare, newFen, '0x', { gasLimit: 500000 });
+                showAlert('⏳ Moving...', 'info');
+                await tx.wait();
+                showAlert('✅ Moved!', 'success');
+                moveFrom = null;
+                setTimeout(() => loadGame(currentGameId), 2000);
+            } catch (e) {
+                gameEngine.undo();
+                moveFrom = null;
+                renderChessBoard();
+                showAlert('❌ Failed', 'error');
+            }
+        }
+
+        function initCheckersBoard(fen) {
+            checkersBoard = Array(64).fill(0).map((_, i) => {
+                const row = Math.floor(i / 8);
+                const col = i % 8;
+                if ((row + col) % 2 === 1) {
+                    if (row < 3) return 1;
+                    if (row > 4) return 2;
+                }
+                return 0;
+            });
+        }
+
+        function renderCheckersBoard() {
+            const container = document.getElementById('boardContainer');
+            container.innerHTML = '';
+            for (let row = 7; row >= 0; row--) {
+                for (let col = 0; col < 8; col++) {
+                    const i = row * 8 + col;
+                    const square = document.createElement('div');
+                    square.className = `board-square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+                    const piece = checkersBoard[i];
+                    if (piece > 0) {
+                        const pieceEl = document.createElement('div');
+                        pieceEl.className = `checker-piece ${piece === 1 || piece === 3 ? 'black' : 'white'} ${piece >= 3 ? 'king' : ''}`;
+                        square.appendChild(pieceEl);
+                    }
+                    container.appendChild(square);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
